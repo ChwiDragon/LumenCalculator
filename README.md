@@ -11,6 +11,17 @@
 |---|---|
 | `lumencalc.html` | 앱 본체 (HTML·CSS·JS 한 파일) |
 | `assets/characters/` | 캐릭터 전신·두상·특성 마크 이미지. 이름 규칙은 그 폴더의 `README.txt` |
+| `lumencalc.apk` | 안드로이드 설치 파일 (프로토타입) |
+| `app/` | APK를 만드는 Capacitor 안드로이드 프로젝트 (`build-apk.ps1`로 다시 빌드) |
+
+## APK 설치 · 다시 빌드
+
+- **설치:** `lumencalc.apk`를 폰으로 옮겨 실행합니다. "출처를 알 수 없는 앱" 설치 허용이 필요할 수 있습니다.
+- **다시 빌드:** `lumencalc.html`을 고친 뒤 `powershell -ExecutionPolicy Bypass -File app\build-apk.ps1`을 실행하면 `lumencalc.apk`가 새로 만들어집니다.
+  - 처음 한 번은 `app/`에서 `npm install`이 필요합니다.
+  - 새 버전을 낼 때는 `lumencalc.html`의 `APP.version`과 `app/android/app/build.gradle`의 `versionName`을 같이 올리고, `versionCode`도 1씩 올려야 기존 앱 위에 업데이트 설치됩니다.
+- **서명 키:** `app/android/release.keystore`와 `keystore.properties`는 git에 올리지 않습니다. 이 키를 잃어버리면 기존 설치본 위에 업데이트할 수 없으니 따로 백업해 두세요.
+- 아래 1~5번 설정은 `app/`에 이미 모두 적용되어 있습니다.
 
 ## APK로 만들 때 꼭 지킬 것
 

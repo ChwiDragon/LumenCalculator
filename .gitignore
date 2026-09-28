@@ -4,3 +4,8 @@
 
 # Unrelated Windows binary that ended up in this folder
 *.winmd
+
+# APK project: installed packages and generated web copy (build-apk.ps1 recreates www/)
+app/node_modules/
+app/www/
+# Signing secrets are ignored in app/android/.gitignore (keystore.properties, *.keystore)
