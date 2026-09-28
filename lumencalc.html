@@ -66,7 +66,7 @@
   - 토큰 칸은 토큰이 있는 캐릭터만 표시. 토큰 색 = 캐릭터 상징색. 점 배치는 최대치 기준으로 고정.
     델피 3/3 · 울프 0/5(5개 강조, 5개에서 특성 ON → 모두 사용하고 강조는 유지,
     특성 OFF나 토큰 개수가 바뀌면 강조 꺼짐) · 비올라 0/3(1개 이상 강조)
-    레브 0/6 · 린 0/∞ · 요한 3/5 · 이제벨 0/∞ · 키메라 0/9(9개 강조) · 무영 3/5 · 핀프 4/4(0개 강조) · CMYK 10/10
+    레브 0/6 · 린 0/∞ · 요한 3/5(체력이 2000 이하로 내려가는 순간 +1) ·이제벨 0/∞ · 키메라 0/9(9개 강조) · 무영 3/5 · 핀프 4/4(0개 강조) · CMYK 10/10
     숫자·마름모 탭 → 0으로 초기화: 울프, 비올라, 린, 이제벨, 무영.
   - 무영: 체력이 2500 이하가 되면 특성 자동 ON, 2500 초과로 회복하면 자동 OFF.
   - 타오: 양(흰)·음(검) 토큰 각 0/4. 둘 다 4개 → 조화(특성) ON, 한쪽이라도 2개 이하 → OFF.
@@ -1084,6 +1084,7 @@
   //   color : 캐릭터 상징색
   //   trait : 특성 이름,  autoTrait: 체력이 이 값 이하가 되면 특성 자동 ON (넘으면 OFF)
   //   traitHand: 특성 ON 동안 최대 패 매수에 더하는 수 (키메라 +1)
+  //   hpToken: { at, add } 체력이 at 초과 → at 이하로 내려가는 순간 토큰 add개 추가(최대치까지) (요한 2000 → +1)
   //   counter: 하단 토큰 칸 (없으면 표시 안 함)
   //     { kind: 'count', label, start, max, hi }   max: null이면 상한 없음
   //        tapReset: true 이면 숫자나 마름모를 눌러 0으로 초기화
@@ -1114,7 +1115,7 @@
     { id: 'rita', name: '리타', color: '#FFE870', hands: [6, 7, 8, 9, 10], trait: '빛의 루멘',
       counter: { kind: 'stance', states: [{ id: 'guardian', label: '가디언' }, { id: 'assassin', label: '어쌔신' }, { id: 'paladin', label: '팔라딘' }] } },
     { id: 'lin', name: '린', color: '#FF9838', counter: { kind: 'count', start: 0, max: null, tapReset: true } },
-    { id: 'johan', name: '요한', color: '#F4F5FA', counter: { kind: 'count', start: 3, max: 5 } },
+    { id: 'johan', name: '요한', color: '#F4F5FA', hpToken: { at: 2000, add: 1 }, counter: { kind: 'count', start: 3, max: 5 } },
     { id: 'jezebel', name: '이제벨', color: '#E5484D', counter: { kind: 'count', start: 0, max: null, tapReset: true } },
     { id: 'iomong', name: '이오몽', color: '#FFFFFF' },
     { id: 'chimera', name: '키메라', color: '#A2714C', hands: [5, 5, 5, 6, 6], traitHand: 1, counter: { kind: 'count', start: 0, max: 9, hi: 'full' } },
@@ -1144,7 +1145,7 @@
   const STORE_KEY = 'lumencalc.v6';
   const LOG_ARCHIVE_MAX = 10;   // 새 게임 때 자동 보관하는 지난 로그 수
   const DELETE_HOLD_MS = 1000;  // ALL DELETE 길게 누르는 시간
-  const APP = { name: '루멘콘덴서 계산기', version: '0.35.0', build: '2026-09-28' };
+  const APP = { name: '루멘콘덴서 계산기', version: '0.36.0', build: '2026-09-28' };
 
   // ================= 아이콘 =================
   const I = {
@@ -1807,6 +1808,7 @@
       '특성 마크를 누르면 밝게(ON) / 어둡게(OFF) 바뀌어요. 켜져 있는 동안 마크가 은은하게 빛나요.',
       '울프: 하울링 5개에서 특성을 켜면 하울링이 모두 사라지고, 칸 강조는 특성을 끄거나 하울링 개수가 바뀔 때까지 남아요.',
       '키메라: 토큰 9개면 칸이 강조되고, 특성을 켜면 최대 패 매수가 1장 늘어요.', '핀프 & 솔다트는 체력 5500으로 시작해요.',
+      '요한: 체력이 2000 이하로 내려가는 순간 토큰이 1개 늘어요(최대 5개).',
       '무영: 체력이 2500 이하가 되면 특성이 자동으로 켜지고, 2500을 넘게 회복하면 꺼져요.',
       '타오: 양·음이 모두 4개가 되면 조화가 켜지고, 한쪽이라도 2개 이하가 되면 꺼져요. 조화 중에는 양/음 줄(글자·마름모)을 눌러 하나를 고를 수 있어요(고른 줄이 강조돼요). 조화 중에 특성 마크를 누르면 토큰이 모두 사라지고 조화가 꺼져요.',
       '리타: 가디언·어쌔신·팔라딘 중 하나를 선언해요. 특성 마크(빛의 루멘)를 켜면 세 상태가 모두 적용되고, 그 중에도 하나를 선언할 수 있어요(흰 테두리).',
@@ -1945,6 +1947,7 @@
       p.hp = next;
       logEntry(merged, key, i, d < 0 ? '피해' : '회복', p.hp, d < 0 ? 'dmg' : 'heal', real);
       autoTrait(i, beforeHp);
+      autoToken(i, beforeHp);
       const now = Date.now();
       const b = ui.burst[i];
       const same = b && (b.amt < 0) === (real < 0) && now - b.t < BURST_MS;
@@ -2120,6 +2123,20 @@
   };
 
   // 체력이 기준을 넘나들 때만 특성을 자동으로 켜고 끔 (그 사이 수동 조작은 유지)
+  // 체력이 기준을 넘어 내려가는 순간 토큰 자동 추가 (같은 되돌리기 단계에 포함)
+  function autoToken(i, before) {
+    const p = state.players[i];
+    const c = charOf(p);
+    const ht = c && c.hpToken;
+    if (!ht || !c.counter || !(before > ht.at && p.hp <= ht.at)) return;
+    const ct = c.counter;
+    const next = ct.max ? Math.min(ct.max, p.counts[0] + ht.add) : p.counts[0] + ht.add;
+    const added = next - p.counts[0];
+    if (!added) return; // 이미 최대치
+    p.counts[0] = next;
+    p.spent = false;
+    addLog(i, `${ct.label || '토큰'} +${added} (체력 ${ht.at} 이하)`, ct.max ? `${next}/${ct.max}` : next, '');
+  }
   function autoTrait(i, before) {
     const p = state.players[i];
     const c = charOf(p);
