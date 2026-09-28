@@ -1,0 +1,6 @@
+# Local tooling
+.claude/
+.idea/
+
+# Unrelated Windows binary that ended up in this folder
+*.winmd
