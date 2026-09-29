@@ -25,6 +25,7 @@
     OS가 화면을 돌리면 CSS 회전과 겹쳐서 화면이 틀어진다.
   - [APK 권장] 노치 대응: styles.xml windowLayoutInDisplayCutoutMode = shortEdges.
     안전 영역(env(safe-area-inset-*))은 회전 방향에 맞춰 --safe-* 변수로 다시 매핑해 둠.
+    크기 기준(container)은 이 여백을 뺀 .screen → APK에서 시스템 바가 있어도 비율이 맞음.
 
  ■ APK 체크리스트 (Digimon Memory Checker APK와 같은 구성)
   - Capacitor 등 WebView에 이 파일을 index.html로 넣는다. assets/ 폴더도 같이 복사.
@@ -63,7 +64,8 @@
   - 1초(MERGE_MS) 안에 같은 종류(같은 플레이어의 피해/회복/FP/같은 토큰)를 이어 누르면
     되돌리기·로그에서 한 번으로 묶는다.
   - 특성 마크: 탭하면 밝게(ON)/어둡게(OFF). 강조 효과는 은은하게(움직이는 효과 금지).
-    린·이제벨·이오몽·키메라·CMYK는 게임 시작부터 특성 ON 고정(탭해도 안 꺼짐). 키메라는 그래서 손패 항상 +1.
+    린·이제벨·이오몽·CMYK는 게임 시작부터 특성 ON 고정(탭해도 안 꺼짐).
+    키메라는 특성 ON으로 시작하지만 끌 수 있음(ON이면 손패 +1).
   - 앱을 다시 열 때 "지난 게임 보관" 알림은 띄우지 않음(보관은 그대로 됨).
   - 토큰 숫자가 칸보다 넓어지면 JS(fitText)가 글자를 줄여 +/− 버튼과 겹치지 않게 함.
     APK는 폰 '글자 크기' 설정이 WebView 글자만 키우지 않도록 MainActivity에서 setTextZoom(100).
@@ -199,7 +201,10 @@
       --safe-b: env(safe-area-inset-left, 0px);
     }
   }
-  .screen { position: absolute; inset: var(--safe-t) var(--safe-r) var(--safe-b) var(--safe-l); }
+  /* 크기 기준(--u의 cqw/cqh)은 시스템 바를 뺀 실제 화면 영역(.screen).
+     .app을 기준으로 하면 APK처럼 상태바·내비게이션 바 여백이 있을 때 내용이 전체 폭 기준으로 커져서
+     좁아진 영역에 끼어 토큰 점·숫자가 +버튼 쪽으로 밀림 (브라우저는 여백 0이라 안 보임) */
+  .screen { position: absolute; inset: var(--safe-t) var(--safe-r) var(--safe-b) var(--safe-l); container-type: size; }
   .p1 { --pc: var(--p1); }
   .p2 { --pc: var(--p2); }
   .num { font-family: var(--font-num); font-weight: 700; font-variant-numeric: tabular-nums; }
@@ -1101,7 +1106,8 @@
   //   color : 캐릭터 상징색
   //   trait : 특성 이름,  autoTrait: 체력이 이 값 이하가 되면 특성 자동 ON (넘으면 OFF)
   //   traitHand: 특성 ON 동안 최대 패 매수에 더하는 수 (키메라 +1)
-  //   traitFixed: true 이면 게임 시작부터 특성 ON 고정, 눌러도 꺼지지 않음 (린·이제벨·이오몽·키메라·CMYK)
+  //   traitFixed: true 이면 게임 시작부터 특성 ON 고정, 눌러도 꺼지지 않음 (린·이제벨·이오몽·CMYK)
+  //   traitOn: true 이면 게임 시작 때 특성 ON, 끄고 켤 수 있음 (키메라)
   //   hpToken: { at, add } 체력이 at 초과 → at 이하로 내려가는 순간 토큰 add개 추가(최대치까지), 게임 중 1번만 (요한 2000 → +1)
   //   counter: 하단 토큰 칸 (없으면 표시 안 함)
   //     { kind: 'count', label, start, max, hi }   max: null이면 상한 없음
@@ -1136,7 +1142,7 @@
     { id: 'johan', name: '요한', color: '#F4F5FA', hpToken: { at: 2000, add: 1 }, counter: { kind: 'count', start: 3, max: 5 } },
     { id: 'jezebel', name: '이제벨', color: '#E5484D', traitFixed: true, counter: { kind: 'count', start: 0, max: null, tapReset: true } },
     { id: 'iomong', name: '이오몽', color: '#FFFFFF', traitFixed: true },
-    { id: 'chimera', name: '키메라', color: '#A2714C', hands: [5, 5, 5, 6, 6], traitHand: 1, traitFixed: true, counter: { kind: 'count', start: 0, max: 9, hi: 'full' } },
+    { id: 'chimera', name: '키메라', color: '#A2714C', hands: [5, 5, 5, 6, 6], traitHand: 1, traitOn: true, counter: { kind: 'count', start: 0, max: 9, hi: 'full' } },
     { id: 'muyoung', name: '무영', color: '#3D6EF2', hp: 4500, autoTrait: 2500, counter: { kind: 'count', start: 3, max: 5, tapReset: true } },
     { id: 'finf', name: '핀프 & 솔다트', color: '#9AA3B5', hp: 5500, counter: { kind: 'count', start: 4, max: 4, hi: 'zero' } },
     { id: 'cmyk', name: 'CMYK', color: '#FF5AA0', hands: [10, 10, 10, 10, 10], traitFixed: true, counter: { kind: 'count', start: 10, max: 10 } },
@@ -1163,7 +1169,7 @@
   const STORE_KEY = 'lumencalc.v6';
   const LOG_ARCHIVE_MAX = 10;   // 새 게임 때 자동 보관하는 지난 로그 수
   const DELETE_HOLD_MS = 1000;  // ALL DELETE 길게 누르는 시간
-  const APP = { name: '루멘콘덴서 계산기', version: '0.38.0', build: '2026-09-28' };
+  const APP = { name: '루멘콘덴서 계산기', version: '0.39.0', build: '2026-09-28' };
 
   // ================= 아이콘 =================
   const I = {
@@ -1835,8 +1841,8 @@
     ['FP · 특성 · 토큰', ['FP는 데미지 버튼 옆의 + / − 로 조절하고, 가운데 숫자를 누르면 0으로 초기화돼요.',
       '특성 마크를 누르면 밝게(ON) / 어둡게(OFF) 바뀌어요. 켜져 있는 동안 마크가 은은하게 빛나요.',
       '울프: 하울링 5개에서 특성을 켜면 하울링이 모두 사라지고, 칸 강조는 특성을 끄거나 하울링 개수가 바뀔 때까지 남아요.',
-      '린·이제벨·이오몽·키메라·CMYK는 특성이 처음부터 켜져 있고 꺼지지 않아요.',
-      '키메라: 토큰 9개면 칸이 강조되고, 특성(항상 ON) 덕분에 최대 패 매수가 1장 많아요.', '핀프 & 솔다트는 체력 5500으로 시작해요.',
+      '린·이제벨·이오몽·CMYK는 특성이 처음부터 켜져 있고 꺼지지 않아요.',
+      '키메라: 특성이 켜진 채로 시작하고 끌 수 있어요. 특성이 켜져 있으면 최대 패 매수가 1장 늘어요. 토큰 9개면 칸이 강조돼요.', '핀프 & 솔다트는 체력 5500으로 시작해요.',
       '요한: 체력이 처음 2000 이하가 될 때 토큰이 1개 늘어요. 게임 중 1번만이에요(최대 5개).',
       '무영: 체력이 2500 이하가 되면 특성이 자동으로 켜지고, 2500을 넘게 회복하면 꺼져요.',
       '타오: 양·음이 모두 4개가 되면 조화가 켜지고, 한쪽이라도 2개 이하가 되면 꺼져요. 조화 중에는 양/음 줄(글자·마름모)을 눌러 하나를 고를 수 있어요(고른 줄이 강조돼요). 조화 중에 특성 마크를 누르면 토큰이 모두 사라지고 조화가 꺼져요.',
@@ -1919,7 +1925,7 @@
     state.players.forEach((p) => {
       p.hp = p.maxHp = charOf(p).hp;
       const ct = charOf(p).counter;
-      p.fp = 0; p.trait = !!charOf(p).traitFixed; p.stance = null; p.sel = null; p.spent = false; p.hpTokenUsed = false;
+      p.fp = 0; p.trait = !!(charOf(p).traitFixed || charOf(p).traitOn); p.stance = null; p.sel = null; p.spent = false; p.hpTokenUsed = false;
       p.counts = ct && ct.start ? [ct.start, ct.kind === 'dual' ? ct.start : 0] : [0, 0];
     });
     archiveCurrent();
