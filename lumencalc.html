@@ -610,6 +610,11 @@
     color: var(--heal);
   }
   .q:active { transform: scale(.95); filter: brightness(1.5); }
+  /* 백의 자리 강조(E안): 부호는 숫자 세로 가운데에 붙이고, 00은 작고 흐리게 */
+  .q .qn { display: inline-flex; align-items: center; line-height: 1; }
+  .q .qs { font-size: 1em; margin-right: .04em; transform: translateY(-.04em); }
+  .q .qh { font-size: 1.55em; }
+  .q .qz { font-size: .6em; opacity: .5; align-self: flex-end; margin-bottom: .22em; }
 
   /* 마름모 버튼: 마름모는 그림(::before)으로만 그리고, 터치 영역은 버튼 네모 전체 */
   .dbtn {
@@ -645,7 +650,7 @@
   }
   .fp .dbtn { --ds: calc(9 * var(--u)); }
   /* 현재 FP 숫자 = 탭하면 0으로 초기화 (칸 너비 전체가 터치 영역) */
-  .fp .val { justify-self: stretch; text-align: center; padding: calc(1 * var(--u)) 0; cursor: pointer; }
+  .fp .val { justify-self: stretch; text-align: center; padding: calc(4.2 * var(--u)) 0; cursor: pointer; }
   .fp .val { font-size: max(16px, calc(5.8 * var(--u))); line-height: 1; }
   .fp .val:active { background: var(--surface-2); }
   .fp .val.pos { color: var(--lumen); }
@@ -1177,7 +1182,7 @@
   const STORE_KEY = 'lumencalc.v6';
   const LOG_ARCHIVE_MAX = 10;   // 새 게임 때 자동 보관하는 지난 로그 수
   const DELETE_HOLD_MS = 1000;  // ALL DELETE 길게 누르는 시간
-  const APP = { name: '루멘콘덴서 계산기', version: '0.41.0', build: '2026-09-28' };
+  const APP = { name: '루멘콘덴서 계산기', version: '0.43.0', build: '2026-09-28' };
 
   // ================= 아이콘 =================
   const I = {
@@ -1463,7 +1468,12 @@
   function sideHtml(i) {
     const p = state.players[i];
     const c = charOf(p);
-    const quick = QUICK.map((v) => `<button class="q num chamfer${v > 0 ? ' heal' : ''}" data-a="hp" data-p="${i}" data-v="${v}">${signed(v)}</button>`).join('');
+    // 버튼 글자: 부호 + 백의 자리(크게) + 00(작고 흐리게) — 앞자리로 빠르게 구분
+    const qLabel = (v) => {
+      const h = Math.floor(Math.abs(v) / 100), rest = String(Math.abs(v) % 100).padStart(2, '0');
+      return `<span class="qn"><span class="qs">${v < 0 ? '−' : '+'}</span><span class="qh">${h}</span><span class="qz">${rest}</span></span>`;
+    };
+    const quick = QUICK.map((v) => `<button class="q num chamfer${v > 0 ? ' heal' : ''}" data-a="hp" data-p="${i}" data-v="${v}" aria-label="${signed(v)}">${qLabel(v)}</button>`).join('');
     return `
       <div class="side p${i + 1}" id="side${i}">
         <div class="plate">
