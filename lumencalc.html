@@ -47,6 +47,9 @@
      계산기 화면의 경기 시간·10초 타이머에는 안내 문구 없이 숫자만 표시.
      가운데 열은 양쪽과 같은 줄(CSS subgrid)을 씀: 경기 시간 = 툴바 바로 아래(체력 숫자 줄),
      10초 타이머 = FP 칸과 같은 높이(데미지·FP 줄), TURN = 특성·토큰 줄 아래.
+     가운데 열은 좁게(30u, 마름모는 칸의 88%) → 양쪽 칸이 넓음. 툴바는 가운데 열보다 크게
+     양옆 칸으로 --tb-out만큼 넘어가고, 손패 마름모가 그만큼 바깥으로 비켜 섬.
+     되돌리기 때 알림은 띄우지 않음(로그에 흐리게 '되돌림'으로 남음).
      오른쪽 위: 로그 / 설정 버튼. 캐릭터가 늘어날 것을 대비해 빈 칸을 항상 3개 이상 남김.
   2) 계산기: 왼쪽 1P / 오른쪽 2P 좌우 대칭, 가운데에 툴바·경기 시간·10초 타이머·턴.
 
@@ -130,6 +133,7 @@
     --heal: #3DCB8A;
     --lumen: #FFC247;
     --u: min(1cqh, .45cqw);
+    --tb-out: calc(5 * var(--u)); /* 계산기 툴바가 가운데 열 밖(양옆 칸)으로 넘어가는 길이 */
     --cut: calc(1.6 * var(--u));
     --font-display: "Black Han Sans", "IBM Plex Sans KR", "Malgun Gothic", sans-serif;
     --font-body: "IBM Plex Sans KR", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
@@ -458,7 +462,7 @@
   /* 줄: 이름판 / 체력 숫자 / 체력 막대 / 데미지·FP / 특성·토큰 — 양쪽과 가운데 열이 같은 줄을 공유 */
   .game {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) calc(40 * var(--u)) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) calc(30 * var(--u)) minmax(0, 1fr);
     grid-template-rows: auto auto auto minmax(0, 1fr) auto;
     column-gap: calc(3 * var(--u));
     row-gap: calc(1.8 * var(--u));
@@ -515,8 +519,9 @@
     gap: .8cqw;
   }
   .side.p2 .hand { flex-direction: row-reverse; }
-  .side.p1 .hand { margin-right: calc(2 * var(--u)); }
-  .side.p2 .hand { margin-left: calc(2 * var(--u)); }
+  /* 가운데 툴바가 양옆 칸으로 --tb-out만큼 넘어오므로 손패 마름모를 그만큼 바깥으로 */
+  .side.p1 .hand { margin-right: calc(var(--tb-out) + 2 * var(--u)); }
+  .side.p2 .hand { margin-left: calc(var(--tb-out) + 2 * var(--u)); }
   .hand .lbl { font-size: max(9px, calc(2.2 * var(--u))); color: var(--muted); letter-spacing: .06em; writing-mode: horizontal-tb; }
   .hand .dia {
     width: calc(11 * var(--u));
@@ -800,6 +805,8 @@
     grid-row: 1;
     align-self: start;
     justify-self: stretch;
+    /* 가운데 열보다 넓게: 칸 사이 간격(3u)을 넘어 양옆 칸으로 --tb-out만큼 */
+    margin: 0 calc(-3 * var(--u) - var(--tb-out));
     display: flex;
     gap: 1px;
     background: var(--line);
@@ -811,14 +818,14 @@
   .toolbar button {
     flex: 1 1 0;
     min-width: 0;
-    height: calc(8.4 * var(--u));
-    min-height: 30px;
+    height: calc(10.5 * var(--u));
+    min-height: 34px;
     display: grid;
     place-items: center;
     background: var(--surface);
     color: var(--muted);
   }
-  .toolbar button svg { width: 48%; height: 48%; }
+  .toolbar button svg { width: calc(5 * var(--u)); height: calc(5 * var(--u)); }
   .toolbar button:active { background: var(--surface-2); color: var(--text); }
   .toolbar button.armed { background: var(--dmg); color: #fff; }
   .toolbar button[disabled] { color: var(--faint); cursor: default; }
@@ -843,14 +850,15 @@
     display: grid;
     place-items: center;
   }
-  .dtimer svg.track { position: absolute; inset: 0; width: 100%; height: 100%; }
+  /* 마름모는 칸보다 작게(88%) — 칸 전체는 그대로 터치 영역 */
+  .dtimer svg.track { position: absolute; inset: 6%; width: 88%; height: 88%; }
   .dtimer .bg { stroke: var(--surface-3); fill: rgba(19, 26, 43, .7); }
   .dtimer .inner { stroke: var(--line); fill: none; }
   .dtimer .fg { stroke: var(--lumen); fill: none; transition: stroke .2s; }
   .dtimer.warn .fg { stroke: var(--dmg); }
   .dtimer.idle .fg { stroke: var(--faint); }
   .dtimer .face { position: relative; display: grid; justify-items: center; gap: calc(.5 * var(--u)); pointer-events: none; }
-  .dtimer .sec { font-size: calc(9.5 * var(--u)); line-height: .9; }
+  .dtimer .sec { font-size: calc(8 * var(--u)); line-height: .9; }
   .dtimer.warn .sec, .dtimer.done .sec { color: var(--dmg); }
   .dtimer.done .sec { animation: blink .35s steps(2) 4; }
   .dtimer > button.hit { position: absolute; inset: 0; }
@@ -1169,7 +1177,7 @@
   const STORE_KEY = 'lumencalc.v6';
   const LOG_ARCHIVE_MAX = 10;   // 새 게임 때 자동 보관하는 지난 로그 수
   const DELETE_HOLD_MS = 1000;  // ALL DELETE 길게 누르는 시간
-  const APP = { name: '루멘콘덴서 계산기', version: '0.39.0', build: '2026-09-28' };
+  const APP = { name: '루멘콘덴서 계산기', version: '0.40.0', build: '2026-09-28' };
 
   // ================= 아이콘 =================
   const I = {
@@ -2144,7 +2152,6 @@
       ui.burst = [null, null];
       // 되돌린 줄은 바로 지우지 않고 흐리게 남김 → 다음 새 기록이 생길 때 지워짐
       state.log.forEach((r) => { if (r.hid === h.id) r.undone = true; });
-      flashToast(`되돌리기 · ${h.label}`);
     },
     log() { ui.logOpen = !ui.logOpen; ui.settingsOpen = false; ui.logView = 'current'; },
     logbg() { ui.logOpen = false; },

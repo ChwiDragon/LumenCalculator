@@ -20,7 +20,8 @@ robocopy "$root\assets" "$app\www\assets" /MIR /NFL /NDL /NJH /NJS /NP | Out-Nul
 Set-Location $app
 npx cap sync android
 Set-Location "$app\android"
-cmd /c ".\gradlew.bat assembleRelease --console=plain"
+# --no-daemon: a background Gradle daemon keeps the console pipe open and the calling shell never returns
+cmd /c ".\gradlew.bat assembleRelease --console=plain --no-daemon"
 if ($LASTEXITCODE -ne 0) { throw 'gradle build failed' }
 
 # 3. result -> ../lumencalc.apk
