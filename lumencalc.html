@@ -299,10 +299,11 @@
     border: 1px solid color-mix(in srgb, var(--cc) 22%, transparent);
   }
   /* 전신을 크게 키워 아래를 화면 밖으로 → 반신처럼 보이게.
-     그림은 칸 맨 위에 붙으므로(xMidYMin / object-position: top) 머리는 항상 화면 높이의 31% 지점 */
+     그림은 칸 맨 위에 붙으므로(xMidYMin / object-position: top) 머리 높이가 화면 폭과 상관없이 거의 일정.
+     뒤의 min(...)은 머리 크기 절반만큼 더 내림: 실루엣 머리 지름 60/420, 그림 배율 = min(30cqw/200, 150cqh/420) */
   .fighter .body {
     position: absolute;
-    bottom: -81cqh;
+    bottom: calc(-81cqh - min(4.5cqw, 10.71cqh));
     height: 150cqh;
     width: 30cqw;
     filter: drop-shadow(0 0 calc(3 * var(--u)) color-mix(in srgb, var(--cc) 50%, transparent));
@@ -1195,7 +1196,7 @@
   const STORE_KEY = 'lumencalc.v6';
   const LOG_ARCHIVE_MAX = 10;   // 새 게임 때 자동 보관하는 지난 로그 수
   const DELETE_HOLD_MS = 1000;  // ALL DELETE 길게 누르는 시간
-  const APP = { name: '루멘콘덴서 계산기', version: '0.46.0', build: '2026-09-28' };
+  const APP = { name: '루멘콘덴서 계산기', version: '0.47.0', build: '2026-09-28' };
 
   // ================= 아이콘 =================
   const I = {
