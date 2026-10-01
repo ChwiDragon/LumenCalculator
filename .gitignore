@@ -5,6 +5,15 @@
 # Unrelated Windows binary that ended up in this folder
 *.winmd
 
+# Assets (character art, fonts, etc.) stay local and never go to GitHub.
+# Only the README that explains the file naming is tracked.
+assets/**
+!assets/characters/
+!assets/characters/README.txt
+
+# Google Play release folder (AAB, store graphics, checklist) - local only
+release/
+
 # APK project: installed packages and generated web copy (build-apk.ps1 recreates www/)
 app/node_modules/
 app/www/
