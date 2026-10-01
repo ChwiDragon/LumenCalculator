@@ -41,7 +41,9 @@
      제목 'CHARACTER SELECT'. 아래쪽에 지금 고를 차례를 크게 '1P SELECT'/'2P SELECT'로 표시
      (1P 파랑 · 2P 빨강 그라데이션 테두리).
      둘 다 고른 뒤: 고른 캐릭터 칸을 다시 누르면 그쪽 선택 취소(미러전이면 2P부터), 다른 칸은 무반응(안내창 없음).
-     좌우 아래 캐릭터를 눌러도 그쪽만 해제. 다음 칸 터치가 빈 쪽을 채움. 둘 다 고르면 게임 시작 옆에 초기화(↻ 아이콘) 버튼 = 1P·2P 모두 해제.
+     좌우 아래 캐릭터를 눌러도 그쪽만 해제. 다음 칸 터치가 빈 쪽을 채움.
+     고른 캐릭터의 전신·이름은 선택 칸보다 앞에 그리지만 터치는 통과(마름모가 그대로 눌림).
+     해제 터치 영역 = 옆 칸 아래쪽 62% 중 로스터 바깥 테두리(볼록 껍질) 밖 → 위쪽 모서리·마름모 사이 빈틈은 무시. 둘 다 고르면 게임 시작 옆에 초기화(↻ 아이콘) 버튼 = 1P·2P 모두 해제.
      앱 실행 · 캐릭터 선택 버튼 · ALL DELETE로 선택 화면에 오면 항상 빈 상태에서 시작.
      좌우 아래 모서리에 선택한 캐릭터의 전신(반신처럼 잘림) + 이름. 둘 다 고르면 'GAME START'.
      계산기 화면의 경기 시간·10초 타이머에는 안내 문구 없이 숫자만 표시.
@@ -310,6 +312,15 @@
   .fighter.p2 .body .sil { transform: scaleX(-1); }
   .fighter .body .sil { height: 100%; width: 100%; }
   .fighter.empty .body { filter: none; opacity: .22; }
+  /* 고른 캐릭터의 전신·이름은 선택 칸(마름모)보다 앞에 그림. 터치는 통과시켜 아래 마름모가 그대로 눌림.
+     선택 해제는 로스터 바깥(좌우 아래 빈 모서리)을 눌렀을 때만 — 클릭 처리에서 inRoster()로 거름 */
+  .fighter:not(.empty) .body, .fighter:not(.empty) .plate { z-index: 2; pointer-events: none; }
+  /* 선택 해제 터치 영역: 옆 칸의 아래쪽 62%만 (위쪽 모서리 제외). 그중 로스터 모양 안쪽은 inRoster()로 제외 */
+  button.fighter { pointer-events: none; }
+  .fighter .unzone { position: absolute; left: 0; right: 0; bottom: 0; height: 62%; pointer-events: auto; }
+  /* 앞으로 나온 이름판의 어두운 바탕이 가운데 아래 버튼(초기화)을 덮지 않게 안쪽 끝은 투명하게 */
+  .fighter.p1:not(.empty) .plate { -webkit-mask-image: linear-gradient(to right, #000 62%, transparent 92%); mask-image: linear-gradient(to right, #000 62%, transparent 92%); }
+  .fighter.p2:not(.empty) .plate { -webkit-mask-image: linear-gradient(to left, #000 62%, transparent 92%); mask-image: linear-gradient(to left, #000 62%, transparent 92%); }
   .fighter .plate {
     position: absolute;
     left: 0;
@@ -1184,7 +1195,7 @@
   const STORE_KEY = 'lumencalc.v6';
   const LOG_ARCHIVE_MAX = 10;   // 새 게임 때 자동 보관하는 지난 로그 수
   const DELETE_HOLD_MS = 1000;  // ALL DELETE 길게 누르는 시간
-  const APP = { name: '루멘콘덴서 계산기', version: '0.45.0', build: '2026-09-28' };
+  const APP = { name: '루멘콘덴서 계산기', version: '0.46.0', build: '2026-09-28' };
 
   // ================= 아이콘 =================
   const I = {
@@ -1408,7 +1419,7 @@
     }
     return `
       <button class="fighter p${i + 1}" style="--cc:${c.color}" data-a="unpick" data-p="${i}" aria-label="${i + 1}P ${esc(c.name)}, 눌러서 해제">
-        <div class="glow"></div><div class="bigdia"></div>
+        <div class="glow"></div><div class="bigdia"></div><span class="unzone" aria-hidden="true"></span>
         <div class="body art contain">${silhouette('c' + i, c.color)}${artImg(c, 'body')}</div>
         <div class="plate">
           <span class="ptag">${i + 1}P</span>
@@ -2229,10 +2240,30 @@
   ['pointerup', 'pointercancel'].forEach((t) => document.addEventListener(t, () => clearTimeout(longTimer)));
   document.addEventListener('contextmenu', (e) => e.preventDefault());
 
+  // 로스터(역삼각형 마름모 묶음) 바깥 테두리 안쪽인지: 모든 칸 마름모의 꼭짓점으로 볼록 껍질을 만들어 판정
+  // (화면이 90° 돌아가 있어도 화면 좌표 그대로 계산)
+  function inRoster(x, y) {
+    const pts = [];
+    $('select').querySelectorAll('.roster .slot').forEach((s) => {
+      const r = s.getBoundingClientRect();
+      const cx = (r.left + r.right) / 2, cy = (r.top + r.bottom) / 2;
+      pts.push([cx, r.top], [r.right, cy], [cx, r.bottom], [r.left, cy]);
+    });
+    if (pts.length < 3) return false;
+    pts.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+    const cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+    const half = (list) => { const h = []; for (const p of list) { while (h.length >= 2 && cross(h[h.length - 2], h[h.length - 1], p) <= 0) h.pop(); h.push(p); } h.pop(); return h; };
+    const hull = [...half(pts), ...half(pts.slice().reverse())];
+    const signs = hull.map((p, k) => cross(p, hull[(k + 1) % hull.length], [x, y]));
+    return signs.every((v) => v >= 0) || signs.every((v) => v <= 0);
+  }
+
   document.addEventListener('click', (e) => {
     if (holdFired) { holdFired = false; if (e.target.closest('[data-hold]')) return; }
     const btn = e.target.closest('[data-a]');
     if (!btn || btn.disabled) return;
+    // 전신(선택 해제)은 로스터 모양 바깥을 눌렀을 때만 — 마름모 사이 빈틈은 무시
+    if (btn.dataset.a === 'unpick' && inRoster(e.clientX, e.clientY)) return;
     if (longFired && btn.dataset.long) { longFired = false; return; }
     const fn = actions[btn.dataset.a];
     if (!fn) return;
