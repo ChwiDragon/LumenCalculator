@@ -11,7 +11,7 @@
 |---|---|
 | `lumencalc.html` | 앱 본체 (HTML·CSS·JS 한 파일) |
 | `assets/characters/` | 캐릭터 전신·두상·특성 마크 이미지. 이름 규칙은 그 폴더의 `README.txt` |
-| `lumencalc.apk` | 안드로이드 설치 파일 (프로토타입) |
+| `lumencalc.apk` | 안드로이드 설치 파일 (캐릭터 그림을 뺀 GitHub용 버전) |
 | `app/` | APK를 만드는 Capacitor 안드로이드 프로젝트 (`build-apk.ps1`로 다시 빌드, `build-aab.ps1`은 구글 플레이용 앱 번들) |
 
 `assets/` 안의 파일(캐릭터 그림·글꼴)과 구글 플레이 릴리즈 폴더 `release/`는 GitHub에 올리지 않습니다(`.gitignore`).
