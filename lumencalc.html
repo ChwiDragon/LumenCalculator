@@ -295,10 +295,10 @@
     inset: 10%;
     border: 1px solid color-mix(in srgb, var(--cc) 22%, transparent);
   }
-  /* 전신을 크게 키워 아래를 화면 밖으로 → 반신처럼 보이게 */
+  /* 전신을 크게 키워 아래를 화면 밖으로 → 반신처럼 보이게. 머리가 화면 위쪽 1/3 안에 오도록 위치 */
   .fighter .body {
     position: absolute;
-    bottom: -80cqh;
+    bottom: -71cqh;
     height: 150cqh;
     width: 30cqw;
     filter: drop-shadow(0 0 calc(3 * var(--u)) color-mix(in srgb, var(--cc) 50%, transparent));
@@ -1182,7 +1182,7 @@
   const STORE_KEY = 'lumencalc.v6';
   const LOG_ARCHIVE_MAX = 10;   // 새 게임 때 자동 보관하는 지난 로그 수
   const DELETE_HOLD_MS = 1000;  // ALL DELETE 길게 누르는 시간
-  const APP = { name: '루멘콘덴서 계산기', version: '0.43.0', build: '2026-09-28' };
+  const APP = { name: '루멘콘덴서 계산기', version: '0.44.0', build: '2026-09-28' };
 
   // ================= 아이콘 =================
   const I = {
