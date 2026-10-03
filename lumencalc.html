@@ -341,7 +341,14 @@
     word-break: keep-all;
     text-wrap: balance;
   }
+  .fighter:not(.empty) .name { color: var(--cc); text-shadow: 0 0 calc(2 * var(--u)) rgba(6, 8, 16, .9); } /* 캐릭터 상징색 */
   .fighter.empty .name { color: var(--muted); font-size: max(14px, calc(4.4 * var(--u))); }
+  .fighter .ptag { font-size: max(15px, calc(4.6 * var(--u))); }
+  /* 지금 고르는 쪽 화면 바깥 모서리 빛 (1P 왼쪽 파랑, 2P 오른쪽 빨강). 터치는 통과 */
+  .selglow { position: absolute; inset: 0; z-index: 3; pointer-events: none; opacity: 0; transition: opacity .3s; }
+  .selglow.p1, .selglow.p2 { opacity: 1; }
+  .selglow.p1 { background: linear-gradient(90deg, rgba(42, 107, 255, .55), rgba(42, 107, 255, .12) 7%, transparent 18%); box-shadow: inset 3px 0 0 #5DB2FF; }
+  .selglow.p2 { background: linear-gradient(270deg, rgba(255, 36, 64, .55), rgba(255, 36, 64, .12) 7%, transparent 18%); box-shadow: inset -3px 0 0 #FF4D5E; }
   .fighter.next .ptag { animation: blink 1s steps(2) infinite; }
   @keyframes blink { 50% { opacity: .25; } }
 
@@ -384,6 +391,7 @@
     margin: 0;
     font-family: var(--font-num);
     font-weight: 700;
+    color: var(--lumen);
     font-size: max(15px, calc(4.6 * var(--u)));
     letter-spacing: .18em;
   }
@@ -510,7 +518,9 @@
   .plate .facering .face-fb { font-size: calc(3.6 * var(--u)); }
   .plate .who { flex: 1; min-width: 0; display: grid; gap: calc(.5 * var(--u)); }
   .side.p2 .plate .who { justify-items: end; }
-  .plate .line { display: flex; align-items: center; gap: .8cqw; }
+  .plate .line { display: flex; align-items: center; gap: calc(1.6 * var(--u)); min-width: 0; }
+  .side .plate .ptag { font-size: max(16px, calc(5.2 * var(--u))); flex: none; }
+  .plate .line .cname { min-width: 0; font-size: max(16px, calc(5.4 * var(--u))); }
   .side.p2 .plate .line { flex-direction: row-reverse; }
   .plate .cname {
     font-family: var(--font-display);
@@ -537,7 +547,14 @@
   /* 가운데 툴바가 양옆 칸으로 --tb-out만큼 넘어오므로 손패 마름모를 그만큼 바깥으로 */
   .side.p1 .hand { margin-right: calc(var(--tb-out) + 2 * var(--u)); }
   .side.p2 .hand { margin-left: calc(var(--tb-out) + 2 * var(--u)); }
-  .hand .lbl { font-size: max(9px, calc(2.2 * var(--u))); color: var(--muted); letter-spacing: .06em; writing-mode: horizontal-tb; }
+  /* 손패 마름모 색 = 체력 구간: 5000~4001 파랑 · ~3001 초록 · ~2001 노랑 · ~1001 주황 · 1000 이하 빨강 (JS가 --hc 지정) */
+  .hand .dia {
+    --hc: var(--p1);
+    color: #fff;
+    background: color-mix(in srgb, var(--hc) 34%, var(--surface-2));
+    box-shadow: inset 0 0 0 2px var(--hc), 0 0 calc(1.6 * var(--u)) color-mix(in srgb, var(--hc) 45%, transparent);
+    transition: background .25s, box-shadow .25s;
+  }
   .hand .dia {
     width: calc(11 * var(--u));
     height: calc(11 * var(--u));
@@ -545,8 +562,6 @@
     min-height: 38px;
     display: grid;
     place-items: center;
-    background: var(--surface-2);
-    box-shadow: inset 0 0 0 1px var(--line);
     font-size: max(18px, calc(6.2 * var(--u)));
     line-height: 1;
   }
@@ -629,7 +644,7 @@
   .q .qn { display: inline-flex; align-items: center; line-height: 1; }
   .q .qs { font-size: 1em; margin-right: .04em; transform: translateY(-.04em); }
   .q .qh { font-size: 1.55em; }
-  .q .qz { font-size: .6em; opacity: .5; align-self: flex-end; margin-bottom: .22em; }
+  .q .qz { font-size: .6em; align-self: flex-end; margin-bottom: .22em; }
 
   /* 마름모 버튼: 마름모는 그림(::before)으로만 그리고, 터치 영역은 버튼 네모 전체 */
   .dbtn {
@@ -1151,6 +1166,8 @@
   const DEFAULT_HP = 5000;
   const DEFAULT_HANDS = [6, 7, 8, 9, 9];
   const HAND_BANDS = [4000, 3000, 2000, 1000]; // 체력이 이 값 '초과'면 앞 구간
+  // 손패 마름모 색 (체력 구간 순서): 파랑 · 초록 · 노랑 · 주황 · 빨강
+  const HAND_COLORS = ['#4DA3FF', '#3DCB8A', '#FFD23F', '#FF9838', '#FF4D4D'];
   const MIN_EMPTY_SLOTS = 3; // 선택 화면에 항상 남겨 둘 빈 칸 수 (추가 캐릭터 자리)
   const ROSTER_ROWS = 4;     // 역삼각형 줄 수 (캐릭터가 늘면 윗줄이 길어짐)
   const MERGE_MS = 1000;      // 이 시간 안에 같은 종류로 연속 입력하면 기록/되돌리기에서 한 번으로 묶음
@@ -1197,7 +1214,7 @@
   const STORE_KEY = 'lumencalc.v6';
   const LOG_ARCHIVE_MAX = 10;   // 새 게임 때 자동 보관하는 지난 로그 수
   const DELETE_HOLD_MS = 1000;  // ALL DELETE 길게 누르는 시간
-  const APP = { name: '루멘콘덴서 계산기', version: '0.48.0', build: '2026-09-28' };
+  const APP = { name: '루멘콘덴서 계산기', version: '0.49.0', build: '2026-09-28' };
 
   // ================= 아이콘 =================
   const I = {
@@ -1342,10 +1359,11 @@
   }
   function esc(s) { return String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
   const charOf = (p) => CHAR_BY_ID[p.char] || null;
+  // 체력 구간 번호 0~4 (5000~4001 / ~3001 / ~2001 / ~1001 / 1000 이하)
+  const hpBand = (p) => { const b = HAND_BANDS.findIndex((x) => p.hp > x); return b < 0 ? HAND_BANDS.length : b; };
   const handLimit = (p) => {
-    const band = HAND_BANDS.findIndex((b) => p.hp > b);
     const c = charOf(p);
-    return c.hands[band < 0 ? HAND_BANDS.length : band] + (p.trait && c.traitHand ? c.traitHand : 0);
+    return c.hands[hpBand(p)] + (p.trait && c.traitHand ? c.traitHand : 0);
   };
   const signed = (n) => (n > 0 ? '+' + n : String(n).replace('-', '−'));
   const timeLeft = () => {
@@ -1467,6 +1485,7 @@
       : `<div class="selbadge p${n + 1}"><b>${n + 1}P</b><span>SELECT</span></div>`}${clearBtn}</div>`;
     setHtml($('select'), `
       ${fighterHtml(0)}
+      <div class="selglow${n == null ? '' : ` p${n + 1}`}" aria-hidden="true"></div>
       <div class="pickcol">
         <div class="pickhead"><h1>CHARACTER SELECT</h1></div>
         <div class="seltools chamfer">
@@ -1494,10 +1513,9 @@
         <div class="plate">
           <div class="facering dia">${faceArt(c, false).replace('class="art"', 'class="art dia"')}</div>
           <div class="who">
-            <div class="line"><span class="ptag">${i + 1}P</span><span id="badges${i}"></span></div>
-            <div class="cname">${esc(c.name)}</div>
+            <div class="line"><span class="ptag">${i + 1}P</span><span class="cname">${esc(c.name)}</span><span id="badges${i}"></span></div>
           </div>
-          <div class="hand"><span class="lbl">손패</span><b class="dia num" id="hand${i}">0</b></div>
+          <div class="hand" aria-label="최대 손패"><b class="dia num" id="hand${i}">0</b></div>
         </div>
         <div class="hpline">
           <span class="hp num" id="hp${i}">0</span><span class="hpmax num" id="hpmax${i}"></span>
@@ -1669,6 +1687,7 @@
       $('hp' + i).textContent = p.hp;
       $('hpmax' + i).textContent = '/' + p.maxHp;
       $('hand' + i).textContent = handLimit(p);
+      $('hand' + i).style.setProperty('--hc', HAND_COLORS[hpBand(p)]);
       $('side' + i).classList.toggle('ko', p.hp <= 0);
       $('side' + i).classList.toggle('trait-on', !!p.trait);
       const bar = $('bar' + i);
