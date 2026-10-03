@@ -13,7 +13,8 @@
 
   예)  wolf_body.png   wolf_face.png   wolf_trait.png
 
-  리타 상태 마크(선택): rita_guardian.png / rita_assassin.png / rita_paladin.png
+  리타 상태 일러(정사각형): rita_guardian.png / rita_assassin.png / rita_paladin.png
+  타오 토큰 일러(정사각형): tao_yang.png (양) / tao_yin.png (음)
   (리타의 trait 이미지 = 빛의 루멘, 타오의 trait 이미지 = 조화)
 
 캐릭터 id 목록
@@ -32,7 +33,7 @@
   이오몽        iomong
   키메라        chimera
   무영          muyoung
-  핀프 & 솔다트 finf
+  핀프          finf
   CMYK          cmyk
   미녕이        minyeong
 

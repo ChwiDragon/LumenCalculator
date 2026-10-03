@@ -13,6 +13,8 @@ assets/**
 
 # Google Play release folder (AAB, store graphics, checklist) - local only
 release/
+# Placeholder images showing every asset file name the app looks for - local only
+asset-dummies/
 
 # APK project: installed packages and generated web copy (build-apk.ps1 recreates www/)
 app/node_modules/
