@@ -754,13 +754,24 @@
     grid-template-columns: minmax(0, 1fr) auto auto auto;
     align-items: center;
     gap: calc(1.2 * var(--u));
-    padding: 0 calc(.6 * var(--u)) 0 calc(1.6 * var(--u));
+    padding: 0 calc(.6 * var(--u)) 0 0;
     background: var(--surface);
     transition: background .2s;
   }
   .counter.dual .dbtn { --ds: calc(8.6 * var(--u)); width: calc(10.4 * var(--u)); align-self: stretch; }
   /* 일러는 왼쪽, 개수 숫자는 일러와 − 버튼 사이 빈칸의 가운데 */
-  .counter .grp .tv { justify-self: stretch; display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: calc(1.4 * var(--u)); }
+  /* 조화 중 양/음 고르기 터치 영역 = − 버튼 왼쪽 전부 (줄 높이 전체, 왼쪽 끝 ~ − 버튼 앞 간격까지) */
+  .counter .grp .tv {
+    justify-self: stretch;
+    align-self: stretch;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: calc(1.4 * var(--u));
+    padding: 0 calc(1.2 * var(--u)) 0 calc(1.6 * var(--u));
+    margin-right: calc(-1.2 * var(--u));
+    border-radius: 0;
+  }
   .counter .grp .tv .val { justify-self: center; }
   /* 양/음 토큰 일러 (정사각형): assets/characters/tao_yang · tao_yin, 없으면 흰/검은 네모에 양/음 글자 */
   .counter .grp .tart {
@@ -825,6 +836,7 @@
   .counter .grp.sel { background: color-mix(in srgb, var(--cc) 18%, var(--surface)); }
   .counter .grp.sel .val { color: var(--cc); }
   .counter.dual:not(.armed) .tap { cursor: default; }
+  /* 타오 양/음 줄: 조화 중에만 누르는 순간 토큰 초기화와 같은 반응 (조화 OFF면 반응 없음) */
   .counter.dual:not(.armed) .tap:active { background: none; }
 
   /* 가운데 열: 양쪽과 같은 줄(subgrid)을 씀
@@ -1216,7 +1228,7 @@
   const LOG_ARCHIVE_MAX = 10;   // 새 게임 때 자동 보관하는 지난 로그 수
   const DELETE_HOLD_MS = 1000;  // ALL DELETE 길게 누르는 시간
   // 버전을 올릴 때마다 build(빌드 날짜)도 그날 날짜로 갱신
-  const APP = { name: '루멘콘덴서 계산기', version: '0.58.0', build: '2026-10-04' };
+  const APP = { name: '루멘콘덴서 계산기', version: '0.61.0', build: '2026-10-04' };
 
   // ================= 아이콘 =================
   const I = {
