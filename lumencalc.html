@@ -347,8 +347,8 @@
   /* 지금 고르는 쪽 화면 바깥 모서리 빛 (1P 왼쪽 파랑, 2P 오른쪽 빨강). 터치는 통과 */
   .selglow { position: absolute; inset: 0; z-index: 3; pointer-events: none; opacity: 0; transition: opacity .3s; }
   .selglow.p1, .selglow.p2 { opacity: 1; }
-  .selglow.p1 { background: linear-gradient(90deg, rgba(42, 107, 255, .55), rgba(42, 107, 255, .12) 7%, transparent 18%); box-shadow: inset 3px 0 0 #5DB2FF; }
-  .selglow.p2 { background: linear-gradient(270deg, rgba(255, 36, 64, .55), rgba(255, 36, 64, .12) 7%, transparent 18%); box-shadow: inset -3px 0 0 #FF4D5E; }
+  .selglow.p1 { background: linear-gradient(90deg, rgba(42, 107, 255, .5), rgba(42, 107, 255, .12) 7%, transparent 18%); }
+  .selglow.p2 { background: linear-gradient(270deg, rgba(255, 36, 64, .5), rgba(255, 36, 64, .12) 7%, transparent 18%); }
   .fighter.next .ptag { animation: blink 1s steps(2) infinite; }
   @keyframes blink { 50% { opacity: .25; } }
 
@@ -518,7 +518,9 @@
   .plate .facering .face-fb { font-size: calc(3.6 * var(--u)); }
   .plate .who { flex: 1; min-width: 0; display: grid; gap: calc(.5 * var(--u)); }
   .side.p2 .plate .who { justify-items: end; }
-  .plate .line { display: flex; align-items: center; gap: calc(1.6 * var(--u)); min-width: 0; }
+  /* 1P/2P와 이름은 글자 아래선(baseline)을 맞춤 — 글꼴이 달라 가운데 정렬하면 이름이 떠 보임 */
+  .plate .line { display: flex; align-items: baseline; gap: calc(1.6 * var(--u)); min-width: 0; }
+  .plate .line #badges0, .plate .line #badges1 { align-self: center; }
   .side .plate .ptag { font-size: max(16px, calc(5.2 * var(--u))); flex: none; }
   .plate .line .cname { min-width: 0; font-size: max(16px, calc(5.4 * var(--u))); }
   .side.p2 .plate .line { flex-direction: row-reverse; }
@@ -551,9 +553,9 @@
   .hand .dia {
     --hc: var(--p1);
     color: #fff;
-    background: color-mix(in srgb, var(--hc) 34%, var(--surface-2));
-    box-shadow: inset 0 0 0 2px var(--hc), 0 0 calc(1.6 * var(--u)) color-mix(in srgb, var(--hc) 45%, transparent);
-    transition: background .25s, box-shadow .25s;
+    /* 테두리선은 마름모로 잘리면 꼭짓점에만 진하게 남아서 쓰지 않고, 바탕색만 칠함 */
+    background: color-mix(in srgb, var(--hc) 42%, var(--surface-2));
+    transition: background .25s;
   }
   .hand .dia {
     width: calc(11 * var(--u));
@@ -1214,7 +1216,7 @@
   const STORE_KEY = 'lumencalc.v6';
   const LOG_ARCHIVE_MAX = 10;   // 새 게임 때 자동 보관하는 지난 로그 수
   const DELETE_HOLD_MS = 1000;  // ALL DELETE 길게 누르는 시간
-  const APP = { name: '루멘콘덴서 계산기', version: '0.49.0', build: '2026-09-28' };
+  const APP = { name: '루멘콘덴서 계산기', version: '0.50.0', build: '2026-09-28' };
 
   // ================= 아이콘 =================
   const I = {
