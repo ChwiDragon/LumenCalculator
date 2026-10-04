@@ -1164,6 +1164,7 @@
   //   traitHand: 특성 ON 동안 최대 패 매수에 더하는 수 (키메라 +1)
   //   traitFixed: true 이면 게임 시작부터 특성 ON 고정, 눌러도 꺼지지 않음 (린·이제벨·이오몽·CMYK)
   //   traitOn: true 이면 게임 시작 때 특성 ON, 끄고 켤 수 있음 (키메라)
+  //   traitByCount: true 이면 특성 = 토큰 1개 이상 ON / 0개 OFF, 특성 마크는 눌러도 바뀌지 않음 (핀프)
   //   hpToken: { at, add } 체력이 at 초과 → at 이하로 내려가는 순간 토큰 add개 추가(최대치까지), 게임 중 1번만 (요한 2000 → +1)
   //   counter: 하단 토큰 칸 (없으면 표시 안 함)
   //     { kind: 'count', label, start, max, hi }   max: null이면 상한 없음
@@ -1202,7 +1203,7 @@
     { id: 'iomong', name: '이오몽', color: '#FFFFFF', traitFixed: true },
     { id: 'chimera', name: '키메라', color: '#A2714C', hands: [5, 5, 5, 6, 6], traitHand: 1, traitOn: true, counter: { kind: 'count', start: 0, max: 9, hi: 'full' } },
     { id: 'muyoung', name: '무영', color: '#3D6EF2', hp: 4500, autoTrait: 2500, counter: { kind: 'count', start: 3, max: 5, tapReset: true } },
-    { id: 'finf', name: '핀프', color: '#9AA3B5', hp: 5500, counter: { kind: 'count', start: 4, max: 4, hi: 'zero' } },
+    { id: 'finf', name: '핀프', color: '#9AA3B5', hp: 5500, traitByCount: true, counter: { kind: 'count', start: 4, max: 4, hi: 'zero' } },
     { id: 'cmyk', name: 'CMYK', color: '#FF5AA0', hands: [10, 10, 10, 10, 10], traitFixed: true, counter: { kind: 'count', start: 10, max: 10 } },
     { id: 'minyeong', name: '미녕이', color: '#F3E3BE' },
   ].map((c, i, all) => ({
@@ -1228,7 +1229,7 @@
   const LOG_ARCHIVE_MAX = 10;   // 새 게임 때 자동 보관하는 지난 로그 수
   const DELETE_HOLD_MS = 1000;  // ALL DELETE 길게 누르는 시간
   // 버전을 올릴 때마다 build(빌드 날짜)도 그날 날짜로 갱신
-  const APP = { name: '루멘콘덴서 계산기', version: '0.61.0', build: '2026-10-04' };
+  const APP = { name: '루멘콘덴서 계산기', version: '0.62.0', build: '2026-10-04' };
 
   // ================= 아이콘 =================
   const I = {
@@ -2006,6 +2007,7 @@
       p.hp = p.maxHp = c.hp;
       p.fp = 0; p.trait = !!(c.traitFixed || c.traitOn); p.stance = null; p.sel = null; p.spent = false; p.hpTokenUsed = false;
       p.counts = ct && ct.start ? [ct.start, ct.kind === 'dual' ? ct.start : 0] : [0, 0];
+      if (c.traitByCount) p.trait = p.counts[0] > 0;
     });
     archiveCurrent();
     Object.assign(state, { screen: 'game', turn: 1, sudden: false, history: [], log: [], logName: fmtArchiveName(new Date()), timer: { left: state.matchSeconds, since: null } });
@@ -2088,7 +2090,7 @@
     trait(i) {
       const p = state.players[i];
       const c = charOf(p);
-      if (c.traitFixed) return; // 항상 ON인 캐릭터는 눌러도 바뀌지 않음
+      if (c.traitFixed || c.traitByCount) return; // 항상 ON이거나 토큰 개수로 정해지는 캐릭터는 눌러도 바뀌지 않음
       const kind = c.counter && c.counter.kind;
       if (kind === 'dual') {
         // 타오: 조화는 토큰으로만 켜짐. 조화 중에 누르면 토큰 모두 제거 → 조화 OFF
@@ -2127,6 +2129,11 @@
       p.counts[k] = next;
       p.spent = false;
       logEntry(merged, `ct${i}_${k}`, i, label, ct.max ? `${next}/${ct.max}` : next, 'count', press);
+      if (c.traitByCount && p.trait !== next > 0) {
+        // 핀프: 토큰 1개 이상이면 특성 ON, 0개면 OFF
+        p.trait = next > 0;
+        addLog(i, c.trait, p.trait ? 'ON' : 'OFF', '');
+      }
       if (ct.kind === 'dual') {
         // 타오 조화: 둘 다 최대면 ON, 한쪽이라도 2개 이하가 되면 OFF
         const [a, b] = p.counts;
