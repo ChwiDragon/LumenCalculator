@@ -29,6 +29,9 @@ $code = [regex]::Match($gradle, 'versionCode (\d+)').Groups[1].Value
 
 function Build-Apk([bool]$withArt, [string]$dest) {
   # 1. web files -> www (lumencalc.html becomes index.html)
+  # start from an empty www: robocopy /XF never deletes excluded files, so art left by a previous
+  # release build would otherwise end up in the GitHub APK
+  if (Test-Path "$app\www") { Remove-Item -Recurse -Force "$app\www" }
   New-Item -ItemType Directory -Force "$app\www" | Out-Null
   Copy-Item "$root\lumencalc.html" "$app\www\index.html" -Force
   if ($withArt) {

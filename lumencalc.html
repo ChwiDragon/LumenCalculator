@@ -242,6 +242,9 @@
   .art > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
   /* 전신은 위(머리)에 맞춤: 화면 폭이 좁아져 그림이 작아져도 머리 높이가 그대로 */
   .art.contain > img { object-fit: contain; object-position: top; }
+  /* 두상(face) 그림은 시계 반대방향으로 45° 돌려 그린 정사각형 → 시계방향 45°로 되돌려 마름모 칸에 꽉 채움.
+     정사각형을 45° 돌리면 그대로 마름모가 되므로 한 변 = 칸 너비 / √2 (≈70.7%, 가장자리 틈 없게 조금 크게) */
+  .dia img[data-kind="face"] { inset: auto; left: 50%; top: 50%; width: 72%; height: 72%; translate: -50% -50%; rotate: 45deg; }
   .face-fb {
     --cc: #888;
     width: 100%;
@@ -1246,7 +1249,7 @@
   const LOG_ARCHIVE_MAX = 10;   // 새 게임 때 자동 보관하는 지난 로그 수
   const DELETE_HOLD_MS = 1000;  // ALL DELETE 길게 누르는 시간
   // 버전을 올릴 때마다 build(빌드 날짜)도 그날 날짜로 갱신
-  const APP = { name: '루멘콘덴서 계산기', version: '0.68.0', build: '2026-10-05' };
+  const APP = { name: '루멘콘덴서 계산기', version: '0.69.0', build: '2026-10-05' };
 
   // ================= 아이콘 =================
   const I = {

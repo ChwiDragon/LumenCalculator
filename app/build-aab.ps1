@@ -18,6 +18,7 @@ $release = "$root\release"
 New-Item -ItemType Directory -Force $release | Out-Null
 
 # 1. web files -> www (same as build-apk.ps1)
+if (Test-Path "$app\www") { Remove-Item -Recurse -Force "$app\www" }
 New-Item -ItemType Directory -Force "$app\www" | Out-Null
 Copy-Item "$root\lumencalc.html" "$app\www\index.html" -Force
 robocopy "$root\assets" "$app\www\assets" /MIR /XD src /NFL /NDL /NJH /NJS /NP | Out-Null
