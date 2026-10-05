@@ -10,13 +10,17 @@ $env:Path = "$tools\node;$env:JAVA_HOME\bin;$env:Path"
 
 $app = $PSScriptRoot
 $root = Split-Path $app -Parent
+
+# Korean fonts: keep only the characters used in lumencalc.html (assets/fonts/src/*.ttf -> assets/fonts/*.woff2)
+python "$app\make-fonts.py"
+if ($LASTEXITCODE -ne 0) { throw 'make-fonts.py failed (pip install fonttools brotli)' }
 $release = "$root\release"
 New-Item -ItemType Directory -Force $release | Out-Null
 
 # 1. web files -> www (same as build-apk.ps1)
 New-Item -ItemType Directory -Force "$app\www" | Out-Null
 Copy-Item "$root\lumencalc.html" "$app\www\index.html" -Force
-robocopy "$root\assets" "$app\www\assets" /MIR /NFL /NDL /NJH /NJS /NP | Out-Null
+robocopy "$root\assets" "$app\www\assets" /MIR /XD src /NFL /NDL /NJH /NJS /NP | Out-Null
 
 # 2. sync + signed release bundle
 Set-Location $app

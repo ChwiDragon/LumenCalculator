@@ -18,6 +18,10 @@ $env:Path = "$tools\node;$env:JAVA_HOME\bin;$env:Path"
 
 $app = $PSScriptRoot
 $root = Split-Path $app -Parent
+
+# Korean fonts: keep only the characters used in lumencalc.html (assets/fonts/src/*.ttf -> assets/fonts/*.woff2)
+python "$app\make-fonts.py"
+if ($LASTEXITCODE -ne 0) { throw 'make-fonts.py failed (pip install fonttools brotli)' }
 $release = "$root\release"
 $gradle = Get-Content "$app\android\app\build.gradle" -Raw
 $ver = [regex]::Match($gradle, 'versionName "([^"]+)"').Groups[1].Value
@@ -28,9 +32,9 @@ function Build-Apk([bool]$withArt, [string]$dest) {
   New-Item -ItemType Directory -Force "$app\www" | Out-Null
   Copy-Item "$root\lumencalc.html" "$app\www\index.html" -Force
   if ($withArt) {
-    robocopy "$root\assets" "$app\www\assets" /MIR /NFL /NDL /NJH /NJS /NP | Out-Null
+    robocopy "$root\assets" "$app\www\assets" /MIR /XD src /NFL /NDL /NJH /NJS /NP | Out-Null
   } else {
-    robocopy "$root\assets" "$app\www\assets" /MIR /XF *.png *.webp *.jpg *.jpeg /NFL /NDL /NJH /NJS /NP | Out-Null
+    robocopy "$root\assets" "$app\www\assets" /MIR /XD src /XF *.png *.webp *.jpg *.jpeg /NFL /NDL /NJH /NJS /NP | Out-Null
   }
   # 2. copy into the Android project and build a signed release APK
   Set-Location $app

@@ -105,19 +105,23 @@
 
  ■ 레이아웃 단위
   - 크기는 --u = min(1cqh, .45cqw) 기준(화면 비율이 달라도 겹치지 않게). 새 요소도 --u로 크기를 줄 것.
+  - 칸 크기가 글자에 따라 변하지 않게: 칸은 --u로 크기를 정하고, 글자 줄이 칸 높이를 정하는 곳은 line-height를 숫자로 줄 것
+    (기본값 normal은 글꼴마다 달라서 글꼴이 늦게 오거나 없으면 칸이 밀림). 그림은 정해진 칸 안에 채우기만 함.
 ================================================================================
 -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;600;700&display=swap">
 <style>
-  /* 숫자 글꼴(Chakra Petch)은 앱에 포함 → 인터넷 없이도 숫자 폭이 같게 유지됨 (APK 오프라인 대비).
-     assets/fonts/ 파일이 없으면(아티팩트 등) Google Fonts에서 받음. 라이선스: SIL OFL 1.1 */
-  @font-face { font-family: "Chakra Petch"; font-weight: 500; font-display: swap;
+  /* 글꼴은 모두 앱에 포함(assets/fonts/) → 인터넷 없이 바로 그려지고, 늦게 받은 글꼴로 바뀌며 화면이 출렁이지 않음.
+     한글 글꼴은 이 파일에 쓰인 글자만 남긴 것 (app/make-fonts.py가 빌드 때마다 다시 만듦). 라이선스: SIL OFL 1.1
+     font-display: block → 기본 글꼴로 먼저 그렸다가 바꾸지 않음 (파일이 없으면 바로 기본 글꼴) */
+  @font-face { font-family: "Black Han Sans"; font-weight: 400; font-display: block; src: url(assets/fonts/BlackHanSans-400.woff2) format("woff2"); }
+  @font-face { font-family: "IBM Plex Sans KR"; font-weight: 400; font-display: block; src: url(assets/fonts/IBMPlexSansKR-400.woff2) format("woff2"); }
+  @font-face { font-family: "IBM Plex Sans KR"; font-weight: 600; font-display: block; src: url(assets/fonts/IBMPlexSansKR-600.woff2) format("woff2"); }
+  @font-face { font-family: "IBM Plex Sans KR"; font-weight: 700; font-display: block; src: url(assets/fonts/IBMPlexSansKR-700.woff2) format("woff2"); }
+  @font-face { font-family: "Chakra Petch"; font-weight: 500; font-display: block;
     src: url(assets/fonts/ChakraPetch-500.woff2) format("woff2"), url(https://fonts.gstatic.com/s/chakrapetch/v13/cIflMapbsEk7TDLdtEz1BwkebIl1R5_F.woff2) format("woff2"); }
-  @font-face { font-family: "Chakra Petch"; font-weight: 600; font-display: swap;
+  @font-face { font-family: "Chakra Petch"; font-weight: 600; font-display: block;
     src: url(assets/fonts/ChakraPetch-600.woff2) format("woff2"), url(https://fonts.gstatic.com/s/chakrapetch/v13/cIflMapbsEk7TDLdtEz1BwkeQI51R5_F.woff2) format("woff2"); }
-  @font-face { font-family: "Chakra Petch"; font-weight: 700; font-display: swap;
+  @font-face { font-family: "Chakra Petch"; font-weight: 700; font-display: block;
     src: url(assets/fonts/ChakraPetch-700.woff2) format("woff2"), url(https://fonts.gstatic.com/s/chakrapetch/v13/cIflMapbsEk7TDLdtEz1BwkeJI91R5_F.woff2) format("woff2"); }
 </style>
 <style>
@@ -225,6 +229,7 @@
     font-family: var(--font-num);
     font-weight: 700;
     font-size: max(10px, calc(2.6 * var(--u)));
+    line-height: 1.3; /* 줄 높이를 숫자로 고정 = 글꼴이 바뀌어도 칸 높이가 같음 (Chakra Petch 기본값과 동일) */
     letter-spacing: .12em;
     color: var(--pc);
   }
@@ -385,6 +390,7 @@
     font-weight: 700;
     color: var(--lumen);
     font-size: max(15px, calc(4.6 * var(--u)));
+    line-height: 1.3; /* 고정: 이 줄 높이가 아래 로스터 위치를 정함 */
     letter-spacing: .18em;
   }
 
@@ -471,6 +477,7 @@
     font-family: var(--font-num);
     font-weight: 700;
     font-size: max(16px, calc(5 * var(--u)));
+    line-height: 1.3; /* 고정 */
     letter-spacing: .14em;
     padding: calc(1.8 * var(--u)) 6cqw;
     background: linear-gradient(180deg, #FFD778, var(--lumen));
@@ -877,7 +884,8 @@
   .toolbar button.armed { background: var(--dmg); color: #fff; }
   .toolbar button[disabled] { color: var(--faint); cursor: default; }
 
-  .clock { display: grid; justify-items: center; gap: calc(.4 * var(--u)); }
+  /* 폭 고정: 시간 글자 폭과 상관없이 터치 영역이 같음 */
+  .clock { width: calc(16 * var(--u)); display: grid; justify-items: center; gap: calc(.4 * var(--u)); }
   .clock .num { font-size: max(15px, calc(5 * var(--u))); line-height: 1; letter-spacing: .04em; }
   .clock.paused .num { color: var(--muted); }
   .clock.over .num { color: var(--dmg); }
@@ -918,10 +926,13 @@
   .sdbtn .s { font-family: var(--font-num); font-weight: 700; font-size: max(8px, calc(2 * var(--u))); letter-spacing: .06em; }
 
   .turnbtn {
+    /* 폭 고정: 턴 숫자가 두 자리가 되거나 SUDDEN으로 바뀌어도 버튼 크기가 같음 */
+    width: calc(27 * var(--u));
     display: flex;
+    justify-content: center;
     align-items: baseline;
     gap: 1.4cqw;
-    padding: calc(1.6 * var(--u)) 3cqw;
+    padding: calc(1.6 * var(--u)) 0;
     background: var(--surface);
     --cut: calc(1.4 * var(--u));
   }
@@ -1229,7 +1240,7 @@
   const LOG_ARCHIVE_MAX = 10;   // 새 게임 때 자동 보관하는 지난 로그 수
   const DELETE_HOLD_MS = 1000;  // ALL DELETE 길게 누르는 시간
   // 버전을 올릴 때마다 build(빌드 날짜)도 그날 날짜로 갱신
-  const APP = { name: '루멘콘덴서 계산기', version: '0.62.0', build: '2026-10-04' };
+  const APP = { name: '루멘콘덴서 계산기', version: '0.63.0', build: '2026-10-05' };
 
   // ================= 아이콘 =================
   const I = {
