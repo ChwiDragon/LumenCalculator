@@ -32,8 +32,10 @@
   - 세로 고정(위 참고), 화면 꺼짐 방지: JS Wake Lock + MainActivity에 FLAG_KEEP_SCREEN_ON 권장.
   - 진동(navigator.vibrate) 사용 → VIBRATE 권한.
   - 저장은 localStorage 키 'lumencalc.v6' 하나(상태 전체 JSON). WebView의 DOM Storage 켜기.
-  - 글꼴은 Google Fonts(인터넷 필요). 오프라인이면 시스템 글꼴로 대체되어도 동작에는 문제 없음.
-    완전 오프라인 디자인을 원하면 Black Han Sans / Chakra Petch / IBM Plex Sans KR을 로컬 파일로 포함.
+  - 글꼴(Black Han Sans / IBM Plex Sans KR / Chakra Petch)은 assets/fonts/에 포함 → 인터넷 없이 같은 화면.
+    한글 글꼴은 이 파일에 쓰인 글자만 남긴 것(app/make-fonts.py, 빌드 스크립트가 자동 실행). 파일이 없으면 시스템 글꼴.
+  - 시작할 때 화면이 한 번 커지지 않게: MainActivity가 처음부터 WebView를 전체 화면으로 둠
+    (Capacitor는 viewport-fit=cover를 확인하기 전까지 시스템 바만큼 줄여 띄움).
   - 새 버전을 낼 때 스크립트의 APP.version / APP.build 를 올린다(설정 > 버전 탭에 표시됨).
 
  ■ 화면 구성
@@ -1240,7 +1242,7 @@
   const LOG_ARCHIVE_MAX = 10;   // 새 게임 때 자동 보관하는 지난 로그 수
   const DELETE_HOLD_MS = 1000;  // ALL DELETE 길게 누르는 시간
   // 버전을 올릴 때마다 build(빌드 날짜)도 그날 날짜로 갱신
-  const APP = { name: '루멘콘덴서 계산기', version: '0.64.0', build: '2026-10-05' };
+  const APP = { name: '루멘콘덴서 계산기', version: '0.64.1', build: '2026-10-05' };
 
   // ================= 아이콘 =================
   const I = {
