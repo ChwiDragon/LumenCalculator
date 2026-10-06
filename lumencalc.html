@@ -300,18 +300,22 @@
     inset: 10%;
     border: 1px solid color-mix(in srgb, var(--cc) 22%, transparent);
   }
-  /* 반신 그림 = 정사각형. 머리 꼭대기(그림 위에서 14%)가 화면 비율과 상관없이 항상 화면 높이의 50%에 오게.
-     한 변 --bs = min(30cqw, 71.43cqh) (예전 전신 그림의 폭과 같아 캐릭터 크기는 그대로), 칸 위치 = 50% − 14% × 한 변.
-     화면이 정사각형에 가까우면 그림 아래 끝이 화면 안에 들어오므로 아래 18%는 흐리게 사라지게 함 */
+  /* 반신 그림 = 정사각형. 그림 위에서 14% 지점(머리 꼭대기)이 화면 비율과 상관없이 항상 화면 높이의 55%에 오게.
+     한 변 --bs = min(30cqw, 71.43cqh) (예전 전신 그림의 폭과 같아 캐릭터 크기는 그대로), 칸 위치 = 55% − 14% × 한 변.
+     그림은 배경까지 꽉 찬 네모 → 모서리는 둥글게, 네 변은 흐리게 사라지게 해서 네모 경계가 배경에 녹아들게 함
+     (가로 흐림 × 세로 흐림을 겹침. 아래는 화면 끝·이름판과 이어지도록 더 길게) */
   .fighter .body {
     --bs: min(30cqw, 71.43cqh);
     position: absolute;
-    top: calc(50cqh - .14 * var(--bs));
+    top: calc(55cqh - .14 * var(--bs));
     width: var(--bs);
     height: var(--bs);
+    border-radius: calc(.08 * var(--bs));
     filter: drop-shadow(0 0 calc(3 * var(--u)) color-mix(in srgb, var(--cc) 50%, transparent));
-    -webkit-mask-image: linear-gradient(to bottom, #000 82%, transparent);
-    mask-image: linear-gradient(to bottom, #000 82%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 14%, #000 86%, transparent), linear-gradient(to bottom, transparent, #000 12%, #000 72%, transparent);
+    -webkit-mask-composite: source-in;
+    mask-image: linear-gradient(to right, transparent, #000 14%, #000 86%, transparent), linear-gradient(to bottom, transparent, #000 12%, #000 72%, transparent);
+    mask-composite: intersect;
   }
   .fighter.p1 .body { left: -4cqw; }
   .fighter.p2 .body { right: -4cqw; }
@@ -1251,7 +1255,7 @@
   const LOG_ARCHIVE_MAX = 10;   // 새 게임 때 자동 보관하는 지난 로그 수
   const DELETE_HOLD_MS = 1000;  // ALL DELETE 길게 누르는 시간
   // 버전을 올릴 때마다 build(빌드 날짜)도 그날 날짜로 갱신
-  const APP = { name: '루멘콘덴서 계산기', version: '0.70.0', build: '2026-10-05' };
+  const APP = { name: '루멘콘덴서 계산기', version: '0.71.0', build: '2026-10-06' };
 
   // ================= 아이콘 =================
   const I = {
