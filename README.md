@@ -76,3 +76,6 @@ Black Han Sans(제목·이름), IBM Plex Sans KR(본문), Chakra Petch(숫자)�
 `lumencalc.html`이나 아티팩트 링크를 폰에서 **세로로 들고** 열면 APK와 같은 회전 화면이 나옵니다. 폰의 자동 회전을 꺼 두면 APK와 완전히 같은 조건이 됩니다.
 
 PC처럼 원래 가로인 화면에서는 회전하지 않습니다.
+
+`lumencalc.html`과 `assets/` 폴더를 폰에 복사해서 열 때는 `assets/.nomedia` 파일도 함께 복사하세요.
+이 빈 파일이 있어야 캐릭터 그림이 폰 갤러리에 사진처럼 뜨지 않습니다. (APK로 설치하면 그림이 앱 안에 있어서 갤러리에 뜨지 않습니다)

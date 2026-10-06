@@ -10,6 +10,9 @@
 assets/**
 !assets/characters/
 !assets/characters/README.txt
+# .nomedia = keep the phone gallery from listing these images when the folder is copied to a phone
+!assets/.nomedia
+!assets/characters/.nomedia
 
 # Google Play release folder (AAB, store graphics, checklist) - local only
 release/
