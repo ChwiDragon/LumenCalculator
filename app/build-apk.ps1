@@ -44,7 +44,10 @@ function Build-Apk([bool]$withArt, [string]$dest) {
   npx cap sync android
   Set-Location "$app\android"
   # --no-daemon: a background Gradle daemon keeps the console pipe open and the calling shell never returns
-  cmd /c ".\gradlew.bat assembleRelease --console=plain --no-daemon"
+  # release APK: character-art app icon (app/make-icons.py -> src/art/res) overlaid with -PwithArt
+  $artProp = ''
+  if ($withArt) { python "$app\make-icons.py"; $artProp = '-PwithArt' }
+  cmd /c ".\gradlew.bat assembleRelease $artProp --console=plain --no-daemon"
   if ($LASTEXITCODE -ne 0) { throw 'gradle build failed' }
   Copy-Item "$app\android\app\build\outputs\apk\release\app-release.apk" $dest -Force
   "built: $dest"

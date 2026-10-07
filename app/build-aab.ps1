@@ -27,7 +27,8 @@ robocopy "$root\assets" "$app\www\assets" /MIR /XD src /NFL /NDL /NJH /NJS /NP |
 Set-Location $app
 npx cap sync android
 Set-Location "$app\android"
-cmd /c ".\gradlew.bat bundleRelease --console=plain --no-daemon"
+python "$app\make-icons.py"   # character-art app icon (Play build always has art)
+cmd /c ".\gradlew.bat bundleRelease -PwithArt --console=plain --no-daemon"
 if ($LASTEXITCODE -ne 0) { throw 'gradle bundleRelease failed' }
 
 # 3. versioned copy into release/

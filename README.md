@@ -17,6 +17,7 @@
 | `app/build-apk.ps1` | APK 빌드 (GitHub용·릴리즈용 두 가지) |
 | `app/build-aab.ps1` | 구글 플레이 업로드용 앱 번들(`.aab`) 빌드 |
 | `app/make-fonts.py` | 한글 글꼴을 앱에 쓰인 글자만 남겨 줄임 (빌드 스크립트가 자동 실행) |
+| `app/make-icons.py` | 캐릭터 그림 앱 아이콘 생성 (`assets/icon/app-icon.webp` → 릴리즈 APK·AAB 전용, GitHub용은 금색 마름모 아이콘) |
 
 `assets/` 안의 파일(캐릭터 그림·글꼴)과 구글 플레이 릴리즈 폴더 `release/`는 GitHub에 올리지 않습니다(`.gitignore`).
 저장소를 새로 받은 경우 아래 [글꼴](#글꼴)과 `assets/characters/README.txt`를 보고 `assets/`를 채워 주세요.

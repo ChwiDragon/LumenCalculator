@@ -15,8 +15,8 @@ android {
         applicationId "com.chwidragon.lumencalc"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 32
-        versionName "0.75.0" // lumencalc.html의 APP.version과 맞춤
+        versionCode 33
+        versionName "0.76.0" // lumencalc.html의 APP.version과 맞춤
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -33,6 +33,10 @@ android {
                 keyPassword keystoreProperties['keyPassword']
             }
         }
+    }
+    // -PwithArt: 캐릭터 그림 앱 아이콘(src/art/res, git에 없음)을 release 리소스에 겹침 (릴리즈 APK·AAB 전용)
+    if (project.hasProperty('withArt')) {
+        sourceSets { release { res.srcDirs += 'src/art/res' } }
     }
     buildTypes {
         release {
