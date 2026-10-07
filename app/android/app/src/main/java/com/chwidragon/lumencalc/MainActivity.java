@@ -7,6 +7,9 @@ import android.view.View;
 import android.view.WindowManager;
 import android.webkit.WebView;
 import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
@@ -18,6 +21,9 @@ public class MainActivity extends BridgeActivity {
         super.onCreate(savedInstanceState);
         // JS Wake Lock의 보조: 경기 중 화면이 꺼지지 않게 함
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        // 전체 화면: 상단바·하단바(내비게이션 바)를 숨김. 화면 가장자리에서 쓸어 넘기면 잠깐 나타났다가 다시 숨음.
+        // 첫 화면을 그리기 전에 숨겨서 시작할 때 화면 크기가 바뀌지 않게 함
+        hideSystemBars();
         if (getBridge() == null || getBridge().getWebView() == null) return;
         WebView webView = getBridge().getWebView();
         // 폰의 '글자 크기' 설정이 WebView 글자만 키워서 토큰 숫자가 +/− 버튼과 겹치던 문제 방지.
@@ -34,6 +40,20 @@ public class MainActivity extends BridgeActivity {
                 return insets;
             });
         }
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        // 다른 앱·알림창에서 돌아왔을 때 다시 숨김
+        if (hasFocus) hideSystemBars();
+    }
+
+    private void hideSystemBars() {
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        WindowInsetsControllerCompat controller = WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+        controller.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+        controller.hide(WindowInsetsCompat.Type.systemBars());
     }
 
     private int webViewMajorVersion() {
