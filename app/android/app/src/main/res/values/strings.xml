@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">루멘콘덴서 계산기</string>
-    <string name="title_activity_main">루멘콘덴서 계산기</string>
+    <string name="app_name">루멘 카운터</string>
+    <string name="title_activity_main">루멘 카운터</string>
     <string name="package_name">com.chwidragon.lumencalc</string>
     <string name="custom_url_scheme">com.chwidragon.lumencalc</string>
 </resources>

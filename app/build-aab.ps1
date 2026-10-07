@@ -37,3 +37,11 @@ $code = [regex]::Match($gradle, 'versionCode (\d+)').Groups[1].Value
 $out = "$release\lumencalc-$ver-vc$code.aab"
 Copy-Item "$app\android\app\build\outputs\bundle\release\app-release.aab" $out -Force
 "built: $out"
+
+# 4. R8 deobfuscation (mapping) file for the Play Console "deobfuscation file" slot.
+#    It is also embedded in the .aab, so uploading it by hand is optional.
+$map = "$app\android\app\build\outputs\mapping\release\mapping.txt"
+if (Test-Path $map) {
+  Copy-Item $map "$release\lumencalc-$ver-vc$code-mapping.txt" -Force
+  "mapping: $release\lumencalc-$ver-vc$code-mapping.txt"
+}
