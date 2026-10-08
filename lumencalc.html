@@ -80,7 +80,7 @@
   - 토큰 칸은 토큰이 있는 캐릭터만 표시. 토큰 색 = 캐릭터 상징색. 점 배치는 최대치 기준으로 고정.
     델피 3/3 · 울프 0/5(5개 강조, 5개에서 특성 ON → 모두 사용하고 강조는 유지,
     특성 OFF나 토큰 개수가 바뀌면 강조 꺼짐) · 비올라 은연 0/3(1개 이상 강조, 1개 이상이면 특성 ON·0개면 OFF, 특성 마크 터치 = 은연 모두 제거)
-    레브 0/6 · 린 0/∞ · 요한 3/5(체력이 처음 2000 이하가 될 때 +1, 게임 중 1번) · 이제벨 0/∞ · 키메라 0/9(9개 강조) · 무영 3/5 · 핀프 4/4(0개 강조, 1개 이상이면 특성 ON·0개면 OFF) · CMYK 10/10
+    레브 0/6 · 린 0/∞ · 요한 예지 2/5(체력이 처음 2000 이하가 될 때 +1, 게임 중 1번) · 이제벨 0/∞ · 키메라 0/9(9개 강조) · 무영 3/5 · 핀프 4/4(0개 강조, 1개 이상이면 특성 ON·0개면 OFF) · CMYK 10/10
     숫자·마름모 탭 → 0으로 초기화: 울프, 비올라, 린, 이제벨, 무영.
   - 무영: 체력이 2500 이하가 되면 특성 자동 ON, 2500 초과로 회복하면 자동 OFF.
   - 타오: 양(흰)·음(검) 토큰 각 0/4. 둘 다 4개 → 조화(특성) ON, 한쪽이라도 2개 이하 → OFF.
@@ -1188,6 +1188,7 @@
   //   traitHand: 특성 ON 동안 최대 패 매수에 더하는 수 (키메라 +1)
   //   traitFixed: true 이면 게임 시작부터 특성 ON 고정, 눌러도 꺼지지 않음 (린·이제벨·이오몽·CMYK)
   //   traitOn: true 이면 게임 시작 때 특성 ON, 끄고 켤 수 있음 (키메라)
+  //   noTraitLog: true 이면 특성 이름이 없는 캐릭터 → 특성 ON/OFF 로그를 남기지 않음 (린·이제벨·이오몽·CMYK)
   //   traitByCount: true 이면 특성 = 토큰 1개 이상 ON / 0개 OFF, 특성 마크로 직접 켜고 끄지 않음 (핀프·비올라)
   //     traitSpends: true 이면 특성 마크를 누를 때 토큰을 모두 제거 → 특성 OFF (비올라, 되돌리기 가능)
   //   hpToken: { at, add } 체력이 at 초과 → at 이하로 내려가는 순간 토큰 add개 추가(최대치까지), 게임 중 1번만 (요한 2000 → +1)
@@ -1212,25 +1213,25 @@
   const MERGE_MS = 1000;      // 이 시간 안에 같은 종류로 연속 입력하면 기록/되돌리기에서 한 번으로 묶음
 
   const CHARACTERS = [
-    { id: 'nia', name: '니아', color: '#5BE37D' },
-    { id: 'root', name: '루트', color: '#6CCBFF' },
-    { id: 'delphi', name: '델피', color: '#19C2B0', counter: { kind: 'count', start: 3, max: 3 } },
-    { id: 'kiss', name: '키스 더 래빗', color: '#FFD23F' },
-    { id: 'wolf', name: '울프', color: '#4A9AD4', counter: { kind: 'count', label: '하울링', start: 0, max: 5, hi: 'full', tapReset: true, spendOnTrait: true } },
-    { id: 'viola', name: '비올라', color: '#B78CFF', traitByCount: true, traitSpends: true, counter: { kind: 'count', label: '은연', start: 0, max: 3, hi: 'min1', tapReset: true } },
-    { id: 'rev', name: '레브', color: '#7A4DC4', counter: { kind: 'count', start: 0, max: 6 } },
+    { id: 'nia', name: '니아', color: '#5BE37D', trait: '오버리밋' },
+    { id: 'root', name: '루트', color: '#6CCBFF', trait: '차지' },
+    { id: 'delphi', name: '델피', color: '#19C2B0', trait: '다운 스탠스', counter: { kind: 'count', label: '개러지', start: 3, max: 3 } },
+    { id: 'kiss', name: '키스 더 래빗', color: '#FFD23F', trait: '예고' },
+    { id: 'wolf', name: '울프', color: '#4A9AD4', trait: '위압', counter: { kind: 'count', label: '하울링', start: 0, max: 5, hi: 'full', tapReset: true, spendOnTrait: true } },
+    { id: 'viola', name: '비올라', color: '#B78CFF', trait: '매튜드', traitByCount: true, traitSpends: true, counter: { kind: 'count', label: '은연', start: 0, max: 3, hi: 'min1', tapReset: true } },
+    { id: 'rev', name: '레브', color: '#7A4DC4', trait: '암야', counter: { kind: 'count', label: '단검', start: 0, max: 6 } },
     { id: 'tao', name: '타오', color: '#FF86B8', trait: '조화', counter: { kind: 'dual', labels: ['양', '음'], ids: ['yang', 'yin'], colors: ['#F6F6FA', '#0C0C12'], dark: [false, true], start: 0, max: 4 } },
     { id: 'rita', name: '리타', color: '#FFE870', hands: [6, 7, 8, 9, 10], trait: '빛의 루멘',
       counter: { kind: 'stance', states: [{ id: 'guardian', label: '가디언' }, { id: 'assassin', label: '어쌔신' }, { id: 'paladin', label: '팔라딘' }] } },
-    { id: 'lin', name: '린', color: '#FF9838', traitFixed: true, counter: { kind: 'count', start: 0, max: null, tapReset: true } },
-    { id: 'johan', name: '요한', color: '#F4F5FA', hpToken: { at: 2000, add: 1 }, counter: { kind: 'count', start: 3, max: 5 } },
-    { id: 'jezebel', name: '이제벨', color: '#E5484D', traitFixed: true, counter: { kind: 'count', start: 0, max: null, tapReset: true } },
-    { id: 'iomong', name: '이오몽', color: '#FFFFFF', traitFixed: true },
-    { id: 'chimera', name: '키메라', color: '#A2714C', hands: [5, 5, 5, 6, 6], traitHand: 1, traitOn: true, counter: { kind: 'count', start: 0, max: 9, hi: 'full' } },
-    { id: 'muyoung', name: '무영', color: '#3D6EF2', hp: 4500, autoTrait: 2500, counter: { kind: 'count', start: 3, max: 5, tapReset: true } },
-    { id: 'finf', name: '핀프', color: '#9AA3B5', hp: 5500, traitByCount: true, counter: { kind: 'count', start: 4, max: 4, hi: 'zero' } },
-    { id: 'cmyk', name: 'CMYK', color: '#FF5AA0', hands: [10, 10, 10, 10, 10], traitFixed: true, counter: { kind: 'count', start: 10, max: 10 } },
-    { id: 'minyeong', name: '미녕이', color: '#F3E3BE' },
+    { id: 'lin', noTraitLog: true, name: '린', color: '#FF9838', traitFixed: true, counter: { kind: 'count', label: '불씨', start: 0, max: null, tapReset: true } },
+    { id: 'johan', name: '요한', color: '#F4F5FA', trait: '디제스터 원', hpToken: { at: 2000, add: 1 }, counter: { kind: 'count', label: '예지', start: 2, max: 5 } },
+    { id: 'jezebel', noTraitLog: true, name: '이제벨', color: '#E5484D', traitFixed: true, counter: { kind: 'count', label: '거미', start: 0, max: null, tapReset: true } },
+    { id: 'iomong', noTraitLog: true, name: '이오몽', color: '#FFFFFF', traitFixed: true },
+    { id: 'chimera', name: '키메라', color: '#A2714C', hands: [5, 5, 5, 6, 6], trait: '섭리의 궤', traitHand: 1, traitOn: true, counter: { kind: 'count', label: '편린', start: 0, max: 9, hi: 'full' } },
+    { id: 'muyoung', name: '무영', color: '#3D6EF2', hp: 4500, trait: '청염', autoTrait: 2500, counter: { kind: 'count', label: '귀섬', start: 3, max: 5, tapReset: true } },
+    { id: 'finf', name: '핀프', color: '#9AA3B5', hp: 5500, trait: 'X-05 솔다트', traitByCount: true, counter: { kind: 'count', label: '파츠', start: 4, max: 4, hi: 'zero' } },
+    { id: 'cmyk', noTraitLog: true, name: 'CMYK', color: '#FF5AA0', hands: [10, 10, 10, 10, 10], traitFixed: true, counter: { kind: 'count', label: '뉴 싱글', start: 10, max: 10 } },
+    { id: 'minyeong', name: '미녕이', color: '#F3E3BE', trait: '하이텐션' },
   ].map((c, i, all) => ({
     hp: DEFAULT_HP,
     hands: DEFAULT_HANDS,
@@ -1256,7 +1257,7 @@
   const LOG_ARCHIVE_MAX = 10;   // 새 게임 때 자동 보관하는 지난 로그 수
   const DELETE_HOLD_MS = 1000;  // ALL DELETE 길게 누르는 시간
   // 버전을 올릴 때마다 build(빌드 날짜)도 그날 날짜로 갱신
-  const APP = { name: '루멘 카운터', version: '0.77.0', build: '2026-10-07' };
+  const APP = { name: '루멘 카운터', version: '0.79.0', build: '2026-10-08' };
 
   // ================= 아이콘 =================
   const I = {
@@ -1962,12 +1963,12 @@
       '손패 한도는 체력 구간에 맞춰 이름 옆 마름모에 자동으로 표시돼요.', '양쪽 체력이 모두 0이 되면 가운데에 서든데스 버튼이 나타나요. 누르면 양쪽 체력 1000 · FP 0으로 시작하고, 되돌리기로 취소할 수 있어요.']],
     ['FP · 특성 · 토큰', ['FP는 데미지 버튼 옆의 + / − 로 조절하고, 가운데 숫자를 누르면 0으로 초기화돼요.',
       '특성 마크를 누르면 밝게(ON) / 어둡게(OFF) 바뀌어요. 켜져 있는 동안 마크가 은은하게 빛나요.',
-      '울프: 하울링 5개에서 특성을 켜면 하울링이 모두 사라지고, 칸 강조는 특성을 끄거나 하울링 개수가 바뀔 때까지 남아요.',
+      '울프: 하울링 5개에서 위압(특성)을 켜면 하울링이 모두 사라지고, 칸 강조는 위압을 끄거나 하울링 개수가 바뀔 때까지 남아요.',
       '린·이제벨·이오몽·CMYK는 특성이 처음부터 켜져 있고 꺼지지 않아요.',
-      '키메라: 특성이 켜진 채로 시작하고 끌 수 있어요. 특성이 켜져 있으면 최대 패 매수가 1장 늘어요. 토큰 9개면 칸이 강조돼요.', '핀프: 체력 5500으로 시작해요. 특성은 토큰이 1개 이상이면 켜지고 0개가 되면 꺼져요(마크로는 바꾸지 않아요).',
-      '비올라: 은연이 1개 이상이면 특성이 켜지고 0개가 되면 꺼져요. 특성 마크를 누르면 은연이 모두 사라지고 특성이 꺼져요(되돌리기 가능).',
-      '요한: 체력이 처음 2000 이하가 될 때 토큰이 1개 늘어요. 게임 중 1번만이에요(최대 5개).',
-      '무영: 체력이 2500 이하가 되면 특성이 자동으로 켜지고, 2500을 넘게 회복하면 꺼져요.',
+      '키메라: 섭리의 궤(특성)가 켜진 채로 시작하고 끌 수 있어요. 켜져 있으면 최대 패 매수가 1장 늘어요. 편린 9개면 칸이 강조돼요.', '핀프: 체력 5500으로 시작해요. X-05 솔다트(특성)는 파츠가 1개 이상이면 켜지고 0개가 되면 꺼져요(마크로는 바꾸지 않아요).',
+      '비올라: 은연이 1개 이상이면 매튜드(특성)가 켜지고 0개가 되면 꺼져요. 특성 마크를 누르면 은연이 모두 사라지고 꺼져요(되돌리기 가능).',
+      '요한: 예지 2개로 시작해요. 체력이 처음 2000 이하가 될 때 예지가 1개 늘어요. 게임 중 1번만이에요(최대 5개).',
+      '무영: 체력이 2500 이하가 되면 청염(특성)이 자동으로 켜지고, 2500을 넘게 회복하면 꺼져요.',
       '타오: 양·음이 모두 4개가 되면 조화가 켜지고, 한쪽이라도 2개 이하가 되면 꺼져요. 조화 중에는 양/음 줄(− 버튼 왼쪽 전체)을 눌러 하나를 고를 수 있어요(고른 줄이 강조돼요). 조화 중에 특성 마크를 누르면 토큰이 모두 사라지고 조화가 꺼져요.',
       '리타: 가디언·어쌔신·팔라딘 중 하나를 선언해요. 특성 마크(빛의 루멘)를 켜면 세 상태가 모두 적용되고, 그 중에도 하나를 선언할 수 있어요(흰 테두리).',
       '토큰이 있는 캐릭터만 토큰 칸이 보여요. 조건을 만족하면 칸이 캐릭터 색으로 강조돼요. 울프·비올라·린·이제벨·무영은 토큰 숫자를 누르면 0이 돼요.']],
@@ -2155,7 +2156,7 @@
         p.counts = [0, 0];
         p.trait = false;
         p.sel = null;
-        addLog(i, `${c.trait} 해제 · 토큰 모두 제거`, '0 / 0', '');
+        addLog(i, `${c.trait} 해제 · ${c.counter.labels.join('·')} 모두 제거`, '0 / 0', '');
         return;
       }
       snapshot(`${i + 1}P ${c.trait}`);
@@ -2168,7 +2169,7 @@
         addLog(i, `${ct.label || '토큰'} 모두 사용`, `0/${ct.max}`, '');
       }
       // 리타: 빛의 루멘은 세 상태를 모두 적용. 선언한 상태(p.stance)는 그대로 유지
-      addLog(i, c.trait, p.trait ? 'ON' : 'OFF', '');
+      traitLog(i, c, p.trait ? 'ON' : 'OFF');
     },
     count(i, v, d) {
       const p = state.players[i];
@@ -2193,7 +2194,7 @@
         if (a >= ct.max && b >= ct.max) p.trait = true;
         else if (a <= 2 || b <= 2) p.trait = false;
         if (!p.trait) p.sel = null;
-        if (p.trait !== before) addLog(i, c.trait, p.trait ? 'ON' : 'OFF', '');
+        if (p.trait !== before) traitLog(i, c, p.trait ? 'ON' : 'OFF');
       }
     },
     // 타오: 조화 상태에서 양/음 중 하나 선택
@@ -2204,7 +2205,7 @@
       const k = Number(d.k || 0);
       snapshot(`${i + 1}P ${c.counter.labels[k]} 선택`);
       p.sel = p.sel === k ? null : k;
-      addLog(i, `${c.trait} · ${c.counter.labels[k]}`, p.sel === k ? '선택' : '해제', '');
+      addLog(i, `${c.trait}-${c.counter.labels[k]}`, p.sel === k ? '선택' : '해제', ''); // 조화-양 / 조화-음
     },
     creset(i, v, d) {
       const p = state.players[i];
@@ -2225,7 +2226,7 @@
       snapshot(`${i + 1}P ${st.label}`);
       p.stance = p.stance === v ? null : v;
       // 빛의 루멘 중에도 하나를 선언할 수 있음 (루멘은 유지)
-      addLog(i, p.trait ? `${st.label} 선언` : st.label, p.stance === v ? 'ON' : 'OFF', '');
+      addLog(i, st.label, p.stance === v ? 'ON' : 'OFF', ''); // 빛의 루멘과 상관없이 가디언/어쌔신/팔라딘
     },
     // 서든데스 버튼: 양쪽 체력 1000 · FP 0 (되돌리기 가능)
     sudden() {
@@ -2316,13 +2317,17 @@
     if (added) p.spent = false;
     addLog(i, `${ct.label || '토큰'} +${added}${added ? '' : ' (최대치)'} · 체력 ${ht.at} 이하 (게임 중 1번)`, ct.max ? `${next}/${ct.max}` : next, '');
   }
+  // 특성 ON/OFF 로그 (특성 이름이 없는 캐릭터는 남기지 않음)
+  function traitLog(i, c, value) {
+    if (!c.noTraitLog) addLog(i, c.trait, value, '');
+  }
   // 핀프·비올라: 토큰 1개 이상이면 특성 ON, 0개면 OFF (바뀔 때만 로그)
   function syncCountTrait(i) {
     const p = state.players[i];
     const c = charOf(p);
     if (!c || !c.traitByCount || p.trait === p.counts[0] > 0) return;
     p.trait = p.counts[0] > 0;
-    addLog(i, c.trait, p.trait ? 'ON' : 'OFF', '');
+    traitLog(i, c, p.trait ? 'ON' : 'OFF');
   }
   // 체력이 기준을 넘나들 때만 특성을 자동으로 켜고 끔 (그 사이 수동 조작은 유지)
   function autoTrait(i, before) {
@@ -2330,8 +2335,8 @@
     const c = charOf(p);
     if (!c || c.autoTrait == null) return;
     const lim = c.autoTrait;
-    if (before > lim && p.hp <= lim && !p.trait) { p.trait = true; addLog(i, c.trait, `ON (체력 ${lim} 이하)`, ''); }
-    else if (before <= lim && p.hp > lim && p.trait) { p.trait = false; addLog(i, c.trait, `OFF (체력 ${lim} 초과)`, ''); }
+    if (before > lim && p.hp <= lim && !p.trait) { p.trait = true; traitLog(i, c, `ON (체력 ${lim} 이하)`); }
+    else if (before <= lim && p.hp > lim && p.trait) { p.trait = false; traitLog(i, c, `OFF (체력 ${lim} 초과)`); }
   }
 
   // 양쪽 체력이 모두 0이면 가운데에 서든데스 버튼이 나타남 (자동으로 넘어가지 않음)
