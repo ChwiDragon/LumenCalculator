@@ -51,7 +51,7 @@
      계산기 화면의 경기 시간·10초 타이머에는 안내 문구 없이 숫자만 표시.
      가운데 열은 양쪽과 같은 줄(CSS subgrid)을 씀: 경기 시간 = 툴바 바로 아래(체력 숫자 줄),
      10초 타이머 = FP 칸과 같은 높이(데미지·FP 줄), TURN = 특성·토큰 줄 아래.
-     가운데 열은 좁게(30u, 마름모는 칸의 88%) → 양쪽 칸이 넓음. 툴바는 가운데 열보다 크게
+     가운데 열은 좁게(24u, 마름모는 칸 폭의 80%) → 양쪽 칸이 넓음. 툴바는 가운데 열보다 크게
      양옆 칸으로 --tb-out만큼 넘어가고, 손패 마름모가 그만큼 바깥으로 비켜 섬.
      되돌리기 때 알림은 띄우지 않음(로그에 흐리게 '되돌림'으로 남음).
      오른쪽 위: 로그 / 설정 버튼. 캐릭터가 늘어날 것을 대비해 빈 칸을 항상 3개 이상 남김.
@@ -144,6 +144,7 @@
     --lumen: #FFC247;
     --u: min(1cqh, .45cqw);
     --tb-out: calc(5 * var(--u)); /* 계산기 툴바가 가운데 열 밖(양옆 칸)으로 넘어가는 길이 */
+    --tb-wide: calc(15 * var(--u)); /* 글자 버튼이라 예전보다 좌우로 더 넓게 (가운데 열이 좁아진 만큼 더함) */
     --cut: calc(1.6 * var(--u));
     --font-display: "Black Han Sans", "IBM Plex Sans KR", "Malgun Gothic", sans-serif;
     --font-body: "IBM Plex Sans KR", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
@@ -503,7 +504,7 @@
   /* 줄: 이름판 / 체력 숫자 / 체력 막대 / 데미지·FP / 특성·토큰 — 양쪽과 가운데 열이 같은 줄을 공유 */
   .game {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) calc(30 * var(--u)) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) calc(24 * var(--u)) minmax(0, 1fr);
     grid-template-rows: auto auto auto minmax(0, 1fr) auto;
     column-gap: calc(3 * var(--u));
     row-gap: calc(1.8 * var(--u));
@@ -873,15 +874,37 @@
     align-self: start;
     justify-self: stretch;
     /* 가운데 열보다 넓게: 칸 사이 간격(3u)을 넘어 양옆 칸으로 --tb-out만큼 */
-    margin: 0 calc(-3 * var(--u) - var(--tb-out));
+    margin: 0 calc(-3 * var(--u) - var(--tb-out) - var(--tb-wide));
     display: flex;
     gap: 1px;
     background: var(--line);
     --cut: calc(1.2 * var(--u));
   }
-  .center .clock { grid-row: 2; align-self: start; }
+  /* UNDO: 양쪽 손패 마름모 사이 (체력 숫자 줄 가운데). 되돌린 직후에는 강조, 새 기록이 생기면 원래대로 */
+  /* 가운데 열 칸은 모두 한 열 (같은 줄에 두 개를 두면 자동 배치가 새 열을 만들어 옆으로 밀림) */
+  .center > * { grid-column: 1; }
+  .center .undobtn { grid-row: 2; align-self: center; }
+  .undobtn { width: calc(20 * var(--u)); padding: calc(2 * var(--u)) 0; background: var(--surface); color: var(--text); font-family: var(--font-num); font-weight: 700; font-size: max(11px, calc(3.2 * var(--u))); letter-spacing: .12em; --cut: calc(1.2 * var(--u)); transition: background .15s, color .15s; }
+  .undobtn:active { background: var(--surface-2); }
+  .undobtn[disabled] { color: var(--faint); cursor: default; }
+  /* 되돌린 직후: 칸 크기·모양은 그대로, 은은하게 빛나는 정도 (안쪽 빛 + 글자 빛) */
+  .undobtn.lit {
+    color: var(--lumen);
+    background: color-mix(in srgb, var(--lumen) 12%, var(--surface));
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--lumen) 45%, transparent), inset 0 0 calc(2 * var(--u)) color-mix(in srgb, var(--lumen) 22%, transparent);
+    text-shadow: 0 0 calc(1.4 * var(--u)) color-mix(in srgb, var(--lumen) 70%, transparent);
+  }
+  /* 10초 / 30초: 카운트다운 바로 아래, 버튼 전체를 누르면 바뀜 */
+  /* 10초/30초: 카운트다운 아래 (아랫선 = FP − 버튼 아랫선) */
+  .center .rsel { grid-row: 4; align-self: end; position: relative; z-index: 3; }
   .center .dtimer { grid-row: 4; }
-  .center .turnbtn { grid-row: 5; align-self: end; }
+  /* 경기 시간은 턴 버튼 바로 위 */
+  .center .cbottom { grid-row: 5; align-self: end; display: grid; justify-items: center; gap: calc(1.2 * var(--u)); }
+  /* 카운트다운 길이 고르기: 10초 / 30초 */
+  .rsel { display: flex; gap: 1px; background: var(--line); --cut: calc(1 * var(--u)); }
+  .rsel span { width: calc(11 * var(--u)); padding: calc(1.2 * var(--u)) 0; background: var(--surface); color: var(--muted); font-family: var(--font-num); font-weight: 700; font-size: max(10px, calc(2.6 * var(--u))); letter-spacing: .06em; text-align: center; }
+  .rsel span.on { background: var(--surface-3); color: var(--lumen); }
+  .rsel:active span { filter: brightness(1.3); }
   .toolbar button {
     flex: 1 1 0;
     min-width: 0;
@@ -893,6 +916,9 @@
     color: var(--muted);
   }
   .toolbar button svg { width: calc(5 * var(--u)); height: calc(5 * var(--u)); }
+  /* 글자 버튼 (NEW GAME / LOG / SETTING): 세 개 같은 폭, 되돌리기 아이콘 칸은 좁게 */
+  .toolbar button.tbtext { flex: 3 1 0; font-family: var(--font-num); font-weight: 700; font-size: max(10px, calc(2.9 * var(--u))); letter-spacing: .05em; white-space: nowrap; color: var(--text); }
+
   .toolbar button:active { background: var(--surface-2); color: var(--text); }
   .toolbar button.armed { background: var(--dmg); color: #fff; }
   .toolbar button[disabled] { color: var(--faint); cursor: default; }
@@ -917,17 +943,28 @@
     min-height: 0;
     display: grid;
     place-items: center;
+    /* 10초/30초 버튼 자리를 위·아래 똑같이 비워 둠 → 마름모와 숫자는 칸 정가운데(FP 숫자와 같은 높이) */
+    --rsel-h: calc(6.6 * var(--u));
+    padding-block: var(--rsel-h);
   }
   /* 마름모는 칸보다 작게(88%) — 칸 전체는 그대로 터치 영역 */
-  .dtimer svg.track { position: absolute; inset: 6%; width: 88%; height: 88%; }
+  .dtimer svg.track { position: absolute; top: var(--rsel-h); left: 10%; width: 80%; height: calc(100% - 2 * var(--rsel-h)); }
   .dtimer .bg { stroke: var(--surface-3); fill: rgba(19, 26, 43, .7); }
   .dtimer .inner { stroke: var(--line); fill: none; }
   .dtimer .fg { stroke: var(--lumen); fill: none; transition: stroke .2s; }
   .dtimer.warn .fg { stroke: var(--dmg); }
   .dtimer.idle .fg { stroke: var(--faint); }
-  .dtimer .face { position: relative; display: grid; justify-items: center; gap: calc(.5 * var(--u)); pointer-events: none; }
+  .dtimer .face { position: relative; display: grid; place-items: center; pointer-events: none; }
+  .dtimer .face > * { grid-area: 1 / 1; }
+  /* 멈춰 있을 때는 숫자 대신 초시계 그림 (누르면 시작한다는 표시) */
+  .dtimer .swatch { width: calc(7 * var(--u)); height: calc(7 * var(--u)); color: var(--muted); opacity: 0; transition: opacity .3s; }
+  .dtimer.idle .swatch { opacity: 1; }
   .dtimer .sec { font-size: calc(8 * var(--u)); line-height: .9; }
   .dtimer.warn .sec, .dtimer.done .sec { color: var(--dmg); }
+  /* 숫자는 돌고 있을 때와 0이 된 직후에만 보임. 멈춰 있을 때는 마름모만 */
+  .dtimer.idle .sec { opacity: 0; }
+  /* 0이 되고 5초 뒤: 숫자가 서서히 사라진 다음 처음 상태로 */
+  .dtimer.fadeout .sec { opacity: 0; transition: opacity .6s; animation: none; }
   .dtimer.done .sec { animation: blink .35s steps(2) 4; }
   .dtimer > button.hit { position: absolute; inset: 0; }
   /* 서든데스 버튼: 양쪽 체력이 모두 0일 때만 10초 타이머 자리 전체(네모 영역)를 덮음 */
@@ -940,18 +977,18 @@
 
   .turnbtn {
     /* 폭 고정: 턴 숫자가 두 자리가 되거나 SUDDEN으로 바뀌어도 버튼 크기가 같음 */
-    width: calc(27 * var(--u));
+    width: calc(21 * var(--u));
     display: flex;
     justify-content: center;
     align-items: baseline;
-    gap: 1.4cqw;
-    padding: calc(1.6 * var(--u)) 0;
+    gap: calc(1.2 * var(--u));
+    padding: calc(1.2 * var(--u)) 0;
     background: var(--surface);
     --cut: calc(1.4 * var(--u));
   }
   .turnbtn:active { background: var(--surface-2); }
-  .turnbtn .lbl { font-family: var(--font-num); font-weight: 700; font-size: max(10px, calc(2.6 * var(--u))); letter-spacing: .16em; color: var(--muted); }
-  .turnbtn .num { font-size: max(16px, calc(5.4 * var(--u))); line-height: 1; color: var(--lumen); }
+  .turnbtn .lbl { font-family: var(--font-num); font-weight: 700; font-size: max(9px, calc(2.2 * var(--u))); letter-spacing: .14em; color: var(--muted); }
+  .turnbtn .num { font-size: max(14px, calc(4.6 * var(--u))); line-height: 1; color: var(--lumen); }
   .turnbtn.sd .lbl { color: var(--lumen); }
 
   .toast {
@@ -1029,6 +1066,7 @@
     padding: calc(1.4 * var(--u)) calc(2 * var(--u));
     border-bottom: 1px solid var(--line);
     scrollbar-width: thin;
+    touch-action: none; /* 끌기 스크롤은 JS가 처리 (화면 회전 대응) */
   }
   .ltab {
     flex: none;
@@ -1044,7 +1082,7 @@
     white-space: nowrap;
     position: relative;
     overflow: hidden;
-    touch-action: pan-x;
+    touch-action: none;
   }
   .ltab span { position: relative; }
   .ltab .fill { position: absolute; inset: 0; background: #fff; opacity: .35; transform: scaleX(0); transform-origin: left center; }
@@ -1059,6 +1097,8 @@
     flex-direction: column;
     gap: calc(.8 * var(--u));
     scrollbar-width: thin;
+    /* 브라우저가 스스로 스크롤하려고 하면 끌기가 중간에 취소됨(pointercancel) → 끌기 스크롤은 JS가 처리 */
+    touch-action: none;
   }
   .lempty { text-align: center; color: var(--muted); padding: calc(6 * var(--u)) 0; font-size: max(12px, calc(3 * var(--u))); }
   .lrow {
@@ -1134,7 +1174,7 @@
     box-shadow: inset 0 -2px 0 transparent;
   }
   .settings .tabs button.on { color: var(--text); box-shadow: inset 0 -2px 0 var(--lumen); }
-  .setbody { overflow-y: auto; padding: calc(2.4 * var(--u)) 2.4cqw; display: grid; gap: calc(2.4 * var(--u)); align-content: start; }
+  .setbody { touch-action: none; overflow-y: auto; padding: calc(2.4 * var(--u)) 2.4cqw; display: grid; gap: calc(2.4 * var(--u)); align-content: start; }
   .setrow { display: flex; align-items: center; justify-content: space-between; gap: 2cqw; }
   .setrow b { display: block; font-size: max(13px, calc(3.6 * var(--u))); }
   .setrow small { display: block; margin-top: .3em; font-size: max(10px, calc(2.5 * var(--u))); color: var(--muted); line-height: 1.4; max-width: 36ch; }
@@ -1144,6 +1184,8 @@
   .presets { display: flex; flex-wrap: wrap; gap: calc(1 * var(--u)); --cut: calc(.8 * var(--u)); }
   .presets button { padding: .5em 1em; background: var(--surface-2); font-size: max(11px, calc(2.8 * var(--u))); font-weight: 600; }
   .presets button.on { background: var(--lumen); color: #1A1300; }
+  .restart { flex: none; padding: .6em 1.2em; background: var(--surface-2); font-family: var(--font-num); font-weight: 700; letter-spacing: .08em; font-size: max(11px, calc(2.8 * var(--u))); --cut: calc(.8 * var(--u)); }
+  .restart.armed { background: var(--dmg); color: #fff; }
   .setrow.now { padding-top: calc(1.6 * var(--u)); border-top: 1px solid var(--line); color: var(--muted); font-size: max(11px, calc(2.8 * var(--u))); }
   .setrow.now b { color: var(--text); font-size: max(14px, calc(4.2 * var(--u))); }
   .help { gap: calc(2 * var(--u)); }
@@ -1250,14 +1292,15 @@
   const QUICK = [-600, -500, -400, -300, +200, +100, -100, -200];
   const quickOrder = (i) => (i === 0 ? QUICK : [...QUICK.slice(0, 4).reverse(), ...QUICK.slice(4).reverse()]);
   const MATCH_SECONDS = 30 * 60;
-  const ROUND_SECONDS = 10;
+  const ROUND_SECONDS = 10;            // 가운데 카운트다운 기본값 (10초 / 30초 중 고름: state.roundSeconds)
+  const roundSec = () => (state.roundSeconds === 30 ? 30 : ROUND_SECONDS);
   const SUDDEN_DEATH_HP = 1000;
   const BURST_MS = 1600;
   const STORE_KEY = 'lumencalc.v6';
   const LOG_ARCHIVE_MAX = 10;   // 새 게임 때 자동 보관하는 지난 로그 수
   const DELETE_HOLD_MS = 1000;  // ALL DELETE 길게 누르는 시간
   // 버전을 올릴 때마다 build(빌드 날짜)도 그날 날짜로 갱신
-  const APP = { name: '루멘 카운터', version: '0.79.0', build: '2026-10-08' };
+  const APP = { name: '루멘 카운터', version: '0.87.0', build: '2026-10-11' };
 
   // ================= 아이콘 =================
   const I = {
@@ -1391,7 +1434,7 @@
 
   const ui = { armed: null, toast: '', logOpen: false, logView: 'current', settingsOpen: false, settingsTab: 'settings', burst: [null, null], round: { end: null, done: false } };
   // 화면이 바뀔 때(새 게임·불러오기·전체 삭제) 열린 창·합계 표시·10초 타이머를 처음 상태로
-  const resetUi = () => Object.assign(ui, { burst: [null, null], armed: null, logOpen: false, settingsOpen: false, logView: 'current', round: { end: null, done: false } });
+  const resetUi = () => Object.assign(ui, { burst: [null, null], armed: null, undid: false, logOpen: false, settingsOpen: false, logView: 'current', round: { end: null, done: false } });
 
   // ================= helpers =================
   const $ = (id) => document.getElementById(id);
@@ -1439,8 +1482,9 @@
     if (state.history.length > 200) state.history.shift();
   }
   function addLog(side, text, value, kind) {
-    // 새 기록이 생기면 되돌린(흐리게 남겨 둔) 줄은 그때 지움
-    if (state.log.some((r) => r.undone)) state.log = state.log.filter((r) => !r.undone);
+    // 새 기록이 생기면 되돌린(흐리게 남겨 둔) 줄은 그때 지우고, UNDO 강조도 끔 (예전 저장에 남은 'undo' 표시 줄도 함께 정리)
+    if (state.log.some((r) => r.undone || r.kind === 'undo')) state.log = state.log.filter((r) => !r.undone && r.kind !== 'undo');
+    ui.undid = false;
     state.log.unshift({ t: Date.now(), turn: state.turn, side, text, value, kind, hid: actionHid });
     if (state.log.length > 300) state.log.pop();
   }
@@ -1711,15 +1755,11 @@
       ${sideHtml(0)}
       <div class="center">
         <div class="toolbar chamfer">
-          <button data-a="reselect" id="tb-reselect" aria-label="캐릭터 다시 선택">${I.user}</button>
-          <button data-a="reset" id="tb-reset" aria-label="새 게임">${I.reset}</button>
-          <button data-a="settings" id="tb-settings" aria-label="설정">${I.gear}</button>
-          <button data-a="log" aria-label="기록 보기">${I.log}</button>
-          <button data-a="undo" id="tb-undo" aria-label="되돌리기">${I.undo}</button>
+          <button class="tbtext" data-a="reselect" id="tb-reselect" aria-label="새 게임 (캐릭터 선택으로)">NEW GAME</button>
+          <button class="tbtext" data-a="log" aria-label="기록 보기">LOG</button>
+          <button class="tbtext" data-a="settings" id="tb-settings" aria-label="설정">SETTING</button>
         </div>
-        <button class="clock" id="clock" data-a="clock" data-long="clockReset">
-          <span class="num" id="clockNum">30:00</span>
-        </button>
+        <button class="undobtn chamfer" data-a="undo" id="tb-undo" aria-label="되돌리기">UNDO</button>
         <div class="dtimer idle" id="dtimer">
           <svg class="track" viewBox="0 0 100 100" aria-hidden="true">
             <polygon class="bg" points="50,3 97,50 50,97 3,50" stroke-width="1"/>
@@ -1727,9 +1767,13 @@
             <polygon class="fg" id="dtFg" points="50,3 97,50 50,97 3,50" stroke-width="3.2" stroke-linejoin="round"
               pathLength="100" stroke-dasharray="100" stroke-dashoffset="0"/>
           </svg>
-          <button class="hit" data-a="round" aria-label="10초 타이머: 탭하면 시작, 도는 중에 탭하면 10초로 돌아가 멈춤"></button>
+          <button class="hit" data-a="round" aria-label="카운트다운: 탭하면 시작, 도는 중에 탭하면 처음으로 돌아가 멈춤"></button>
           <div class="face">
-            <span class="sec num" id="dtSec">${ROUND_SECONDS}</span>          </div>
+            <svg class="swatch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="13.5" r="7.5"/><path d="M12 13.5V9.5M10 2.5h4M12 2.5V6M18.2 7.3l1.4-1.4"/>
+            </svg>
+            <span class="sec num" id="dtSec">${roundSec()}</span>
+          </div>
           <button class="sdbtn" id="sdBtn" data-a="sudden" hidden aria-label="서든데스 시작">
             <svg class="sdshape" viewBox="0 0 100 100" aria-hidden="true">
               <defs><linearGradient id="sdGrad" x1="0" y1="0" x2=".35" y2="1"><stop offset="0" stop-color="#FFD978"/><stop offset=".55" stop-color="#FFC247"/><stop offset="1" stop-color="#E29A1E"/></linearGradient></defs>
@@ -1738,9 +1782,15 @@
             <span class="face"><span class="t">서든데스</span><span class="s num">HP ${SUDDEN_DEATH_HP} · FP 0</span></span>
           </button>
         </div>
-        <button class="turnbtn chamfer" id="turnBtn" data-a="turn" data-long="turnDown" aria-label="턴 +1, 길게 눌러 −1">
-          <span class="lbl" id="turnLbl">TURN</span><span class="num" id="turnNum">1</span>
-        </button>
+        <button class="rsel chamfer" data-a="rsec" aria-label="카운트다운 10초/30초 바꾸기"><span id="rsec10">10</span><span id="rsec30">30</span></button>
+        <div class="cbottom">
+          <button class="clock" id="clock" data-a="clock" data-long="clockReset">
+            <span class="num" id="clockNum">30:00</span>
+          </button>
+          <button class="turnbtn chamfer" id="turnBtn" data-a="turn" data-long="turnDown" aria-label="턴 +1, 길게 눌러 −1">
+            <span class="lbl" id="turnLbl">TURN</span><span class="num" id="turnNum">1</span>
+          </button>
+        </div>
       </div>
       ${sideHtml(1)}`;
     barPrev[0] = barPrev[1] = null;
@@ -1800,7 +1850,7 @@
     $('turnBtn').classList.toggle('sd', state.sudden);
     setProp($('sdBtn'), 'hidden', !bothKo());
     setProp($('tb-undo'), 'disabled', !state.history.length);
-    $('tb-reset').classList.toggle('armed', ui.armed === 'reset');
+    $('tb-undo').classList.toggle('lit', !!ui.undid); // 'undid'는 로그의 '되돌림' 표시 클래스라 다른 이름
     $('tb-reselect').classList.toggle('armed', ui.armed === 'reselect');
     $('tb-settings').classList.toggle('on', ui.settingsOpen);
     updateClock();
@@ -1830,16 +1880,40 @@
   // 10초 타이머
   function roundLeft() {
     const r = ui.round;
-    return r.end ? Math.max(0, (r.end - Date.now()) / 1000) : (r.done ? 0 : ROUND_SECONDS);
+    return r.end ? Math.max(0, (r.end - Date.now()) / 1000) : (r.done ? 0 : roundSec());
+  }
+  // 0이 된 뒤 5초 지나면 숫자를 서서히 지우고(0.6초) 처음 상태로 되돌림
+  let roundResetTimer = null;
+  const ROUND_HOLD_MS = 5000, ROUND_FADE_MS = 600;
+  function cancelRoundReset() {
+    clearTimeout(roundResetTimer);
+    roundResetTimer = null;
+    const box = $('dtimer');
+    if (box) box.classList.remove('fadeout');
+  }
+  function scheduleRoundReset() {
+    cancelRoundReset();
+    roundResetTimer = setTimeout(() => {
+      const box = $('dtimer');
+      if (box) box.classList.add('fadeout');
+      roundResetTimer = setTimeout(() => {
+        roundResetTimer = null;
+        ui.round = { end: null, done: false };
+        if (box) box.classList.remove('fadeout');
+        updateTimer10();
+      }, ROUND_FADE_MS);
+    }, ROUND_HOLD_MS);
   }
   function updateTimer10() {
     const box = $('dtimer');
     if (!box) return;
     const r = ui.round;
     const left = roundLeft();
-    if (r.end && left <= 0) { r.end = null; r.done = true; buzz([200, 80, 200]); }
+    if (r.end && left <= 0) { r.end = null; r.done = true; buzz([200, 80, 200]); scheduleRoundReset(); }
     setText($('dtSec'), Math.ceil(left));
-    $('dtFg').style.strokeDashoffset = String(100 * (1 - left / ROUND_SECONDS));
+    $('dtFg').style.strokeDashoffset = String(100 * (1 - left / roundSec()));
+    setClass($('rsec10'), roundSec() === 10 ? 'on' : '');
+    setClass($('rsec30'), roundSec() === 30 ? 'on' : '');
     box.classList.toggle('idle', !r.end && !r.done);
     box.classList.toggle('warn', !!r.end && left <= 3);
     box.classList.toggle('done', r.done);
@@ -2000,8 +2074,10 @@
             <button class="dbtn" data-a="mtime" data-v="1" aria-label="경기 시간 1분 늘리기">${I.plus}</button>
           </div>
         </div>
-        <div class="presets">${[20, 25, 30, 40, 50, 60].map((m) => `<button class="chamfer${m === mins ? ' on' : ''}" data-a="mtime" data-set="${m}">${m}분</button>`).join('')}</div>
+        <div class="presets">${[20, 25, 30].map((m) => `<button class="chamfer${m === mins ? ' on' : ''}" data-a="mtime" data-set="${m}">${m}분</button>`).join('')}</div>
         <div class="setrow now"><span>남은 경기 시간</span><b class="num">${fmtClock(timeLeft())}</b></div>
+        ${state.screen === 'game' ? `<div class="setrow"><div><b>같은 캐릭터로 새 게임</b><small>지금 1P·2P 캐릭터 그대로 처음부터 다시 시작해요. 두 번 눌러 확인.</small></div>
+          <button class="restart chamfer${ui.armed === 'reset' ? ' armed' : ''}" data-a="reset">RESTART</button></div>` : ''}
       </div>` : tab === 'about' ? `
       <div class="setbody about">
         <div class="brand"><span class="mk dia"></span><div><b>${esc(APP.name)}</b><small>오프라인 대전용 체력 · 토큰 계산기</small></div></div>
@@ -2246,12 +2322,19 @@
       addLog(null, d > 0 ? `턴 ${state.turn} 시작` : `턴 ${state.turn}로 되돌림`, null, 'turn');
     },
     turnDown() { actions.turn(null, -1); },
-    // 10초 타이머: 멈춰 있으면(10) 시작, 도는 중이거나 끝난 뒤(0) 탭하면 10초로 돌아가 멈춤
+    // 카운트다운: 멈춰 있으면 시작, 도는 중이거나 끝난 뒤(0) 탭하면 처음으로 돌아가 멈춤. 0이 되면 5초 뒤 저절로 처음으로
     round() {
+      cancelRoundReset();
       const r = ui.round;
       if (r.end || r.done) { ui.round = { end: null, done: false }; return; }
-      ui.round = { end: Date.now() + ROUND_SECONDS * 1000, done: false };
+      ui.round = { end: Date.now() + roundSec() * 1000, done: false };
       startTimerLoop();
+    },
+    // 카운트다운 길이 바꾸기 (10초 ↔ 30초) → 멈춘 상태로 새 길이에서 시작 대기
+    rsec() {
+      cancelRoundReset();
+      state.roundSeconds = roundSec() === 30 ? 10 : 30; // 누를 때마다 10초 ↔ 30초
+      ui.round = { end: null, done: false };
     },
     clock() {
       const left = timeLeft();
@@ -2284,6 +2367,7 @@
       ui.burst = [null, null];
       // 되돌린 줄은 바로 지우지 않고 흐리게 남김 → 다음 새 기록이 생길 때 지워짐
       state.log.forEach((r) => { if (r.hid === h.id) r.undone = true; });
+      ui.undid = true;
     },
     log() { ui.logOpen = !ui.logOpen; ui.settingsOpen = false; ui.logView = 'current'; },
     logbg() { ui.logOpen = false; },
@@ -2377,7 +2461,54 @@
     return signs.every((v) => v >= 0) || signs.every((v) => v <= 0);
   }
 
+  // ---------- 끌어서 스크롤 (로그 목록·로그 탭·설정/사용법) ----------
+  // 폰을 눕혀 쓰는 화면은 CSS로 90° 돌아가 있어서, 브라우저 기본 스크롤은 손가락 방향과 90° 어긋남
+  // (위아래로 끌면 아무것도 안 움직임). 그래서 손가락 이동을 앱 화면 기준으로 바꿔 직접 스크롤하고, 놓으면 관성으로 조금 더 미끄러짐.
+  let dragScrolled = false;
+  (() => {
+    const SEL = '.llist, .ltabs, .setbody';
+    const rotated = () => matchMedia('(orientation: portrait)').matches;
+    // 화면(손가락) 이동 → 앱 기준 이동: rotate(90deg) 이므로 앱의 x = 화면 y, 앱의 y = −화면 x
+    const toApp = (dx, dy) => (rotated() ? [dy, -dx] : [dx, dy]);
+    let el = null, id = null, px = 0, py = 0, moved = false, vx = 0, vy = 0, lastT = 0, raf = 0;
+    document.addEventListener('pointerdown', (e) => {
+      const t = e.target.closest(SEL);
+      if (!t) return;
+      cancelAnimationFrame(raf);
+      el = t; id = e.pointerId; px = e.clientX; py = e.clientY; moved = false; vx = vy = 0; lastT = performance.now();
+    }, true);
+    document.addEventListener('pointermove', (e) => {
+      if (!el || e.pointerId !== id) return;
+      const [ax, ay] = toApp(e.clientX - px, e.clientY - py);
+      if (!moved && Math.hypot(ax, ay) < 8) return; // 살짝 떨린 건 탭으로 둠
+      moved = true;
+      const now = performance.now(), dt = Math.max(8, now - lastT);
+      el.scrollLeft -= ax; el.scrollTop -= ay;
+      vx = ax / dt; vy = ay / dt; lastT = now; px = e.clientX; py = e.clientY;
+    }, true);
+    const end = (e) => {
+      if (!el || e.pointerId !== id) return;
+      const t = el;
+      el = null;
+      if (!moved) return;
+      dragScrolled = true; // 끌기 끝의 click은 버튼 누름으로 치지 않음
+      setTimeout(() => { dragScrolled = false; }, 350);
+      let last = performance.now();
+      const glide = (now) => {
+        const dt = now - last; last = now;
+        vx *= Math.pow(.95, dt / 16); vy *= Math.pow(.95, dt / 16);
+        if (Math.abs(vx) + Math.abs(vy) < .02) return;
+        t.scrollLeft -= vx * dt; t.scrollTop -= vy * dt;
+        raf = requestAnimationFrame(glide);
+      };
+      if (performance.now() - lastT < 80) raf = requestAnimationFrame(glide);
+    };
+    document.addEventListener('pointerup', end, true);
+    document.addEventListener('pointercancel', end, true);
+  })();
+
   document.addEventListener('click', (e) => {
+    if (dragScrolled) { dragScrolled = false; return; }
     if (holdFired) { holdFired = false; if (e.target.closest('[data-hold]')) return; }
     const btn = e.target.closest('[data-a]');
     if (!btn || btn.disabled) return;
