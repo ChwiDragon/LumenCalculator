@@ -30,3 +30,6 @@ app/android/app/src/art/
 app/node_modules/
 app/www/
 # Signing secrets are ignored in app/android/.gitignore (keystore.properties, *.keystore)
+
+# 개인 문서(권리 합의서 등)는 올리지 않음
+/*.pdf
