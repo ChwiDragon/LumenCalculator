@@ -3,6 +3,8 @@
 오프라인 대전 카드게임 '루멘콘덴서'를 두 사람이 폰 한 대로 함께 쓰는 체력·토큰 계산기입니다.
 앱 전체가 `lumencalc.html` 한 파일에 들어 있습니다.
 
+**웹에서 바로 쓰기:** https://chwidragon.github.io/LumenCalculator/ (GitHub Pages — 캐릭터 그림과 앱 글꼴 없이 대체 그림·시스템 글꼴로 나옵니다)
+
 **기능과 규칙의 전체 설명은 `lumencalc.html` 맨 위 주석에 있습니다.** 수정하거나 APK로 만들기 전에 먼저 읽어 주세요.
 
 ## 폴더 구성
@@ -10,6 +12,7 @@
 | 경로 | 내용 |
 |---|---|
 | `lumencalc.html` | 앱 본체 (HTML·CSS·JS 한 파일) |
+| `index.html` | GitHub Pages 첫 화면 (`lumencalc.html`로 넘김) |
 | `lumencalc.apk` | 안드로이드 설치 파일 (캐릭터 그림을 뺀 GitHub용 버전) |
 | `assets/characters/` | 캐릭터 전신·두상·특성 마크 이미지. 이름 규칙은 그 폴더의 `README.txt` |
 | `assets/fonts/` | 앱에 넣는 글꼴 (`.woff2`). 원본 `.ttf`는 `assets/fonts/src/` |
