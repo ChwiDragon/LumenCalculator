@@ -13,6 +13,7 @@
 
 게임 진행 상황(고른 캐릭터, 체력, 토큰, 경기 기록 최근 10게임)과 설정(경기 시간)은 **이 기기 안에만** 저장됩니다.
 이 정보는 외부로 전송되지 않으며, 앱을 삭제하거나 앱의 "ALL DELETE" 기능을 쓰면 지워집니다.
+경기 기록을 "TXT EXPORT"로 내보내면 사용자가 직접 고른 위치에 텍스트 파일로 저장되며, 앱이 이 파일을 어디로도 보내지 않습니다.
 
 ## 사용하는 권한
 
@@ -49,7 +50,7 @@ Effective: October 7, 2026
 **The app does not collect or transmit any personal information.**
 
 - **Data collected:** none. No accounts, ads, or analytics.
-- **Data stored on the device:** game progress, game logs (last 10 games) and settings are stored only on the device. They are never sent anywhere and are removed when the app is uninstalled or when "ALL DELETE" is used.
+- **Data stored on the device:** game progress, game logs (last 10 games) and settings are stored only on the device. They are never sent anywhere and are removed when the app is uninstalled or when "ALL DELETE" is used. "TXT EXPORT" saves the game logs as a text file to a location the user chooses; the app does not send that file anywhere.
 - **Permissions:** vibration (button feedback); internet (a default permission of the WebView component that displays the app — the app does not send or receive data with it).
 - **Sharing with third parties:** none.
 - **Contact:** https://github.com/ChwiDragon/LumenCalculator/issues

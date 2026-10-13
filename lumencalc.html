@@ -63,7 +63,7 @@
   - 손패 한도: 체력 구간 5000~4001 / 4000~3001 / 3000~2001 / 2000~1001 / 1000 이하.
     기본 6/7/8/9/9, 리타 6/7/8/9/10, 키메라 5/5/5/6/6(특성 ON이면 +1), CMYK 10×5.
     시작 체력 기본 5000, 무영 4500, 핀프 5500.
-  - FP: 데미지 버튼 옆 + / −. 가운데 현재 FP 숫자를 탭하면 0으로 초기화(되돌리기 가능). 10초 타이머: 탭=10초 시작, 도는 중(또는 끝난 뒤) 탭=10초로 돌아가 멈춤. 길게 누르기 없음. 효과음 없음.
+  - FP: 데미지 버튼 옆 + / −. 가운데 현재 FP 숫자를 탭하면 0으로 초기화(되돌리기 가능), 카운트다운 위 FP 버튼 = FP 팝업: 양쪽 −8~+8, 누르면 바로 그 값(+ / −와 같이 1초 안이면 기록 묶음), 가운데 ✕로 닫기. 10초 타이머: 탭=10초 시작, 도는 중(또는 끝난 뒤) 탭=10초로 돌아가 멈춤. 길게 누르기 없음. 효과음 없음.
   - 경기 시간: 탭=시작/일시정지, 길게=초기화. 남은 1분부터 노란색, 10초부터 빨간색. 설정에서 분 단위로 바꾸면 즉시 적용.
   - TURN: 탭 +1, 길게 −1.
   - 서든데스: 양쪽 체력이 모두 0이면 가운데(10초 타이머 자리)에 '서든데스' 버튼이 나타남.
@@ -93,12 +93,13 @@
   - 마름모 버튼은 주변 네모 전체가 터치 영역(.dbtn). 예외: 선택 화면 칸(서로 맞물림). 리타 상태는 일러+이름 카드 전체가 터치 영역.
 
  ■ 로그 (Digimon Memory Checker 로그와 같은 구성)
-  - GAME LOG 창: 시각 | 색 태그(묶인 입력은 누른 값 나열) | 결과값. 1P 파랑 / 2P 분홍.
+  - GAME LOG 창: 머리줄에 보고 있는 로그 이름 · 1P(캐릭터) VS 2P(캐릭터). 시각 | 1P·2P와 캐릭터 이름 + 색 태그(묶인 입력은 누른 값 나열) | 결과값. 1P 파랑 / 2P 분홍.
   - 로그 이름 = 게임 시작 시각(월일시분). 새 게임 때 자동 보관(최근 10개), 탭으로 보기.
   - 로그 이름을 1초 누르면 그 게임의 마지막 상황을 불러와 이어하기.
   - 되돌리기한 행동의 로그 줄은 바로 지우지 않고 흐리게(취소선 + '되돌림') 남김.
     다음에 새 기록(피해·FP·토큰·턴 등 무엇이든)이 생기면 그때 되돌린 줄이 모두 지워짐.
   - ALL DELETE 1초 → 모든 로그 삭제 + 게임 초기화(선택 화면).
+  - TXT EXPORT → 모든 로그(보관 + 지금)를 게임별 텍스트 파일로. APK는 안드로이드 저장 창(MainActivity LumenNative.saveText, 권한 없음), 브라우저는 다운로드.
   - 앱을 다시 열면: 진행 중이던 게임은 로그에 보관하고 캐릭터 선택부터 시작(1P·2P 선택도 비움).
 
  ■ 캐릭터 데이터 · 이미지
@@ -145,6 +146,9 @@
     --u: min(1cqh, .45cqw);
     --tb-out: calc(5 * var(--u)); /* 계산기 툴바가 가운데 열 밖(양옆 칸)으로 넘어가는 길이 */
     --tb-wide: calc(15 * var(--u)); /* 글자 버튼이라 예전보다 좌우로 더 넓게 (가운데 열이 좁아진 만큼 더함) */
+    /* 툴바 글자 버튼(LOG 등) 한 칸 크기 = UNDO·FP 버튼 크기 */
+    --tbtn-w: calc((24 * var(--u) + 2 * (3 * var(--u) + var(--tb-out) + var(--tb-wide)) - 2px) / 3);
+    --tbtn-h: max(34px, calc(10.5 * var(--u)));
     --cut: calc(1.6 * var(--u));
     --font-display: "Black Han Sans", "IBM Plex Sans KR", "Malgun Gothic", sans-serif;
     --font-body: "IBM Plex Sans KR", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
@@ -514,6 +518,7 @@
   .side {
     min-width: 0;
     grid-row: 1 / -1;
+    grid-column: 1;
     display: grid;
     grid-template-rows: subgrid;
   }
@@ -523,6 +528,8 @@
     gap: 1.2cqw;
     height: calc(11 * var(--u));
   }
+  /* 열을 고정해 둠: 위에 덮는 FP 팝업이 자리를 먼저 차지해도 칸이 밀리지 않게 */
+  .side.p2 { grid-column: 3; }
   .side.p2 .plate { flex-direction: row-reverse; }
   .plate .facering {
     flex: none;
@@ -699,6 +706,56 @@
   .fp .val.pos { color: var(--heal); } /* + 는 회복 버튼과 같은 초록 */
   .fp .val.neg { color: var(--dmg); }
 
+  /* FP 팝업: 게임 칸(.game)의 줄·열을 그대로 써서 양쪽 칸 전체를 덮음 */
+  #fppop { display: contents; }
+  #fppop[hidden] { display: none; }
+  .fpbg { position: absolute; inset: 0; z-index: 30; background: rgba(5, 8, 16, .78); animation: fpfade .12s ease-out; }
+  .fppanel {
+    grid-row: 1 / -1;
+    z-index: 31;
+    display: grid;
+    grid-template-rows: subgrid;
+    column-gap: calc(1.4 * var(--u));
+    animation: fpfade .12s ease-out;
+  }
+  .fppanel.p1 { grid-column: 1; grid-template-columns: minmax(0, 1fr) calc(12 * var(--u)); }
+  .fppanel.p2 { grid-column: 3; grid-template-columns: calc(12 * var(--u)) minmax(0, 1fr); }
+  /* 숫자 버튼 = 데미지 버튼과 같은 크기·위치:
+     ±1~4 두 줄은 데미지 버튼 두 줄(.quick) 자리 그대로, ±5~8은 그 바로 위·아래에 같은 높이·같은 간격
+     (위·아래 줄은 .fpq 기준 절대 위치 → 높이 %가 .fpq 높이를 따라가서 화면 크기가 바뀌어도 데미지 버튼과 같음) */
+  .fpq, .fprow {
+    min-height: 0;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: calc(1.4 * var(--u));
+  }
+  .fpq { position: relative; grid-row: 4; grid-template-rows: repeat(2, minmax(0, 1fr)); margin-top: calc(.6 * var(--u)); }
+  .fprow { position: absolute; left: 0; right: 0; height: calc((100% - 1.4 * var(--u)) / 2); }
+  .fprow.top { bottom: calc(100% + 1.4 * var(--u)); }
+  .fprow.bot { top: calc(100% + 1.4 * var(--u)); }
+  .fppanel.p1 .fpq { grid-column: 1; }
+  .fppanel.p2 .fpq { grid-column: 2; }
+  /* 0 = FP 칸과 같은 자리·크기 */
+  .fpn.zero { grid-row: 4; margin-top: calc(.6 * var(--u)); }
+  .fppanel.p1 .fpn.zero { grid-column: 2; }
+  .fppanel.p2 .fpn.zero { grid-column: 1; }
+  .fpn {
+    --cut: calc(1.6 * var(--u));
+    min-height: 0;
+    font-size: max(18px, calc(7.4 * var(--u)));
+    line-height: 1;
+    background: var(--surface-2);
+    color: var(--text);
+    transition: filter .08s, transform .08s;
+  }
+  /* 색도 데미지(빨강)·회복(초록) 버튼과 같게 */
+  .fpn.plus { background: linear-gradient(180deg, color-mix(in srgb, var(--heal) 15%, var(--surface)), color-mix(in srgb, var(--heal) 7%, var(--surface))); color: var(--heal); }
+  .fpn.minus { background: linear-gradient(180deg, color-mix(in srgb, var(--dmg) 16%, var(--surface)), color-mix(in srgb, var(--dmg) 8%, var(--surface))); color: var(--dmg); }
+  .fpn:active { transform: scale(.95); filter: brightness(1.5); }
+  /* 지금 FP 값: 금색 안쪽 테두리 */
+  .fpn.cur { box-shadow: inset 0 0 0 calc(.5 * var(--u)) var(--lumen), inset 0 0 calc(3 * var(--u)) color-mix(in srgb, var(--lumen) 30%, transparent); }
+  @keyframes fpfade { from { opacity: 0; } }
+
   /* 하단: 특성 마크 · 토큰 (FP 아래까지 전체 폭) */
   .extras {
     display: grid;
@@ -865,6 +922,7 @@
   .center {
     min-width: 0;
     grid-row: 1 / -1;
+    grid-column: 2;
     display: grid;
     grid-template-rows: subgrid;
     justify-items: center;
@@ -884,7 +942,7 @@
   /* 가운데 열 칸은 모두 한 열 (같은 줄에 두 개를 두면 자동 배치가 새 열을 만들어 옆으로 밀림) */
   .center > * { grid-column: 1; }
   .center .undobtn { grid-row: 2; align-self: center; }
-  .undobtn { width: calc(20 * var(--u)); padding: calc(2 * var(--u)) 0; background: var(--surface); color: var(--text); font-family: var(--font-num); font-weight: 700; font-size: max(11px, calc(3.2 * var(--u))); letter-spacing: .12em; --cut: calc(1.2 * var(--u)); transition: background .15s, color .15s; }
+  .undobtn { width: var(--tbtn-w); height: var(--tbtn-h); padding: 0; background: var(--surface); color: var(--text); font-family: var(--font-num); font-weight: 700; font-size: max(11px, calc(3.2 * var(--u))); letter-spacing: .12em; --cut: calc(1.2 * var(--u)); transition: background .15s, color .15s; }
   .undobtn:active { background: var(--surface-2); }
   .undobtn[disabled] { color: var(--faint); cursor: default; }
   /* 되돌린 직후: 칸 크기·모양은 그대로, 은은하게 빛나는 정도 (안쪽 빛 + 글자 빛) */
@@ -898,6 +956,12 @@
   /* 10초/30초: 카운트다운 아래 (아랫선 = FP − 버튼 아랫선) */
   .center .rsel { grid-row: 4; align-self: end; position: relative; z-index: 3; }
   .center .dtimer { grid-row: 4; }
+  /* FP 버튼: 카운트다운 위 (윗선 = FP + 버튼 윗선), 크기 = LOG 버튼. 누르면 FP 팝업 */
+  .center .fpopen { grid-row: 4; align-self: start; margin-top: calc(.6 * var(--u)); position: relative; z-index: 3; }
+  .fpopen { width: var(--tbtn-w); height: var(--tbtn-h); padding: 0; background: var(--surface); color: var(--lumen); font-family: var(--font-num); font-weight: 700; font-size: max(15px, calc(4.6 * var(--u))); line-height: 1; letter-spacing: .1em; --cut: calc(1.2 * var(--u)); }
+  /* FP 팝업이 열려 있는 동안 FP 버튼은 어두워지지 않고 위에 보임 (누르는 기능 없음) */
+  .fp-open .center .fpopen { z-index: 32; pointer-events: none; }
+  .fpopen:active { background: var(--surface-3); }
   /* 경기 시간은 턴 버튼 바로 위 */
   .center .cbottom { grid-row: 5; align-self: end; display: grid; justify-items: center; gap: calc(1.2 * var(--u)); }
   /* 카운트다운 길이 고르기: 10초 / 30초 */
@@ -943,12 +1007,13 @@
     min-height: 0;
     display: grid;
     place-items: center;
-    /* 10초/30초 버튼 자리를 위·아래 똑같이 비워 둠 → 마름모와 숫자는 칸 정가운데(FP 숫자와 같은 높이) */
+    /* 위는 FP 버튼, 아래는 10초/30초 버튼 자리를 비워 둠 → 마름모는 그 사이에 들어가는 가장 큰 크기 */
     --rsel-h: calc(6.6 * var(--u));
-    padding-block: var(--rsel-h);
+    --dt-top: calc(var(--tbtn-h) + 1 * var(--u));
+    padding-block: var(--dt-top) var(--rsel-h);
   }
   /* 마름모는 칸보다 작게(88%) — 칸 전체는 그대로 터치 영역 */
-  .dtimer svg.track { position: absolute; top: var(--rsel-h); left: 10%; width: 80%; height: calc(100% - 2 * var(--rsel-h)); }
+  .dtimer svg.track, .fpx .dshape, .fpx .x { position: absolute; top: var(--dt-top); left: 10%; width: 80%; height: calc(100% - var(--dt-top) - var(--rsel-h)); }
   .dtimer .bg { stroke: var(--surface-3); fill: rgba(19, 26, 43, .7); }
   .dtimer .inner { stroke: var(--line); fill: none; }
   .dtimer .fg { stroke: var(--lumen); fill: none; transition: stroke .2s; }
@@ -966,7 +1031,16 @@
   /* 0이 되고 5초 뒤: 숫자가 서서히 사라진 다음 처음 상태로 */
   .dtimer.fadeout .sec { opacity: 0; transition: opacity .6s; animation: none; }
   .dtimer.done .sec { animation: blink .35s steps(2) 4; }
-  .dtimer > button.hit { position: absolute; inset: 0; }
+  /* 카운트다운 터치 영역은 위 FP 버튼과 아래 10/30 버튼 사이 */
+  .dtimer > button.hit { position: absolute; inset: var(--dt-top) 0 var(--rsel-h); }
+  /* FP 팝업 닫기: 양쪽 0 버튼 사이 네모 전체(FP 버튼·10/30 자리 포함)가 터치 영역.
+     그림은 카운트다운 마름모와 같은 자리·크기의 마름모 + 가운데 ✕ */
+  .dtimer .fpx { display: none; position: absolute; inset: 0; z-index: 32; color: var(--text); }
+  .fp-open .dtimer .fpx { display: block; }
+  .fpx .dshape polygon { fill: var(--surface-2); stroke: var(--surface-3); }
+  .fpx:active .dshape polygon { fill: var(--surface-3); }
+  .fpx .x { display: grid; place-items: center; }
+  .fpx .x svg { width: calc(8 * var(--u)); height: calc(8 * var(--u)); }
   /* 서든데스 버튼: 양쪽 체력이 모두 0일 때만 10초 타이머 자리 전체(네모 영역)를 덮음 */
   .sdbtn { position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; }
   .sdbtn .sdshape { position: absolute; inset: 0; width: 100%; height: 100%; }
@@ -1055,7 +1129,14 @@
     padding: calc(1.6 * var(--u)) calc(2.4 * var(--u));
     border-bottom: 1px solid var(--line);
   }
-  .logpanel header b { font-family: var(--font-num); font-weight: 700; letter-spacing: .08em; font-size: max(13px, calc(3.6 * var(--u))); }
+  .logpanel header b { flex: none; font-family: var(--font-num); font-weight: 700; letter-spacing: .08em; font-size: max(13px, calc(3.6 * var(--u))); }
+  /* GAME LOG 옆: 보고 있는 로그 이름 · 1P(캐릭터) VS 2P(캐릭터) */
+  .lmeta { flex: 1; min-width: 0; display: flex; align-items: baseline; gap: calc(2.4 * var(--u)); margin: 0 calc(2.4 * var(--u)); white-space: nowrap; overflow: hidden; font-size: max(12px, calc(3.2 * var(--u))); }
+  .lmeta .lname { color: var(--lumen); letter-spacing: .04em; }
+  .lmeta .lvs { min-width: 0; overflow: hidden; text-overflow: ellipsis; font-weight: 700; }
+  .lmeta .lvs i { font-style: normal; font-family: var(--font-num); color: var(--muted); margin: 0 .6em; font-size: .85em; }
+  .lmeta .p1c { color: var(--p1); }
+  .lmeta .p2c { color: var(--p2); }
   .lclose { width: calc(8 * var(--u)); height: calc(8 * var(--u)); min-width: 30px; min-height: 30px; border-radius: calc(1.2 * var(--u)); color: var(--muted); font-size: max(15px, calc(4 * var(--u))); }
   .lclose:active { background: var(--surface-2); }
   .ltabs {
@@ -1100,24 +1181,25 @@
     /* 브라우저가 스스로 스크롤하려고 하면 끌기가 중간에 취소됨(pointercancel) → 끌기 스크롤은 JS가 처리 */
     touch-action: none;
   }
-  .lempty { text-align: center; color: var(--muted); padding: calc(6 * var(--u)) 0; font-size: max(12px, calc(3 * var(--u))); }
+  .lempty { text-align: center; color: var(--muted); padding: calc(6 * var(--u)) 0; font-size: max(14px, calc(3.6 * var(--u))); }
   .lrow {
     display: grid;
-    grid-template-columns: calc(14 * var(--u)) minmax(0, 1fr) auto;
+    grid-template-columns: calc(16 * var(--u)) minmax(0, 1fr) auto;
     align-items: center;
     gap: calc(2 * var(--u));
-    padding: calc(1.2 * var(--u)) calc(2 * var(--u));
+    padding: calc(1.4 * var(--u)) calc(2 * var(--u));
     border-radius: calc(1.2 * var(--u));
     background: var(--surface-2);
     border-left: 3px solid transparent;
-    font-size: max(12px, calc(3 * var(--u)));
+    font-size: max(14px, calc(3.7 * var(--u)));
   }
   .lrow.p1 { background: linear-gradient(to right, color-mix(in srgb, var(--p1) 12%, transparent), var(--surface-2) 60%); border-left-color: color-mix(in srgb, var(--p1) 55%, transparent); }
   .lrow.p2 { background: linear-gradient(to right, color-mix(in srgb, var(--p2) 12%, transparent), var(--surface-2) 60%); border-left-color: color-mix(in srgb, var(--p2) 55%, transparent); }
-  .ltime { display: grid; color: var(--muted); font-size: max(10px, calc(2.5 * var(--u))); line-height: 1.25; }
+  .ltime { display: grid; color: var(--muted); font-size: max(12px, calc(3 * var(--u))); line-height: 1.25; }
   .ltime small { font-size: .85em; color: var(--faint); letter-spacing: .06em; }
   .laction { display: flex; align-items: center; flex-wrap: wrap; gap: calc(1.2 * var(--u)); min-width: 0; }
-  .laction .who { font-family: var(--font-num); font-weight: 700; font-size: .85em; }
+  .laction .who { font-family: var(--font-num); font-weight: 700; font-size: .85em; white-space: nowrap; }
+  .laction .who b { margin-left: .4em; font-family: var(--font-body); font-weight: 700; }
   .lrow.p1 .who { color: var(--p1); }
   .lrow.p2 .who { color: var(--p2); }
   .laction .tag {
@@ -1127,22 +1209,28 @@
     font-size: .95em;
     font-variant-numeric: tabular-nums;
     word-break: keep-all;
+    white-space: nowrap;
   }
   .tag.minus { background: color-mix(in srgb, var(--dmg) 22%, transparent); color: #FFA69F; }
   .tag.plus { background: color-mix(in srgb, var(--heal) 22%, transparent); color: #8FE6BD; }
-  .tag.fp { background: color-mix(in srgb, var(--lumen) 20%, transparent); color: #FFD98A; }
+  .tag.lfp { background: color-mix(in srgb, var(--lumen) 20%, transparent); color: #FFD98A; }
   .tag.token { background: color-mix(in srgb, #9AA8FF 20%, transparent); color: #C3CBFF; }
   .tag.turn { background: color-mix(in srgb, var(--lumen) 22%, transparent); color: #FFD98A; }
   .tag.start { background: color-mix(in srgb, var(--p1) 18%, transparent); color: #A9D2FF; }
   .tag.state { background: rgba(138, 147, 180, .18); color: var(--text); }
   .presses { font-family: var(--font-num); font-size: .8em; color: var(--muted); letter-spacing: .03em; }
-  .lvalue { font-size: max(13px, calc(3.4 * var(--u))); white-space: nowrap; }
+  .lvalue { font-size: max(15px, calc(4.2 * var(--u))); white-space: nowrap; }
   /* 되돌린 줄: 흐리게 + 취소선, 다음 새 기록 때 사라짐 */
   .lrow.undone { opacity: .45; }
   .lrow.undone .tag, .lrow.undone .presses, .lrow.undone .lvalue { text-decoration: line-through; }
   .undid { font-size: .78em; font-weight: 700; color: var(--muted); border: 1px solid var(--line); border-radius: calc(.8 * var(--u)); padding: .05em .5em; }
-  .lvalue.neg { color: #FFA69F; }
-  .lvalue.pos { color: #8FE6BD; }
+  /* 결과값(체력·FP·토큰)은 그 줄을 남긴 쪽 색 */
+  .lrow.p1 .lvalue { color: var(--p1); }
+  .lrow.p2 .lvalue { color: var(--p2); }
+  /* 체력·FP 줄: 1P 값 / 2P 값을 각자 색으로 */
+  .lvalue .v1 { color: var(--p1); }
+  .lvalue .v2 { color: var(--p2); }
+  .lvalue i { font-style: normal; color: var(--faint); margin: 0 .35em; }
   .lhint { flex: 1; min-width: 0; font-size: max(10px, calc(2.4 * var(--u))); color: var(--muted); word-break: keep-all; }
   .logpanel footer { display: flex; align-items: center; gap: calc(2 * var(--u)); justify-content: flex-end; padding: calc(1.2 * var(--u)) calc(2 * var(--u)); border-top: 1px solid var(--line); }
   .ldel {
@@ -1160,6 +1248,8 @@
     touch-action: none;
   }
   .ldel span { position: relative; }
+  .lexp { padding: .5em 1.2em; border-radius: calc(1 * var(--u)); background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); font-family: var(--font-num); font-weight: 700; font-size: max(11px, calc(2.6 * var(--u))); letter-spacing: .06em; color: var(--lumen); }
+  .lexp:active { background: var(--surface-3); }
   .ldel .fill { position: absolute; inset: 0; background: var(--dmg); opacity: .45; transform: scaleX(0); transform-origin: left center; }
 
   /* 설정 팝업 */
@@ -1300,7 +1390,7 @@
   const LOG_ARCHIVE_MAX = 10;   // 새 게임 때 자동 보관하는 지난 로그 수
   const DELETE_HOLD_MS = 1000;  // ALL DELETE 길게 누르는 시간
   // 버전을 올릴 때마다 build(빌드 날짜)도 그날 날짜로 갱신
-  const APP = { name: '루멘 카운터', version: '0.87.0', build: '2026-10-11' };
+  const APP = { name: '루멘 카운터', version: '0.96.0', build: '2026-10-13' };
 
   // ================= 아이콘 =================
   const I = {
@@ -1309,6 +1399,7 @@
     log: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 6h10M10 12h10M10 18h10"/><path d="m5 4.5 1.5 1.5L5 7.5 3.5 6zM5 10.5 6.5 12 5 13.5 3.5 12zM5 16.5 6.5 18 5 19.5 3.5 18z" fill="currentColor"/></svg>',
     undo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>',
     plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+    close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
     minus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M5 12h14"/></svg>',
     gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
     spark: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1.5 14.2 9.8 22.5 12 14.2 14.2 12 22.5 9.8 14.2 1.5 12 9.8 9.8z"/></svg>',
@@ -1432,9 +1523,9 @@
     requestWakeLock();
   }
 
-  const ui = { armed: null, toast: '', logOpen: false, logView: 'current', settingsOpen: false, settingsTab: 'settings', burst: [null, null], round: { end: null, done: false } };
+  const ui = { armed: null, toast: '', logOpen: false, logView: 'current', settingsOpen: false, settingsTab: 'settings', burst: [null, null], round: { end: null, done: false }, fpPop: false };
   // 화면이 바뀔 때(새 게임·불러오기·전체 삭제) 열린 창·합계 표시·10초 타이머를 처음 상태로
-  const resetUi = () => Object.assign(ui, { burst: [null, null], armed: null, undid: false, logOpen: false, settingsOpen: false, logView: 'current', round: { end: null, done: false } });
+  const resetUi = () => Object.assign(ui, { burst: [null, null], armed: null, undid: false, logOpen: false, settingsOpen: false, logView: 'current', round: { end: null, done: false }, fpPop: false });
 
   // ================= helpers =================
   const $ = (id) => document.getElementById(id);
@@ -1460,6 +1551,9 @@
     return c.hands[hpBand(p)] + (p.trait && c.traitHand ? c.traitHand : 0);
   };
   const signed = (n) => (n > 0 ? '+' + n : String(n).replace('-', '−'));
+  // 체력·FP 로그의 결과값은 [1P, 2P] 둘 다 남김 (로그에 '4700 / 5000', '+3 / 0'으로 표시)
+  const bothHp = () => state.players.map((p) => p.hp);
+  const bothFp = () => state.players.map((p) => signed(p.fp));
   const timeLeft = () => {
     const t = state.timer;
     return t.since ? Math.max(0, t.left - (Date.now() - t.since) / 1000) : t.left;
@@ -1485,7 +1579,9 @@
     // 새 기록이 생기면 되돌린(흐리게 남겨 둔) 줄은 그때 지우고, UNDO 강조도 끔 (예전 저장에 남은 'undo' 표시 줄도 함께 정리)
     if (state.log.some((r) => r.undone || r.kind === 'undo')) state.log = state.log.filter((r) => !r.undone && r.kind !== 'undo');
     ui.undid = false;
-    state.log.unshift({ t: Date.now(), turn: state.turn, side, text, value, kind, hid: actionHid });
+    // ch: 그 줄을 남긴 쪽 캐릭터 (로그에 '1P 울프'처럼 표시)
+    const ch = side != null && state.players[side] ? state.players[side].char : null;
+    state.log.unshift({ t: Date.now(), turn: state.turn, side, ch, text, value, kind, hid: actionHid });
     if (state.log.length > 300) state.log.pop();
   }
   // 같은 key의 입력이 MERGE_MS 안에 이어지면 되돌리기 지점을 새로 만들지 않음 → true 반환
@@ -1629,6 +1725,30 @@
       </div>`;
   }
 
+  // FP 팝업 (가운데 FP 버튼): 양쪽 칸 전체를 덮는 −8~+8 버튼, 1P·2P 둘 다 입력 가능.
+  // 0 = FP 칸 자리, 숫자 = 가운데에서 멀수록 큰 수 (위 두 줄 +, 아래 두 줄 −), 닫기 = 카운트다운 마름모 자리의 ✕ 마름모.
+  // 열려 있는 동안은 칸을 다시 만들지 않고 지금 값 표시(.cur)만 바꿈 (누를 때마다 깜빡이지 않게)
+  function renderFpPop() {
+    const el = $('fppop'), open = !!ui.fpPop;
+    setProp(el, 'hidden', !open);
+    $('game').classList.toggle('fp-open', open); // 가운데 FP 버튼·닫기(✕ 마름모)를 팝업 위로
+    if (!open) { if (el.firstChild) el.innerHTML = ''; return; }
+    if (!el.firstChild) {
+      const btn = (i, v) => `<button class="fpn num chamfer${v > 0 ? ' plus' : v < 0 ? ' minus' : ' zero'}" data-a="fpset" data-p="${i}" data-v="${v}" aria-label="${i + 1}P FP ${signed(v)}">${signed(v)}</button>`;
+      const panel = (i) => {
+        const row = (r) => (i === 0 ? r.slice().reverse() : r).map((v) => btn(i, v)).join('');
+        return `<div class="fppanel p${i + 1}">
+          <div class="fpq">${row([1, 2, 3, 4])}${row([-1, -2, -3, -4])}
+            <div class="fprow top">${row([5, 6, 7, 8])}</div><div class="fprow bot">${row([-5, -6, -7, -8])}</div></div>
+          ${btn(i, 0)}</div>`;
+      };
+      el.innerHTML = `
+        <div class="fpbg"></div>
+        ${panel(0)}${panel(1)}`;
+    }
+    el.querySelectorAll('.fpn').forEach((b) => b.classList.toggle('cur', Number(b.dataset.v) === state.players[b.dataset.p].fp));
+  }
+
   const fpHtml = (i) => `
     <div class="fp chamfer">
       <button class="dbtn" data-a="fp" data-p="${i}" data-v="1" aria-label="${i + 1}P FP 증가">${I.plus}</button>
@@ -1760,6 +1880,7 @@
           <button class="tbtext" data-a="settings" id="tb-settings" aria-label="설정">SETTING</button>
         </div>
         <button class="undobtn chamfer" data-a="undo" id="tb-undo" aria-label="되돌리기">UNDO</button>
+        <button class="fpopen chamfer" data-a="fppop" aria-label="FP 팝업 열기">FP</button>
         <div class="dtimer idle" id="dtimer">
           <svg class="track" viewBox="0 0 100 100" aria-hidden="true">
             <polygon class="bg" points="50,3 97,50 50,97 3,50" stroke-width="1"/>
@@ -1767,6 +1888,7 @@
             <polygon class="fg" id="dtFg" points="50,3 97,50 50,97 3,50" stroke-width="3.2" stroke-linejoin="round"
               pathLength="100" stroke-dasharray="100" stroke-dashoffset="0"/>
           </svg>
+          <button class="fpx" data-a="fpclose" aria-label="FP 팝업 닫기"><svg class="dshape" viewBox="0 0 100 100" aria-hidden="true"><polygon points="50,3 97,50 50,97 3,50" stroke-width="1"/></svg><span class="x">${I.close}</span></button>
           <button class="hit" data-a="round" aria-label="카운트다운: 탭하면 시작, 도는 중에 탭하면 처음으로 돌아가 멈춤"></button>
           <div class="face">
             <svg class="swatch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -1792,7 +1914,8 @@
           </button>
         </div>
       </div>
-      ${sideHtml(1)}`;
+      ${sideHtml(1)}
+      <div id="fppop" hidden></div>`;
     barPrev[0] = barPrev[1] = null;
     fitDirty = true;
   }
@@ -1836,6 +1959,7 @@
       setAttr(trait, 'aria-pressed', String(p.trait));
       updateCounter(i, p, c);
       setHtml($('badges' + i), p.hp <= 0 ? '<span class="badge ko">K.O.</span>' : '');
+      if (i === 1) renderFpPop();
 
       const b = ui.burst[i];
       const bEl = $('burst' + i);
@@ -1930,26 +2054,37 @@
   }
 
   // ---------- GAME LOG (Digimon Memory Checker 로그와 같은 구성) ----------
-  function logRowHtml(r) {
-    const side = r.side != null ? ` p${r.side + 1}` : '';
-    const who = r.side != null ? `<span class="who">${r.side + 1}P</span>` : '';
+  // chars: 그 로그 게임의 [1P, 2P] 캐릭터 id. 예전 줄(ch 없음)은 이걸로 이름을 찾음
+  function logRowParts(r, chars) {
+    const c = r.side != null ? CHAR_BY_ID[r.ch || (chars && chars[r.side])] : null;
     const net = r.presses ? r.presses.reduce((a, b) => a + b, 0) : null;
     let tag;
     let tagCls = 'state';
     if (r.kind === 'dmg' || r.kind === 'heal') { tag = `${r.text} ${signed(net)}`; tagCls = r.kind === 'dmg' ? 'minus' : 'plus'; }
-    else if (r.kind === 'fp') { tag = `FP ${signed(net)}`; tagCls = 'fp'; }
-    else if (r.kind === 'fpr') { tag = r.text; tagCls = 'fp'; }
+    else if (r.kind === 'fp') { tag = `FP ${signed(net)}`; tagCls = 'lfp'; }
+    else if (r.kind === 'fpr') { tag = r.text; tagCls = 'lfp'; }
     else if (r.kind === 'count') { tag = `${r.text} ${signed(net)}`; tagCls = 'token'; }
     else if (r.kind === 'turn') { tag = r.text; tagCls = 'turn'; }
     else if (r.kind === 'start') { tag = r.text; tagCls = 'start'; }
     else tag = r.text;
-    const presses = r.presses && r.presses.length > 1 ? `<span class="presses">${r.presses.map(signed).join(' · ')}</span>` : '';
-    const valCls = r.kind === 'dmg' ? ' neg' : r.kind === 'heal' ? ' pos' : '';
+    return {
+      time: r.t ? fmtTime(r.t) : '--:--:--', turn: `T${r.turn}`, tag, tagCls,
+      who: r.side != null ? `${r.side + 1}P` : '', name: c ? c.name : '',
+      presses: r.presses && r.presses.length > 1 ? r.presses.map(signed).join(' · ') : '',
+      value: Array.isArray(r.value) ? r.value.map(String) : r.value != null ? String(r.value) : null,
+    };
+  }
+  function logRowHtml(r, chars) {
+    const x = logRowParts(r, chars);
+    const side = r.side != null ? ` p${r.side + 1}` : '';
+    const who = x.who ? `<span class="who">${x.who}${x.name ? `<b>${esc(x.name)}</b>` : ''}</span>` : '';
+    const { tag, tagCls } = x;
+    const presses = x.presses ? `<span class="presses">${x.presses}</span>` : '';
     return `
       <div class="lrow${side}${r.undone ? ' undone' : ''}">
-        <div class="ltime num">${r.t ? fmtTime(r.t) : '--:--:--'}<small>T${r.turn}</small></div>
+        <div class="ltime num">${x.time}<small>${x.turn}</small></div>
         <div class="laction">${who}<span class="tag ${tagCls}">${esc(tag)}</span>${presses}${r.undone ? '<span class="undid">되돌림</span>' : ''}</div>
-        <div class="lvalue num${valCls}">${r.value != null ? esc(r.value) : '—'}</div>
+        <div class="lvalue num">${Array.isArray(x.value) ? `<span class="v1">${esc(x.value[0])}</span><i>/</i><span class="v2">${esc(x.value[1])}</span>` : x.value != null ? esc(x.value) : '—'}</div>
       </div>`;
   }
   function renderLog() {
@@ -1962,17 +2097,83 @@
     for (let k = arcs.length - 1; k >= 0; k--) {
       tabs += `<button class="ltab${ui.logView === String(k) ? ' on' : ''}" data-a="lview" data-hold="logload" data-v="${k}"><i class="fill"></i><span>${esc(arcs[k].name)}</span></button>`;
     }
-    const entries = ui.logView === 'current' ? state.log : arcs[Number(ui.logView)].entries;
-    const rows = entries.map(logRowHtml).join('');
+    const g = ui.logView === 'current' ? currentLogGame() : archiveLogGame(arcs[Number(ui.logView)]);
+    const rows = g.entries.map((r) => logRowHtml(r, g.chars)).join('');
+    // 머리줄: 지금 보고 있는 로그 이름 · 1P(캐릭터) VS 2P(캐릭터)
+    const cn = (k) => (g.chars && CHAR_BY_ID[g.chars[k]] ? CHAR_BY_ID[g.chars[k]].name : '');
+    const vs = cn(0) || cn(1) ? `<span class="lvs"><span class="p1c">1P ${esc(cn(0))}</span><i>VS</i><span class="p2c">2P ${esc(cn(1))}</span></span>` : '';
+    const meta = `<span class="lmeta">${g.entries.length || vs ? `<span class="lname num">${esc(g.name)}</span>${vs}` : ''}</span>`;
     const html = `
       <div class="logpanel">
-        <header><b>GAME LOG</b><button class="lclose" data-a="log" aria-label="닫기">✕</button></header>
+        <header><b>GAME LOG</b>${meta}<button class="lclose" data-a="log" aria-label="닫기">✕</button></header>
         <nav class="ltabs">${tabs}</nav>
         <div class="llist">${rows || '<div class="lempty">아직 기록이 없어요.</div>'}</div>
-        <footer><span class="lhint">로그 이름을 1초 누르면 그 게임의 마지막 상황을 불러와요</span><button class="ldel" data-hold="logdel"><i class="fill"></i><span>ALL DELETE</span></button></footer>
+        <footer><span class="lhint">로그 이름을 1초 누르면 그 게임의 마지막 상황을 불러와요</span><button class="lexp" data-a="logexport" aria-label="모든 로그를 텍스트 파일로 저장">TXT EXPORT</button><button class="ldel" data-hold="logdel"><i class="fill"></i><span>ALL DELETE</span></button></footer>
       </div>`;
     setHtml(el, html); // 내용이 바뀔 때만 다시 그림 (스크롤 위치·길게 누르기 유지)
   }
+  // 로그 한 게임분: 이름 · [1P, 2P] 캐릭터 · 줄(최신이 앞)
+  function currentLogGame() {
+    const snap = state.screen === 'game' ? state : state.lastGame;
+    return { name: state.logName || 'NEW', entries: state.log, chars: snap && snap.players ? snap.players.map((p) => p.char) : null };
+  }
+  const archiveLogGame = (a) => ({ name: a.name, entries: a.entries, chars: a.snap && a.snap.players ? a.snap.players.map((p) => p.char) : null });
+
+  // ---------- 로그 TXT 내보내기 ----------
+  // 보관 로그(오래된 것부터) + 지금 로그를 게임별로, 줄은 시간 순서대로.
+  // 앱(APK): 안드로이드 '다른 이름으로 저장' 창(MainActivity의 LumenNative.saveText)에서 사용자가 고른 곳에 저장 — 권한 필요 없음.
+  // 브라우저: 파일 다운로드.
+  function logsToText() {
+    const games = state.logArchive.map(archiveLogGame);
+    if (state.log.length) games.push(currentLogGame());
+    const now = new Date();
+    const out = [`${APP.name} ${APP.version} · 로그 내보내기 ${now.getFullYear()}-${two(now.getMonth() + 1)}-${two(now.getDate())} ${fmtTime(now)}`, `게임 ${games.length}개`, ''];
+    games.forEach((g) => {
+      const cn = (k) => (g.chars && CHAR_BY_ID[g.chars[k]] ? CHAR_BY_ID[g.chars[k]].name : '?');
+      out.push('='.repeat(48), `[${g.name}] 1P ${cn(0)} VS 2P ${cn(1)}`, '-'.repeat(48));
+      g.entries.slice().reverse().forEach((r) => {
+        const x = logRowParts(r, g.chars);
+        const who = x.who ? `${x.who}${x.name ? ' ' + x.name : ''}  ` : '';
+        const presses = x.presses ? ` (${x.presses})` : '';
+        const value = Array.isArray(x.value) ? x.value.join(' / ') : x.value || '';
+        out.push(`${x.time}  ${x.turn.padEnd(3)}  ${who}${x.tag}${presses}${value ? '  →  ' + value : ''}${r.undone ? '  [되돌림]' : ''}`);
+      });
+      out.push('');
+    });
+    return out.join('\n');
+  }
+  let claudeDownloads = null;
+  if (window.claude && typeof window.claude.use === 'function') {
+    window.claude.use('downloads').then((d) => { claudeDownloads = d; }, () => {});
+  }
+  function exportLogs() {
+    if (!state.log.length && !state.logArchive.length) { flashToast('내보낼 로그가 없어요'); return; }
+    const d = new Date();
+    const name = `lumen-counter-log-${d.getFullYear()}${two(d.getMonth() + 1)}${two(d.getDate())}-${two(d.getHours())}${two(d.getMinutes())}.txt`;
+    const text = logsToText();
+    if (window.LumenNative && window.LumenNative.saveText) { window.LumenNative.saveText(name, text); return; } // 결과는 onLogSaved
+    // claude.ai 아티팩트로 열었을 때: 뷰어가 확인 창을 띄워 저장 (일반 다운로드 링크는 막혀 있음)
+    if (claudeDownloads) {
+      claudeDownloads.save({ filename: name, data: text }).then(
+        () => window.onLogSaved('ok'),
+        (e) => window.onLogSaved(e && e.code === 'declined' ? 'cancel' : 'fail'));
+      return;
+    }
+    try {
+      const url = URL.createObjectURL(new Blob([text], { type: 'text/plain;charset=utf-8' }));
+      const a = document.createElement('a');
+      a.href = url; a.download = name;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+      flashToast('로그 파일을 저장했어요', 1800);
+    } catch (e) { flashToast('이 환경에서는 파일로 저장할 수 없어요', 2000); }
+  }
+  // 안드로이드 저장 창이 닫힌 뒤 MainActivity가 부름: 'ok' / 'cancel' / 'fail'
+  window.onLogSaved = (r) => {
+    flashToast(r === 'ok' ? '로그 파일을 저장했어요' : r === 'cancel' ? '저장을 취소했어요' : '저장하지 못했어요', 1800);
+    refresh();
+  };
+
   // ALL DELETE: 1초 길게 눌러 모든 로그(현재 + 보관함)와 되돌리기 기록 삭제
   function deleteAllLogs() {
     state.log = [];
@@ -2035,7 +2236,7 @@
     ['체력', ['빨간 버튼은 피해, 초록 버튼은 회복이에요. 연달아 누르면 체력 옆에 합계가 잠깐 떠요.',
       '1초 안에 같은 종류를 이어서 누르면 기록과 되돌리기에서 한 번으로 묶여요.',
       '손패 한도는 체력 구간에 맞춰 이름 옆 마름모에 자동으로 표시돼요.', '양쪽 체력이 모두 0이 되면 가운데에 서든데스 버튼이 나타나요. 누르면 양쪽 체력 1000 · FP 0으로 시작하고, 되돌리기로 취소할 수 있어요.']],
-    ['FP · 특성 · 토큰', ['FP는 데미지 버튼 옆의 + / − 로 조절하고, 가운데 숫자를 누르면 0으로 초기화돼요.',
+    ['FP · 특성 · 토큰', ['FP는 데미지 버튼 옆의 + / − 로 조절하고, 가운데 숫자를 누르면 0으로 초기화돼요.', '가운데 FP 버튼을 누르면 양쪽 −8~+8 버튼이 떠요. 누르면 바로 그 값이 되고, 1P·2P 모두 고른 뒤 가운데 ✕로 닫아요.',
       '특성 마크를 누르면 밝게(ON) / 어둡게(OFF) 바뀌어요. 켜져 있는 동안 마크가 은은하게 빛나요.',
       '울프: 하울링 5개에서 위압(특성)을 켜면 하울링이 모두 사라지고, 칸 강조는 위압을 끄거나 하울링 개수가 바뀔 때까지 남아요.',
       '린·이제벨·이오몽·CMYK는 특성이 처음부터 켜져 있고 꺼지지 않아요.',
@@ -2054,7 +2255,7 @@
       '앱을 다시 열면 진행 중이던 게임은 로그에 보관되고 빈 캐릭터 선택 화면부터 시작해요.',
       '새 게임을 시작하면 지금 로그가 자동으로 보관돼요 (최근 10개).', '위쪽 탭을 눌러 지난 게임 로그를 볼 수 있어요.',
       '1초 안에 이어 누른 같은 입력은 한 줄로 묶이고, 누른 값이 차례로 표시돼요.',
-      '되돌리기를 하면 그 행동의 로그 줄은 흐리게 "되돌림"으로 남아 있다가, 다음 새 기록이 생기면 지워져요.', 'ALL DELETE를 1초 동안 누르면 모든 로그가 지워지고 게임도 처음(캐릭터 선택)으로 돌아가요.']],
+      '되돌리기를 하면 그 행동의 로그 줄은 흐리게 "되돌림"으로 남아 있다가, 다음 새 기록이 생기면 지워져요.', 'ALL DELETE를 1초 동안 누르면 모든 로그가 지워지고 게임도 처음(캐릭터 선택)으로 돌아가요.', 'TXT EXPORT를 누르면 모든 로그를 텍스트 파일 하나로 저장해요. 저장할 곳과 파일 이름은 직접 고를 수 있어요.']],
     ['위쪽 버튼', ['사람: 캐릭터 선택으로 (두 번 눌러 확인)', '화살표: 같은 캐릭터로 새 게임 (두 번 눌러 확인)',
       '톱니: 설정 · 사용법', '목록: 기록 보기', '되돌리기: 마지막 행동 취소']],
   ];
@@ -2136,7 +2337,7 @@
     resetUi();
     ui.toast = '';
     const [a, b] = state.players;
-    addLog(null, `게임 시작 · ${charOf(a).name} vs ${charOf(b).name}`, `${a.hp} / ${b.hp}`, 'start');
+    addLog(null, `게임 시작 · ${charOf(a).name} vs ${charOf(b).name}`, [a.hp, b.hp], 'start');
     addLog(null, '턴 1 시작', null, 'turn');
     show();
     requestWakeLock();
@@ -2186,7 +2387,7 @@
       const real = next - p.hp;
       const beforeHp = p.hp;
       p.hp = next;
-      logEntry(merged, key, i, d < 0 ? '피해' : '회복', p.hp, d < 0 ? 'dmg' : 'heal', real);
+      logEntry(merged, key, i, d < 0 ? '피해' : '회복', bothHp(), d < 0 ? 'dmg' : 'heal', real);
       autoTrait(i, beforeHp);
       autoToken(i, beforeHp);
       const now = Date.now();
@@ -2199,15 +2400,28 @@
     fp(i, v) {
       const merged = record(`fp${i}`, `${i + 1}P FP`);
       state.players[i].fp += Number(v);
-      logEntry(merged, `fp${i}`, i, 'FP', signed(state.players[i].fp), 'fp', Number(v));
+      logEntry(merged, `fp${i}`, i, 'FP', bothFp(), 'fp', Number(v));
+    },
+    // FP 팝업 (가운데 FP 버튼). 고르면 바로 그 값, 팝업은 ✕로 닫을 때까지 열려 있음
+    fppop() { if (state.screen === 'game') ui.fpPop = true; },
+    fpclose() { ui.fpPop = false; },
+    logexport() { exportLogs(); },
+    // + / − 와 같은 묶음: 1초 안에 이어서 누르면 기록·되돌리기가 한 번 (로그 "FP +3", 누른 값 "+1 · +2")
+    fpset(i, v) {
+      const p = state.players[i], next = Number(v), d = next - p.fp;
+      if (!d) return;
+      const merged = record(`fp${i}`, `${i + 1}P FP`);
+      p.fp = next;
+      logEntry(merged, `fp${i}`, i, 'FP', bothFp(), 'fp', d);
     },
     // 현재 FP 숫자 탭 → 0 (되돌리기 한 번, 로그 "FP 초기화 (±n)")
     fpreset(i) {
       const p = state.players[i];
       if (!p.fp) return;
       snapshot(`${i + 1}P FP 초기화`);
-      addLog(i, `FP 초기화 (${signed(p.fp)})`, '0', 'fpr');
+      const text = `FP 초기화 (${signed(p.fp)})`;
       p.fp = 0;
+      addLog(i, text, bothFp(), 'fpr');
     },
     trait(i) {
       const p = state.players[i];
