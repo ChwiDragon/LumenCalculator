@@ -1,6 +1,6 @@
 # 루멘 카운터 개인정보처리방침
 
-시행일: 2026년 10월 7일
+시행일: 2026년 10월 15일
 
 **루멘 카운터**(패키지 이름 `com.chwidragon.lumencalc`, 개발자 ChwiDragon)는 오프라인 카드게임 '루멘콘덴서'용 체력·토큰 계산기입니다.
 이 앱은 **어떤 개인정보도 수집하거나 전송하지 않습니다.**
@@ -24,6 +24,12 @@
 
 경기 중 화면이 꺼지지 않도록 화면 켜짐을 유지하지만, 별도의 권한이나 정보 수집은 없습니다.
 
+## 버그 제보 · 건의 사항
+
+설정 > 버전 탭의 "버그 제보 · 건의 사항" 버튼은 기기의 웹 브라우저로 구글 설문지(Google Forms) 페이지를 엽니다.
+앱은 이 페이지에 아무 정보도 넣거나 보내지 않으며, 설문지에 무엇을 적을지는 사용자가 직접 정합니다.
+설문지에 적은 내용은 Google의 개인정보처리방침에 따라 처리됩니다.
+
 ## 제3자 제공
 
 수집하는 정보가 없으므로 제3자에게 제공하는 정보도 없습니다.
@@ -44,7 +50,7 @@ https://github.com/ChwiDragon/LumenCalculator/issues
 
 # Privacy Policy — Lumen Counter
 
-Effective: October 7, 2026
+Effective: October 15, 2026
 
 **Lumen Counter** (`com.chwidragon.lumencalc`, developer ChwiDragon) is an HP/token calculator for the offline card game "Lumen Condensor".
 **The app does not collect or transmit any personal information.**
@@ -52,5 +58,6 @@ Effective: October 7, 2026
 - **Data collected:** none. No accounts, ads, or analytics.
 - **Data stored on the device:** game progress, game logs (last 10 games) and settings are stored only on the device. They are never sent anywhere and are removed when the app is uninstalled or when "ALL DELETE" is used. "TXT EXPORT" saves the game logs as a text file to a location the user chooses; the app does not send that file anywhere.
 - **Permissions:** vibration (button feedback); internet (a default permission of the WebView component that displays the app — the app does not send or receive data with it).
+- **Bug report / feedback:** the button in Settings > Version opens a Google Forms page in the device's web browser. The app fills in or sends nothing; what the user writes there is handled under Google's privacy policy.
 - **Sharing with third parties:** none.
 - **Contact:** https://github.com/ChwiDragon/LumenCalculator/issues
