@@ -14,13 +14,11 @@
 | 어디서 | 상태 | 링크 |
 |---|---|---|
 | 원스토어 | 출시 (판매 중) | https://m.onestore.co.kr/v2/ko-kr/app/0001010466 |
-| Google Play | 비공개 테스트 (등록된 테스터만 설치 가능) | https://play.google.com/apps/testing/com.chwidragon.lumencalc |
 | 웹 (GitHub Pages) | 바로 사용 | https://chwidragon.github.io/LumenCalculator/ |
 | GitHub APK | [`lumencalc.apk`](lumencalc.apk) | 캐릭터 그림을 뺀 버전 |
 
 - 스토어 버전에는 캐릭터 일러스트가 들어 있습니다. 웹과 GitHub APK는 일러스트 대신 캐릭터 색으로 만든 대체 그림이 나옵니다.
-- GitHub APK는 폰으로 옮겨 실행합니다. "출처를 알 수 없는 앱" 설치 허용이 필요할 수 있고,
-  처음 설치할 때 Play 프로텍트가 "앱 검사"를 물어볼 수 있습니다(스토어 밖에서 받은 앱에 뜨는 일반적인 확인 창).
+- GitHub APK는 폰으로 옮겨 실행합니다. "출처를 알 수 없는 앱" 설치 허용이 필요할 수 있습니다.
 - 웹 버전은 폰을 **세로로 들고** 열면 앱과 같은 화면이 나옵니다. 폰의 자동 회전을 꺼 두면 더 편합니다.
 
 ## 사용법
