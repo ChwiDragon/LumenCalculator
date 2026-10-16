@@ -2,41 +2,53 @@
 <meta charset="utf-8">
 <title>루멘 카운터</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<!-- 웹(GitHub Pages) 홈 화면 설치(PWA): 안드로이드 크롬 '앱 설치' · 아이폰 사파리 '홈 화면에 추가'. APK·아티팩트에서는 파일이 없어 무시됨 -->
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="pwa/icon-192.png">
+<link rel="apple-touch-icon" href="pwa/apple-touch-icon.png">
+<meta name="theme-color" content="#0A0E1A">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="루멘 카운터">
 <!--
 ================================================================================
  루멘 카운터 (lumencalc.html) — 개발·APK 패키징 안내
 ================================================================================
  오프라인 대전 카드게임 '루멘콘덴서'를 두 사람이 폰 한 대로 함께 쓰는 체력·토큰 계산기.
  HTML 한 파일로 동작하며, 이 파일 그대로 APK(WebView/Capacitor)에 넣어 쓰도록 만들었다.
- 아래는 사용자 요청으로 정해진 동작들이다. 수정·패키징할 때 바꾸지 말 것.
+ 아래는 사용자 요청으로 정해진 동작들이다.
 
  ■ 화면 방향 (가장 중요)
-  - 이 앱은 "세로 전용"이다. 가로 모드는 따로 없다.
-  - 폰을 옆으로 눕혀서(좌우로 길게) 테이블 가운데에 두고 두 사람이 같이 본다.
-  - 화면(뷰포트)이 세로면 CSS가 .app 전체를 90° 돌려 가로 레이아웃으로 그린다.
+  - 화면은 늘 가로 레이아웃 하나뿐이다. 폰을 옆으로 눕혀서(좌우로 길게) 테이블 가운데에 두고 두 사람이 같이 본다.
       폰의 윗부분 = 앱의 왼쪽(1P), 폰의 아랫부분 = 앱의 오른쪽(2P).
       → 폰 윗부분이 왼쪽으로 가게(반시계 방향으로) 눕히면 정방향.
+  - [APK] AndroidManifest의 Activity에 android:screenOrientation="landscape" (한 방향 고정).
+      landscape = 폰 윗부분이 왼쪽으로 간 방향 → 위와 같은 방향. OS가 가로로 그리므로 CSS 회전 없이 그대로 나옴.
+      저장 위치 선택 창·알림 같은 시스템 화면도 같은 가로 방향으로 뜸.
+      sensorLandscape는 쓰지 않음: 테이블에 평평하게 두면 센서가 방향을 잘못 잡아 경기 중 180° 뒤집힐 수 있음.
+  - 뷰포트가 세로일 때(폰 브라우저·아티팩트를 세로로 들고 볼 때, 안드로이드 16+ 큰 화면에서 방향 고정이 무시될 때)는
+    CSS가 .app 전체를 90° 돌려 같은 가로 레이아웃을 그린다 (폰 윗부분 = 앱 왼쪽, APK와 같은 화면).
     구현: CSS `@media (orientation: portrait) { .app { transform: rotate(90deg) … } }`
           화면 크기는 CSS 100dvw/100dvh로 바로 따라감(자바스크립트로 크기를 재지 않음 → 이벤트를 놓쳐도 틀어지지 않음).
-  - 뷰포트가 원래 가로(PC 미리보기, 자동 회전된 폰 브라우저)면 회전하지 않는다.
-  - 아티팩트·HTML을 폰 브라우저로 볼 때도 세로로 들고 있으면 APK와 똑같이 회전된 화면이 나온다.
-    (폰 자동 회전을 끄고 확인하면 APK와 완전히 같은 조건)
-  - [APK 필수] AndroidManifest의 Activity에 android:screenOrientation="portrait".
-    OS가 화면을 돌리면 CSS 회전과 겹쳐서 화면이 틀어진다.
-  - [APK 권장] 노치 대응: styles.xml windowLayoutInDisplayCutoutMode = shortEdges.
-    안전 영역(env(safe-area-inset-*))은 회전 방향에 맞춰 --safe-* 변수로 다시 매핑해 둠.
+    돌아간 화면은 브라우저 기본 스크롤이 손가락과 90° 어긋나므로 로그·설정 창 스크롤은 JS가 직접 처리(아래 '끌어서 스크롤').
+    화면 좌표를 쓰는 코드(로스터 바깥 판정 등)는 회전 여부와 상관없이 화면 좌표 그대로 계산 → 두 방식 모두 똑같이 동작.
+  - 노치 대응: styles.xml windowLayoutInDisplayCutoutMode = shortEdges (가로에서 노치는 짧은 변 = 앱 왼쪽/오른쪽).
+    안전 영역(env(safe-area-inset-*))은 --safe-* 변수로 앱 기준 방향에 맞춰 매핑(회전할 때는 돌린 방향대로 다시 매핑).
     크기 기준(container)은 이 여백을 뺀 .screen → APK에서 시스템 바가 있어도 비율이 맞음.
 
  ■ APK 체크리스트 (Digimon Memory Checker APK와 같은 구성)
   - Capacitor 등 WebView에 이 파일을 index.html로 넣는다. assets/ 폴더도 같이 복사.
-  - 세로 고정(위 참고), 화면 꺼짐 방지: JS Wake Lock + MainActivity에 FLAG_KEEP_SCREEN_ON 권장.
+  - 가로 고정(위 참고), 화면 꺼짐 방지: JS Wake Lock + MainActivity에 FLAG_KEEP_SCREEN_ON 권장.
   - 진동(navigator.vibrate) 사용 → VIBRATE 권한.
   - 저장은 localStorage 키 'lumencalc.v6' 하나(상태 JSON, 되돌리기 기록은 제외). WebView의 DOM Storage 켜기.
   - 글꼴(Black Han Sans / IBM Plex Sans KR / Chakra Petch)은 assets/fonts/에 포함 → 인터넷 없이 같은 화면.
     한글 글꼴은 이 파일에 쓰인 글자만 남긴 것(app/make-fonts.py, 빌드 스크립트가 자동 실행). 파일이 없으면 시스템 글꼴.
   - 시작할 때 화면이 한 번 커지지 않게: MainActivity가 처음부터 WebView를 전체 화면으로 둠
     (Capacitor는 viewport-fit=cover를 확인하기 전까지 시스템 바만큼 줄여 띄움).
-  - 새 버전을 낼 때 스크립트의 APP.version / APP.build 를 올린다(설정 > 버전 탭에 표시됨).
+  - 버전(스크립트의 APP.version / APP.build, 설정 > 버전 탭에 표시)은 APK를 빌드할 때만 올린다.
+    빌드마다 끝자리 +1(1.0.1 → 1.0.2), 캐릭터가 정식으로 추가될 때 가운데 자리 +1(1.1.0). APP.build = 빌드한 날짜.
+    android/app/build.gradle의 versionName도 같게, versionCode는 빌드마다 +1.
 
  ■ 화면 구성
   1) 캐릭터 선택: 가운데 마름모 칸(역삼각형 배치). 첫 터치 = 1P, 두 번째 터치 = 2P.
@@ -105,6 +117,11 @@
   - ALL DELETE 1초 → 모든 로그 삭제 + 게임 초기화(선택 화면).
   - TXT EXPORT → 모든 로그(보관 + 지금)를 게임별 텍스트 파일로. APK는 안드로이드 저장 창(MainActivity LumenNative.saveText, 권한 없음), 브라우저는 다운로드.
   - 앱을 다시 열면: 진행 중이던 게임은 로그에 보관하고 캐릭터 선택부터 시작(1P·2P 선택도 비움).
+  - 정사각형에 가까운 화면(긴 변 : 짧은 변 ≤ 3 : 2 — 펼친 폴드폰, 4:3 태블릿)의 계산기 화면에서만:
+    위 = 게임 화면(2 : 1 띠, 화면 높이의 60% 이상), 아래 = 이번 게임의 로그 줄만(#logdock, 같은 --u. 탭·머리줄·버튼 없음).
+    아래 로그를 누르거나 설정의 '아래 로그 비율'(이런 화면에서만 보임)로 경계를 3단계로 바꿈(state.dockSize, 저장됨):
+    기본 → 데미지와 토큰·특성 칸 사이가 화면 절반 → 계산기·로그 절반씩.
+    일반 폰(약 2 : 1 이상)·캐릭터 선택 화면에서는 보이지 않음. CSS @media와 JS SPLIT_MQ가 같은 조건, 폴드를 펴고 접으면 바로 바뀜.
 
  ■ 설정 창 (설정 / 사용법 / 버전 탭)
   - 사용법: '상단 메뉴'처럼 "항목: 설명" 한 줄씩 짧게(앞부분 굵게). 캐릭터별 특성·토큰 규칙은 넣지 않음.
@@ -205,8 +222,8 @@
     --safe-l: env(safe-area-inset-left, 0px);
     --safe-r: env(safe-area-inset-right, 0px);
   }
-  /* 세로로 고정된 폰(APK)을 옆으로 눕혀 쓰는 앱: 화면이 세로면 앱 전체를 90° 돌려 가로로 그림
-     (Digimon Memory Checker와 같은 방식 · 폰 윗부분이 앱의 왼쪽으로 감) */
+  /* 화면(뷰포트)이 세로면 앱 전체를 90° 돌려 가로로 그림 (폰 브라우저를 세로로 든 경우 등. APK는 가로 고정이라 보통 쓰이지 않음)
+     폰 윗부분이 앱의 왼쪽으로 감 = APK 가로 고정과 같은 방향 */
   @media (orientation: portrait) {
     .app {
       position: fixed;
@@ -1114,6 +1131,35 @@
     padding: calc(4 * var(--u)) max(16px, calc(6 * var(--u)));
     background: rgba(8, 11, 20, .9);
   }
+  /* 펼친 폴드폰·4:3 태블릿처럼 정사각형에 가까운 화면(긴 변 : 짧은 변 ≤ 3 : 2)에서만:
+     위 = 게임 화면(일반 폰과 비슷한 2 : 1 띠, 화면 높이의 60% 이상), 아래 = 이번 게임의 로그 줄만(#logdock).
+     일반 폰(약 2 : 1 이상)은 이 규칙이 꺼져서 지금과 똑같음. 판정은 JS의 SPLIT_MQ와 같은 조건.
+     cqw/cqh는 .app 기준(회전해도 앱 기준 가로·세로) */
+  .logdock { display: none; }
+  @media (min-aspect-ratio: 2/3) and (max-aspect-ratio: 3/2) {
+    .app { --game-h: max(50cqw, 60cqh); }
+    /* 아래 로그를 누를 때마다 경계가 3단계로 바뀜 (state.dockSize → .app[data-dock])
+       1: 데미지 칸과 토큰·특성 칸 사이가 화면 절반. 그 사이 = 게임 화면 아래에서 31.9u
+          (아래 여백 3u + 토큰·특성 줄 28u + 줄 간격 절반 0.9u), u = min(게임 높이/100, 0.45 × 폭/100)
+          → 게임 높이 = min(50cqh / 0.681, 50cqh + 14.36cqw)
+       2: 계산기와 로그가 절반씩 */
+    .app[data-dock="1"] { --game-h: min(73.42cqh, calc(50cqh + 14.36cqw)); }
+    .app[data-dock="2"] { --game-h: 50cqh; }
+    .screen.game { bottom: auto; height: calc(var(--game-h) - var(--safe-t)); }
+    .logdock {
+      position: absolute;
+      top: var(--game-h);
+      left: var(--safe-l);
+      right: var(--safe-r);
+      bottom: var(--safe-b);
+      z-index: 4; /* 게임 화면 위, 로그·설정 창(5·6) 아래 */
+      /* 글자·칸 크기는 위 게임 화면과 같은 --u */
+      --u: min(calc(var(--game-h) / 100), .45cqw);
+      padding: 0 calc(3 * var(--u)) calc(2 * var(--u));
+    }
+    .logdock:not([hidden]) { display: flex; }
+    .logdock .logpanel { width: 100%; max-height: none; flex: 1; box-shadow: 0 0 0 1px var(--line); }
+  }
   .logpanel {
     width: min(calc(150 * var(--u)), 100%);
     max-height: 100%;
@@ -1276,8 +1322,6 @@
   .presets { display: flex; flex-wrap: wrap; gap: calc(1 * var(--u)); --cut: calc(.8 * var(--u)); }
   .presets button { padding: .5em 1em; background: var(--surface-2); font-size: max(11px, calc(2.8 * var(--u))); font-weight: 600; }
   .presets button.on { background: var(--lumen); color: #1A1300; }
-  .restart { flex: none; padding: .6em 1.2em; background: var(--surface-2); font-family: var(--font-num); font-weight: 700; letter-spacing: .08em; font-size: max(11px, calc(2.8 * var(--u))); --cut: calc(.8 * var(--u)); }
-  .restart.armed { background: var(--dmg); color: #fff; }
   .setrow.now { padding-top: calc(1.6 * var(--u)); border-top: 1px solid var(--line); color: var(--muted); font-size: max(11px, calc(2.8 * var(--u))); }
   .setrow.now b { color: var(--text); font-size: max(14px, calc(4.2 * var(--u))); }
   .help { gap: calc(2 * var(--u)); }
@@ -1314,6 +1358,7 @@
 <div class="app" id="app">
   <div class="screen select" id="select" hidden></div>
   <div class="screen game" id="game" hidden></div>
+  <div class="logdock" id="logdock" data-a="dock" hidden></div>
   <div class="toast chamfer" id="toast" hidden></div>
   <div class="logov" id="log" data-a="logbg" hidden></div>
   <div class="log settings chamfer" id="settings" hidden></div>
@@ -1403,7 +1448,7 @@
   // 버전을 올릴 때마다 build(빌드 날짜)도 그날 날짜로 갱신
   // 버전 탭의 '버그 제보 · 건의 사항' 링크 (APK에서는 Capacitor가 바깥 주소를 시스템 브라우저로 엶)
   const FEEDBACK_URL = 'https://forms.gle/ThJPMxAxXwBPvzcq5';
-  const APP = { name: '루멘 카운터', version: '1.0.0', build: '2026-10-15' };
+  const APP = { name: '루멘 카운터', version: '1.0.1', build: '2026-10-16' };
 
   // ================= 아이콘 =================
   const I = {
@@ -1455,6 +1500,7 @@
     timer: { left: MATCH_SECONDS, since: null },
     players: [freshPlayer(), freshPlayer()],
     history: [], log: [], logArchive: [], logName: null,
+    dockSize: 0, // 펼친 폴드폰의 아래 로그 경계: 0 기본 · 1 데미지/토큰 사이가 화면 절반 · 2 계산기·로그 절반
   });
   let state = freshState();
   try {
@@ -2099,10 +2145,26 @@
         <div class="lvalue num">${Array.isArray(x.value) ? `<span class="v1">${esc(x.value[0])}</span><i>/</i><span class="v2">${esc(x.value[1])}</span>` : x.value != null ? esc(x.value) : '—'}</div>
       </div>`;
   }
+  // 정사각형에 가까운 화면(펼친 폴드폰 등): 게임 화면 아래에 로그를 늘 펼쳐 둠 (CSS의 같은 @media 규칙과 짝)
+  const SPLIT_MQ = matchMedia('(min-aspect-ratio: 2/3) and (max-aspect-ratio: 3/2)');
   function renderLog() {
-    const el = $('log');
+    const el = $('log'), dock = $('logdock');
+    const docked = SPLIT_MQ.matches && state.screen === 'game';
     setProp(el, 'hidden', !ui.logOpen);
-    if (!ui.logOpen) { htmlCache.delete(el); return; }
+    setProp(dock, 'hidden', !docked);
+    if (!ui.logOpen) htmlCache.delete(el);
+    if (!docked) htmlCache.delete(dock);
+    if (!ui.logOpen && !docked) return;
+    if (ui.logOpen) setHtml(el, logPanelHtml()); // 내용이 바뀔 때만 다시 그림 (스크롤 위치·길게 누르기 유지)
+    if (docked) setHtml(dock, logDockHtml());
+  }
+  // 아래에 붙인 로그: 이번 게임의 로그 줄만 (로그 이름 탭·머리줄·TXT EXPORT·ALL DELETE 없음)
+  function logDockHtml() {
+    const g = currentLogGame();
+    const rows = g.entries.map((r) => logRowHtml(r, g.chars)).join('');
+    return `<div class="logpanel"><div class="llist">${rows || '<div class="lempty">아직 기록이 없어요.</div>'}</div></div>`;
+  }
+  function logPanelHtml() {
     const arcs = state.logArchive;
     if (ui.logView !== 'current' && !arcs[Number(ui.logView)]) ui.logView = 'current';
     let tabs = `<button class="ltab cur${ui.logView === 'current' ? ' on' : ''}" data-a="lview" data-hold="logload" data-v="current"><i class="fill"></i><span>● ${esc(state.logName || 'NEW')}</span></button>`;
@@ -2115,14 +2177,13 @@
     const cn = (k) => (g.chars && CHAR_BY_ID[g.chars[k]] ? CHAR_BY_ID[g.chars[k]].name : '');
     const vs = cn(0) || cn(1) ? `<span class="lvs"><span class="p1c">1P ${esc(cn(0))}</span><i>VS</i><span class="p2c">2P ${esc(cn(1))}</span></span>` : '';
     const meta = `<span class="lmeta">${g.entries.length || vs ? `<span class="lname num">${esc(g.name)}</span>${vs}` : ''}</span>`;
-    const html = `
+    return `
       <div class="logpanel">
         <header><b>GAME LOG</b>${meta}<button class="lclose" data-a="log" aria-label="닫기">✕</button></header>
         <nav class="ltabs">${tabs}</nav>
         <div class="llist">${rows || '<div class="lempty">아직 기록이 없어요.</div>'}</div>
         <footer><span class="lhint">로그 이름을 1초 누르면 그 게임의 마지막 상황을 불러와요</span><button class="lexp" data-a="logexport" aria-label="모든 로그를 텍스트 파일로 저장">TXT EXPORT</button><button class="ldel" data-hold="logdel"><i class="fill"></i><span>ALL DELETE</span></button></footer>
       </div>`;
-    setHtml(el, html); // 내용이 바뀔 때만 다시 그림 (스크롤 위치·길게 누르기 유지)
   }
   // 로그 한 게임분: 이름 · [1P, 2P] 캐릭터 · 줄(최신이 앞)
   function currentLogGame() {
@@ -2243,7 +2304,7 @@
   // 사용법: "항목: 설명" 한 줄씩 (앞부분은 굵게 표시). 캐릭터별 특성·토큰 규칙은 넣지 않음
   const HELP = [
     ['상단 메뉴', ['NEW GAME: 캐릭터 선택으로 (두 번 눌러 확인)', 'LOG: 기록 보기', 'SETTING: 설정 · 사용법 · 버전',
-      'UNDO: 마지막 행동 취소 (되돌린 직후 은은하게 빛나요)', 'RESTART (SETTING): 같은 캐릭터로 새 게임 (두 번 눌러 확인)']],
+      'UNDO: 마지막 행동 취소 (되돌린 직후 은은하게 빛나요)']],
     ['캐릭터 선택', ['캐릭터 칸: 처음 누른 쪽이 1P, 두 번째가 2P (같은 캐릭터를 두 번 누르면 미러전)',
       '1P SELECT / 2P SELECT: 지금 고를 차례',
       '고른 캐릭터 칸 · 좌우 아래 캐릭터: 누르면 그쪽 선택 취소', '↻: 1P · 2P 선택 모두 취소',
@@ -2256,7 +2317,7 @@
       '경기 시간: 탭 = 시작 / 일시정지, 길게 = 처음으로 (설정에서 바꾸기)', 'TURN: 탭 = +1, 길게 = −1']],
     ['로그', ['로그 이름: 게임을 시작한 날짜 · 시간', '로그 이름 길게(1초): 그 게임 이어하기',
       '새 게임 · 앱 다시 열기: 지금 로그 자동 보관 (최근 10개)', '1초 안에 같은 입력: 한 줄로 묶임 (되돌리기도 한 번에)',
-      '되돌린 기록: 흐리게 "되돌림"으로 표시', 'ALL DELETE 길게(1초): 모든 로그 삭제', 'TXT EXPORT: 모든 로그를 텍스트 파일로 저장']],
+      '되돌린 기록: 흐리게 "되돌림"으로 표시', 'ALL DELETE 길게(1초): 모든 로그 삭제', 'TXT EXPORT: 모든 로그를 텍스트 파일로 저장', '펼친 폴드폰 · 태블릿: 게임 화면 아래에 이번 게임의 로그가 늘 보여요', '아래 로그 누르기 · SETTING의 아래 로그 비율: 경계 위치 3단계 (기본 → 데미지와 토큰 · 특성 사이가 화면 절반 → 계산기와 로그 절반씩)']],
   ];
   const helpItem = (t) => { const k = t.indexOf(': '); return k < 0 ? esc(t) : `<b>${esc(t.slice(0, k))}</b> ${esc(t.slice(k + 2))}`; };
   function renderSettings() {
@@ -2277,8 +2338,8 @@
         </div>
         <div class="presets">${[20, 25, 30].map((m) => `<button class="chamfer${m === mins ? ' on' : ''}" data-a="mtime" data-set="${m}">${m}분</button>`).join('')}</div>
         <div class="setrow now"><span>남은 경기 시간</span><b class="num">${fmtClock(timeLeft())}</b></div>
-        ${state.screen === 'game' ? `<div class="setrow"><div><b>같은 캐릭터로 새 게임</b><small>지금 1P·2P 캐릭터 그대로 처음부터 다시 시작해요. 두 번 눌러 확인.</small></div>
-          <button class="restart chamfer${ui.armed === 'reset' ? ' armed' : ''}" data-a="reset">RESTART</button></div>` : ''}
+        ${SPLIT_MQ.matches ? `<div class="setrow"><div><b>아래 로그 비율</b><small>펼친 폴드폰 · 태블릿에서 게임 화면과 아래 로그의 경계. 로그를 눌러도 바뀌어요.</small></div></div>
+        <div class="presets">${DOCK_SIZES.map((t, k) => `<button class="chamfer${k === (state.dockSize || 0) ? ' on' : ''}" data-a="dock" data-set="${k}">${t}</button>`).join('')}</div>` : ''}
       </div>` : tab === 'about' ? `
       <div class="setbody about">
         <div class="brand"><span class="mk dia"></span><div><b>${esc(APP.name)}</b><small>오프라인 대전용 체력 · 토큰 계산기</small></div></div>
@@ -2304,7 +2365,11 @@
   }
 
   // ================= 화면 전환 =================
+  // 아래 로그 경계 단계를 CSS에 알림 (게임 화면 크기가 바뀌므로 숫자 맞춤 전에)
+  const DOCK_SIZES = ['기본', '데미지 · 토큰 사이 절반', '절반씩'];
+  const applyDock = () => { $('app').dataset.dock = String(state.dockSize || 0); };
   function show() {
+    applyDock();
     setProp($('select'), 'hidden', state.screen !== 'select');
     setProp($('game'), 'hidden', state.screen !== 'game');
     if (state.screen === 'select') renderSelect();
@@ -2316,6 +2381,8 @@
   let resizeTimer = null;
   const refit = () => { fitDirty = true; if (state.screen === 'game') updateGame(); };
   addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(refit, 120); });
+  // 폴드폰을 펴거나 접으면 아래 로그를 붙이거나 뗌
+  SPLIT_MQ.addEventListener('change', () => { renderOverlays(); refit(); }); // 설정의 '아래 로그 비율'도 함께
   // 글꼴이 늦게 로드되면 숫자 폭이 바뀌므로 로드 후 한 번 더 맞춤
   if (document.fonts) document.fonts.addEventListener('loadingdone', refit);
   function refresh() {
@@ -2587,10 +2654,9 @@
     },
     log() { ui.logOpen = !ui.logOpen; ui.settingsOpen = false; ui.logView = 'current'; },
     logbg() { ui.logOpen = false; },
+    // 아래 로그 경계: 로그를 누르면 다음 단계, 설정의 버튼(data-set)은 그 단계로
+    dock(_, v, d) { state.dockSize = d.set != null ? Number(d.set) : ((state.dockSize || 0) + 1) % 3; applyDock(); fitDirty = true; },
     lview(_, v) { ui.logView = v; },
-    reset() {
-      if (twoStep('reset', '한 번 더 누르면 같은 캐릭터로 새 게임', startGame)) return 'shown';
-    },
     reselect() {
       const done = twoStep('reselect', '한 번 더 누르면 캐릭터 선택으로', () => {
         state.screen = 'select';
@@ -2678,8 +2744,9 @@
   }
 
   // ---------- 끌어서 스크롤 (로그 목록·로그 탭·설정/사용법) ----------
-  // 폰을 눕혀 쓰는 화면은 CSS로 90° 돌아가 있어서, 브라우저 기본 스크롤은 손가락 방향과 90° 어긋남
+  // 뷰포트가 세로라 화면이 CSS로 90° 돌아가 있으면 브라우저 기본 스크롤이 손가락 방향과 90° 어긋남
   // (위아래로 끌면 아무것도 안 움직임). 그래서 손가락 이동을 앱 화면 기준으로 바꿔 직접 스크롤하고, 놓으면 관성으로 조금 더 미끄러짐.
+  // 가로 고정(APK)·가로 뷰포트에서는 회전 없이 그대로 같은 방식(관성 포함)으로 스크롤 → 어느 쪽이든 똑같이 동작.
   let dragScrolled = false;
   (() => {
     const SEL = '.llist, .ltabs, .setbody';
@@ -2766,5 +2833,11 @@
   clearPicks();
   show();
   saveNow();
+
+  // 웹(GitHub Pages)에서만 서비스 워커 등록: 홈 화면에 설치(PWA)한 뒤 인터넷 없이도 열림 (sw.js).
+  // APK(Capacitor)·아티팩트(다른 페이지 안의 iframe)·파일로 열기(http/file)에서는 등록하지 않음
+  if ('serviceWorker' in navigator && location.protocol === 'https:' && !window.Capacitor && window.top === window) {
+    addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+  }
 })();
 </script>

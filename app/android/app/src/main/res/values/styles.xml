@@ -18,9 +18,8 @@
 
     <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
         <item name="android:background">@drawable/splash</item>
-        <!-- 앱이 세로 고정 화면 안에서 CSS로 90° 돌아 가로처럼 그려지므로, 카메라 노치가
-             CSS 기준 긴 변에 올 수 있음. shortEdges로 노치 밑까지 그리고, HTML의
-             env(safe-area-inset-*) 여백이 버튼을 노치에서 비켜 줌. -->
+        <!-- 가로 고정 화면에서 카메라 노치는 짧은 변(앱의 왼쪽/오른쪽)에 옴.
+             shortEdges로 노치 옆까지 그리고, HTML의 env(safe-area-inset-*) 여백이 버튼을 노치에서 비켜 줌. -->
         <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
     </style>
 </resources>
