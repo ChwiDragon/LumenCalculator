@@ -119,7 +119,8 @@
   - 앱을 다시 열면: 진행 중이던 게임은 로그에 보관하고 캐릭터 선택부터 시작(1P·2P 선택도 비움).
   - 정사각형에 가까운 화면(긴 변 : 짧은 변 ≤ 3 : 2 — 펼친 폴드폰, 4:3 태블릿)의 계산기 화면에서만:
     위 = 게임 화면(2 : 1 띠, 화면 높이의 60% 이상), 아래 = 이번 게임의 로그 줄만(#logdock, 같은 --u. 탭·머리줄·버튼 없음).
-    아래 로그를 누르거나 설정의 '아래 로그 비율'(이런 화면에서만 보임)로 경계를 3단계로 바꿈(state.dockSize, 저장됨):
+    아래 로그를 누르거나 설정의 '아래 로그 비율'(이런 화면에서만 보임)로 경계를 3단계로 바꿈(state.dockSize, 저장됨).
+    설정의 '비율 고정' ON(state.dockLock)이면 로그를 눌러도 바뀌지 않음(설정 버튼으로만):
     기본 → 데미지와 토큰·특성 칸 사이가 화면 절반 → 계산기·로그 절반씩.
     일반 폰(약 2 : 1 이상)·캐릭터 선택 화면에서는 보이지 않음. CSS @media와 JS SPLIT_MQ가 같은 조건, 폴드를 펴고 접으면 바로 바뀜.
 
@@ -1322,6 +1323,9 @@
   .presets { display: flex; flex-wrap: wrap; gap: calc(1 * var(--u)); --cut: calc(.8 * var(--u)); }
   .presets button { padding: .5em 1em; background: var(--surface-2); font-size: max(11px, calc(2.8 * var(--u))); font-weight: 600; }
   .presets button.on { background: var(--lumen); color: #1A1300; }
+  /* ON/OFF 버튼 (설정의 '비율 고정') */
+  .switch { flex: none; min-width: calc(14 * var(--u)); padding: .5em 1.2em; background: var(--surface-2); color: var(--muted); font-family: var(--font-num); font-weight: 700; font-size: max(11px, calc(2.8 * var(--u))); letter-spacing: .08em; --cut: calc(.8 * var(--u)); }
+  .switch.on { background: var(--lumen); color: #1A1300; }
   .setrow.now { padding-top: calc(1.6 * var(--u)); border-top: 1px solid var(--line); color: var(--muted); font-size: max(11px, calc(2.8 * var(--u))); }
   .setrow.now b { color: var(--text); font-size: max(14px, calc(4.2 * var(--u))); }
   .help { gap: calc(2 * var(--u)); }
@@ -1445,7 +1449,7 @@
   const STORE_KEY = 'lumencalc.v6';
   const LOG_ARCHIVE_MAX = 10;   // 새 게임 때 자동 보관하는 지난 로그 수
   const DELETE_HOLD_MS = 1000;  // ALL DELETE 길게 누르는 시간
-  // 버전을 올릴 때마다 build(빌드 날짜)도 그날 날짜로 갱신
+  // 버전·빌드 날짜는 APK를 빌드할 때만 올림 (빌드마다 끝자리 +1, 캐릭터 정식 추가 때 가운데 자리 +1)
   // 버전 탭의 '버그 제보 · 건의 사항' 링크 (APK에서는 Capacitor가 바깥 주소를 시스템 브라우저로 엶)
   const FEEDBACK_URL = 'https://forms.gle/ThJPMxAxXwBPvzcq5';
   const APP = { name: '루멘 카운터', version: '1.0.1', build: '2026-10-16' };
@@ -1501,6 +1505,7 @@
     players: [freshPlayer(), freshPlayer()],
     history: [], log: [], logArchive: [], logName: null,
     dockSize: 0, // 펼친 폴드폰의 아래 로그 경계: 0 기본 · 1 데미지/토큰 사이가 화면 절반 · 2 계산기·로그 절반
+    dockLock: false, // true면 아래 로그를 눌러도 경계가 바뀌지 않음 (설정의 '비율 고정')
   });
   let state = freshState();
   try {
@@ -1524,9 +1529,13 @@
     // 게임 중에는 지금 상황을 기억해 둠 → 로그에 함께 보관되어 나중에 불러올 수 있음
     if (state.screen === 'game') state.lastGame = gameSnap();
     // 되돌리기 기록(history)은 저장하지 않음: 앱을 다시 열면 진행 중 게임은 로그로 보관되고 history는 항상 비워짐
-    const { history: _history, ...keep } = state;
-    try { localStorage.setItem(STORE_KEY, JSON.stringify(keep)); } catch (e) {}
+    const { history: _history, logArchive, ...keep } = state;
+    // 보관 로그(최대 10게임 × 수백 줄)는 보관할 때만 바뀌므로 JSON을 기억해 두고 다시 씀 → 탭마다 전부 다시 변환하지 않음
+    const sig = logArchive.map((a) => `${a.name}@${a.endedAt}`).join('|');
+    if (sig !== arcCache.sig) Object.assign(arcCache, { sig, json: JSON.stringify(logArchive) });
+    try { localStorage.setItem(STORE_KEY, `${JSON.stringify(keep).slice(0, -1)},"logArchive":${arcCache.json}}`); } catch (e) {}
   }
+  const arcCache = { sig: null, json: '[]' };
   const save = () => {
     // 지금 상황 기억은 바로(가벼움), 저장소 쓰기만 모아서
     if (state.screen === 'game') state.lastGame = gameSnap();
@@ -2132,7 +2141,18 @@
       value: Array.isArray(r.value) ? r.value.map(String) : r.value != null ? String(r.value) : null,
     };
   }
+  // 줄 HTML은 줄마다 기억해 두고, 그 줄이 바뀌었을 때(묶인 입력·되돌림)만 다시 만듦
+  // → 펼친 폴드폰처럼 로그가 늘 보일 때도 탭마다 수백 줄을 다시 만들지 않음
+  const rowHtmlCache = new WeakMap();
   function logRowHtml(r, chars) {
+    const sig = `${r.t}|${r.undone ? 1 : 0}|${r.presses ? r.presses.length : 0}|${r.value}|${chars || ''}`;
+    const hit = rowHtmlCache.get(r);
+    if (hit && hit.sig === sig) return hit.html;
+    const html = buildRowHtml(r, chars);
+    rowHtmlCache.set(r, { sig, html });
+    return html;
+  }
+  function buildRowHtml(r, chars) {
     const x = logRowParts(r, chars);
     const side = r.side != null ? ` p${r.side + 1}` : '';
     const who = x.who ? `<span class="who">${x.who}${x.name ? `<b>${esc(x.name)}</b>` : ''}</span>` : '';
@@ -2317,7 +2337,7 @@
       '경기 시간: 탭 = 시작 / 일시정지, 길게 = 처음으로 (설정에서 바꾸기)', 'TURN: 탭 = +1, 길게 = −1']],
     ['로그', ['로그 이름: 게임을 시작한 날짜 · 시간', '로그 이름 길게(1초): 그 게임 이어하기',
       '새 게임 · 앱 다시 열기: 지금 로그 자동 보관 (최근 10개)', '1초 안에 같은 입력: 한 줄로 묶임 (되돌리기도 한 번에)',
-      '되돌린 기록: 흐리게 "되돌림"으로 표시', 'ALL DELETE 길게(1초): 모든 로그 삭제', 'TXT EXPORT: 모든 로그를 텍스트 파일로 저장', '펼친 폴드폰 · 태블릿: 게임 화면 아래에 이번 게임의 로그가 늘 보여요', '아래 로그 누르기 · SETTING의 아래 로그 비율: 경계 위치 3단계 (기본 → 데미지와 토큰 · 특성 사이가 화면 절반 → 계산기와 로그 절반씩)']],
+      '되돌린 기록: 흐리게 "되돌림"으로 표시', 'ALL DELETE 길게(1초): 모든 로그 삭제', 'TXT EXPORT: 모든 로그를 텍스트 파일로 저장', '펼친 폴드폰 · 태블릿: 게임 화면 아래에 이번 게임의 로그가 늘 보여요', '아래 로그 누르기 · SETTING의 아래 로그 비율: 경계 위치 3단계 (기본 → 데미지와 토큰 · 특성 사이가 화면 절반 → 계산기와 로그 절반씩)', 'SETTING의 비율 고정 ON: 아래 로그를 눌러도 비율이 바뀌지 않아요']],
   ];
   const helpItem = (t) => { const k = t.indexOf(': '); return k < 0 ? esc(t) : `<b>${esc(t.slice(0, k))}</b> ${esc(t.slice(k + 2))}`; };
   function renderSettings() {
@@ -2338,8 +2358,10 @@
         </div>
         <div class="presets">${[20, 25, 30].map((m) => `<button class="chamfer${m === mins ? ' on' : ''}" data-a="mtime" data-set="${m}">${m}분</button>`).join('')}</div>
         <div class="setrow now"><span>남은 경기 시간</span><b class="num">${fmtClock(timeLeft())}</b></div>
-        ${SPLIT_MQ.matches ? `<div class="setrow"><div><b>아래 로그 비율</b><small>펼친 폴드폰 · 태블릿에서 게임 화면과 아래 로그의 경계. 로그를 눌러도 바뀌어요.</small></div></div>
-        <div class="presets">${DOCK_SIZES.map((t, k) => `<button class="chamfer${k === (state.dockSize || 0) ? ' on' : ''}" data-a="dock" data-set="${k}">${t}</button>`).join('')}</div>` : ''}
+        ${SPLIT_MQ.matches ? `<div class="setrow"><div><b>아래 로그 비율</b><small>펼친 폴드폰 · 태블릿에서 게임 화면과 아래 로그의 경계.${state.dockLock ? '' : ' 로그를 눌러도 바뀌어요.'}</small></div></div>
+        <div class="presets">${DOCK_SIZES.map((t, k) => `<button class="chamfer${k === (state.dockSize || 0) ? ' on' : ''}" data-a="dock" data-set="${k}">${t}</button>`).join('')}</div>
+        <div class="setrow"><div><b>비율 고정</b><small>켜면 아래 로그를 눌러도 비율이 바뀌지 않아요. 위 버튼으로는 바꿀 수 있어요.</small></div>
+          <button class="switch chamfer${state.dockLock ? ' on' : ''}" data-a="docklock" aria-pressed="${!!state.dockLock}">${state.dockLock ? 'ON' : 'OFF'}</button></div>` : ''}
       </div>` : tab === 'about' ? `
       <div class="setbody about">
         <div class="brand"><span class="mk dia"></span><div><b>${esc(APP.name)}</b><small>오프라인 대전용 체력 · 토큰 계산기</small></div></div>
@@ -2655,7 +2677,12 @@
     log() { ui.logOpen = !ui.logOpen; ui.settingsOpen = false; ui.logView = 'current'; },
     logbg() { ui.logOpen = false; },
     // 아래 로그 경계: 로그를 누르면 다음 단계, 설정의 버튼(data-set)은 그 단계로
-    dock(_, v, d) { state.dockSize = d.set != null ? Number(d.set) : ((state.dockSize || 0) + 1) % 3; applyDock(); fitDirty = true; },
+    dock(_, v, d) {
+      if (d.set == null && state.dockLock) return; // 비율 고정 ON: 로그를 눌러도 그대로
+      state.dockSize = d.set != null ? Number(d.set) : ((state.dockSize || 0) + 1) % 3;
+      applyDock(); fitDirty = true;
+    },
+    docklock() { state.dockLock = !state.dockLock; },
     lview(_, v) { ui.logView = v; },
     reselect() {
       const done = twoStep('reselect', '한 번 더 누르면 캐릭터 선택으로', () => {
@@ -2750,7 +2777,8 @@
   let dragScrolled = false;
   (() => {
     const SEL = '.llist, .ltabs, .setbody';
-    const rotated = () => matchMedia('(orientation: portrait)').matches;
+    const PORTRAIT_MQ = matchMedia('(orientation: portrait)'); // 끄는 동안 매번 새로 만들지 않음
+    const rotated = () => PORTRAIT_MQ.matches;
     // 화면(손가락) 이동 → 앱 기준 이동: rotate(90deg) 이므로 앱의 x = 화면 y, 앱의 y = −화면 x
     const toApp = (dx, dy) => (rotated() ? [dy, -dx] : [dx, dy]);
     let el = null, id = null, px = 0, py = 0, moved = false, vx = 0, vy = 0, lastT = 0, raf = 0;

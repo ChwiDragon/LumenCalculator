@@ -33,3 +33,7 @@ app/www/
 
 # 개인 문서(권리 합의서 등)는 올리지 않음
 /*.pdf
+
+# 공개 웹사이트(LumenCounter 저장소) 작업 폴더 — 그림·글꼴 포함, app/build-site.py가 만듦. 이 저장소에는 올리지 않음
+site/
+site-tmp/
