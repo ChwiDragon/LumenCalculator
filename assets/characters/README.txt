@@ -17,6 +17,11 @@
 
   예)  wolf_body.png   wolf_face.png   wolf_trait.png
 
+  추가 일러스트 (선택 사항): body2 / face2 (CMYK 두상은 face3 / face4 까지)
+  - 앱 설정 > 일러스트 탭에서 캐릭터마다 반신·두상 버튼을 눌러 일러스트 고르기 창에서 고름.
+  - 고른 번호의 파일이 없으면 1번(body / face)으로 보임. 크기·규칙은 1번과 같음.
+  예)  wolf_body2.webp   wolf_face2.webp   cmyk_face3.webp   cmyk_face4.webp
+
   리타 상태 일러(정사각형): rita_guardian.png / rita_assassin.png / rita_paladin.png
   타오 토큰 일러(정사각형): tao_yang.png (양) / tao_yin.png (음)
   (리타의 trait 이미지 = 빛의 루멘, 타오의 trait 이미지 = 조화)
@@ -25,7 +30,7 @@
   니아          nia
   루트          root
   델피          delphi
-  키스 더 래빗  kiss
+  키스          kiss
   울프          wolf
   비올라        viola
   레브          rev

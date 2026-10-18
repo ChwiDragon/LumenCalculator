@@ -69,21 +69,22 @@
 
  ■ 계산기 규칙
   - 체력 버튼(1P, 왼쪽→오른쪽): −600 −500 −400 −300 / +200 +100 −100 −200. 2P는 줄마다 좌우를 뒤집은 대칭 배치. 체력은 0~최대 사이.
-  - 체력 옆 합계: 1.6초 안에 같은 방향으로 연달아 누르면 체력 숫자(/최대) 바로 옆에 합계를 잠깐 표시.
+  - 체력 옆 합계: 1초 안에 연달아 누르면(피해·회복 섞여도) 체력 숫자(/최대) 바로 옆에 합친 값을 잠깐(1.6초) 표시.
+    체력 숫자 줄은 높이를 고정해 둠 → 합계가 나타나도 아래 칸들이 움직이지 않음.
   - 손패 한도: 체력 구간 5000~4001 / 4000~3001 / 3000~2001 / 2000~1001 / 1000 이하.
     기본 6/7/8/9/9, 리타 6/7/8/9/10, 키메라 5/5/5/6/6(특성 ON이면 +1), CMYK 10×5.
     시작 체력 기본 5000, 무영 4500, 핀프 5500.
   - FP: 데미지 버튼 옆 + / −. 가운데 현재 FP 숫자를 탭하면 0으로 초기화(되돌리기 가능).
     카운트다운 위 FP 버튼 = FP 팝업: 양쪽 −9~+9. ±1~4는 데미지 버튼 자리, ±5~9는 그 위·아래 줄 다섯 칸(모두 같은 크기,
-    다섯째 칸 ±5는 FP 칸 위·아래). 누르면 바로 그 값(+ / −와 같이 1초 안이면 기록 묶음). 0 = FP 칸 자리, 가운데 ✕ 마름모 = 닫기.
+    다섯째 칸 ±5는 FP 칸 위·아래). 누르면 바로 그 값(+ / −와 같이 2초 안이면 기록 묶음). 0 = FP 칸 자리, 가운데 ✕ 마름모 = 닫기.
   - 카운트다운(10초/30초, 아래 버튼으로 바꿈): 탭=시작, 도는 중(또는 끝난 뒤) 탭=처음으로 돌아가 멈춤, 0이 되고 5초 뒤 저절로 처음으로.
     멈춰 있을 때는 숫자 대신 초시계 그림. 길게 누르기 없음. 효과음 없음.
   - 경기 시간: 탭=시작/일시정지, 길게=초기화. 남은 1분부터 노란색, 10초부터 빨간색. 설정에서 분 단위로 바꾸면 즉시 적용.
   - TURN: 탭 +1, 길게 −1.
   - 서든데스: 양쪽 체력이 모두 0이면 가운데(카운트다운 자리)에 '서든데스' 버튼이 나타남.
     탭 → 양쪽 체력 1000 · FP 0, 버튼 사라짐. 되돌리기로 취소 가능(버튼 다시 나타남).
-  - 1초(MERGE_MS) 안에 같은 종류(같은 플레이어의 피해/회복/FP/같은 토큰)를 이어 누르면
-    되돌리기·로그에서 한 번으로 묶는다.
+  - 같은 종류를 이어 누르면 되돌리기·로그에서 한 번으로 묶는다: 체력·토큰 1초(MERGE_MS), FP 2초(FP_MERGE_MS).
+    같은 종류 = 같은 플레이어의 체력(피해·회복 합쳐서 한 줄: −500, +100 → 피해 −400) / FP(1P·2P 함께 한 줄, 결과값 표시) / 같은 토큰.
   - 특성 마크: 탭하면 밝게(ON)/어둡게(OFF). 강조 효과는 은은하게(움직이는 효과 금지).
     린·이제벨·이오몽·CMYK는 게임 시작부터 특성 ON 고정(탭해도 안 꺼짐).
     키메라는 특성 ON으로 시작하지만 끌 수 있음(ON이면 손패 +1).
@@ -122,7 +123,8 @@
     기본 → 데미지와 토큰·특성 칸 사이가 화면 절반 → 계산기·로그 절반씩.
     일반 폰(약 2 : 1 이상)·캐릭터 선택 화면에서는 보이지 않음. CSS @media와 JS SPLIT_MQ가 같은 조건, 폴드를 펴고 접으면 바로 바뀜.
 
- ■ 설정 창 (설정 / 사용법 / 버전 탭)
+ ■ 설정 창 (설정 / 일러스트 / 사용법 / 버전 탭)
+  - 일러스트: 캐릭터마다 [반신 n번] [두상 n번] 버튼 → 일러스트 고르기 창에서 미리보기를 눌러 선택 (아래 "캐릭터 데이터 · 이미지" 참고).
   - 사용법: '상단 메뉴'처럼 "항목: 설명" 한 줄씩 짧게(앞부분 굵게). 캐릭터별 특성·토큰 규칙은 넣지 않음.
   - 버전: 버전 · 빌드 날짜, '버그 제보 · 건의 사항' 버튼(FEEDBACK_URL, 구글 폼), 비공식 도구 안내, 일러스트 저작권 문구.
     바깥 링크는 <a target="_blank">: APK에서는 Capacitor가 앱 밖 주소를 시스템 브라우저로 엶(권한 필요 없음).
@@ -132,6 +134,8 @@
   - LumenCalculator 저장소의 Pages = 그림 없는 버전. 그림·글꼴을 넣은 공개 사이트는 app/build-site.py → site/ (LumenCounter 저장소).
 
  ■ 캐릭터 데이터 · 이미지
+  - 반신(body) · 두상(face)은 캐릭터마다 일러스트 선택(설정 > 일러스트 탭, state.artPick, 저장됨). 기본 1·2번, CMYK 두상은 4번까지(artCount).
+    n번 = {id}_body{n} / {id}_face{n} 파일(1번은 번호 없음). 없으면 1번 → 그것도 없으면 대체 그림. 특성·리타 상태·타오 토큰 그림은 하나뿐.
   - 스크립트의 CHARACTERS 목록에 한 줄 추가하면 캐릭터가 늘어남(필드 설명은 목록 위 주석).
   - 이미지는 assets/characters/{id}_{body|face|trait}.png(.webp) — 없으면 대체 그림. 자세한 건 그 폴더 README.txt.
 
@@ -297,7 +301,7 @@
   .art.contain > img { object-fit: contain; object-position: top; }
   /* 두상(face) 그림은 시계 반대방향으로 45° 돌려 그린 정사각형 → 시계방향 45°로 되돌려 마름모 칸에 꽉 채움.
      정사각형을 45° 돌리면 그대로 마름모가 되므로 한 변 = 칸 너비 / √2 (≈70.7%, 가장자리 틈 없게 조금 크게) */
-  .dia img[data-kind="face"] { inset: auto; left: 50%; top: 50%; width: 72%; height: 72%; translate: -50% -50%; rotate: 45deg; }
+  .dia img[data-kind="face"], .dia img[data-vkind="face"] { inset: auto; left: 50%; top: 50%; width: 72%; height: 72%; translate: -50% -50%; rotate: 45deg; }
   .face-fb {
     --cc: #888;
     width: 100%;
@@ -643,6 +647,9 @@
     display: flex;
     align-items: baseline;
     gap: 1cqw;
+    /* 높이 고정: 합계(burst) 글자가 처음 나타나거나 숫자가 바뀌어도 이 줄 높이가 변하지 않음
+       → 아래 체력 막대·데미지 버튼·가운데 열이 플레이 중에 움직이지 않음 (글자가 넘치면 그냥 겹쳐 그림) */
+    height: calc(13 * .85 * var(--u)); /* = 체력 숫자 줄 높이(글자 13u × line-height .85), 지금까지 보이던 높이 그대로 */
   }
   .side.p2 .hpline { flex-direction: row-reverse; }
   .hp { font-size: calc(13 * var(--u)); line-height: .85; letter-spacing: -.01em; }
@@ -1289,6 +1296,8 @@
   .tag.minus { background: color-mix(in srgb, var(--dmg) 22%, transparent); color: #FFA69F; }
   .tag.plus { background: color-mix(in srgb, var(--heal) 22%, transparent); color: #8FE6BD; }
   .tag.lfp { background: color-mix(in srgb, var(--lumen) 20%, transparent); color: #FFD98A; }
+  .tag .f1 { color: var(--p1); } /* FP 묶음 줄의 1P 값 파랑 · 2P 값 빨강 (오른쪽 결과값과 같은 색) */
+  .tag .f2 { color: var(--p2); }
   .tag.token { background: color-mix(in srgb, #9AA8FF 20%, transparent); color: #C3CBFF; }
   .tag.turn { background: color-mix(in srgb, var(--lumen) 22%, transparent); color: #FFD98A; }
   .tag.start { background: color-mix(in srgb, var(--p1) 18%, transparent); color: #A9D2FF; }
@@ -1349,6 +1358,32 @@
   .presets { display: flex; flex-wrap: wrap; gap: calc(1 * var(--u)); --cut: calc(.8 * var(--u)); }
   .presets button { padding: .5em 1em; background: var(--surface-2); font-size: max(11px, calc(2.8 * var(--u))); font-weight: 600; }
   .presets button.on { background: var(--lumen); color: #1A1300; }
+  /* 설정 > 캐릭터: [두상] 이름 | 반신 1 2 | 두상 1 2 */
+  .chars { gap: calc(1.2 * var(--u)); }
+  .charrow { display: grid; grid-template-columns: calc(8 * var(--u)) minmax(0, 1fr) auto auto; align-items: center; gap: 2cqw; padding: calc(.6 * var(--u)) 0; border-bottom: 1px solid var(--line); }
+  .charrow .facering { width: calc(8 * var(--u)); height: calc(8 * var(--u)); display: grid; }
+  .charrow b { font-size: max(12px, calc(3.2 * var(--u))); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* 반신 / 두상 버튼: [반신 | 1번] 누르면 일러스트 고르기 창 */
+  .seg { display: flex; align-items: stretch; gap: 1px; background: var(--line); --cut: calc(.8 * var(--u)); }
+  .seg span { padding: 0 1em; display: grid; place-items: center; background: var(--surface); color: var(--muted); font-size: max(10px, calc(2.5 * var(--u))); }
+  .seg b { min-width: calc(10 * var(--u)); padding: calc(1 * var(--u)) .8em; display: grid; place-items: center; background: var(--surface-2); color: var(--lumen); font-size: max(11px, calc(2.8 * var(--u))); }
+  .seg:active b { background: var(--surface-3); }
+  /* 일러스트 고르기 창 */
+  .artpop { position: absolute; inset: 0; z-index: 8; display: grid; place-items: center; padding: calc(4 * var(--u)); background: rgba(8, 11, 20, .78); }
+  .artpanel { max-width: 100%; max-height: 100%; overflow: auto; background: var(--surface); box-shadow: 0 0 0 1px var(--line); --cut: calc(1.6 * var(--u)); }
+  .artpanel header { display: flex; align-items: center; justify-content: space-between; gap: 3cqw; padding: calc(1.6 * var(--u)) calc(2.4 * var(--u)); border-bottom: 1px solid var(--line); }
+  .artpanel header b { font-size: max(13px, calc(3.6 * var(--u))); }
+  .artpanel header button { width: calc(8 * var(--u)); height: calc(8 * var(--u)); min-width: 30px; min-height: 30px; color: var(--muted); font-size: max(15px, calc(4 * var(--u))); }
+  .vtiles { display: flex; flex-wrap: wrap; justify-content: center; gap: calc(2 * var(--u)); padding: calc(2.4 * var(--u)); }
+  .vtile { display: grid; justify-items: center; gap: calc(1 * var(--u)); padding: calc(1 * var(--u)); border-radius: calc(1 * var(--u)); box-shadow: inset 0 0 0 1px var(--line); }
+  .vtile .art { width: calc(26 * var(--u)); height: calc(26 * var(--u)); background: var(--surface-2); }
+  .vtile.face .art { width: calc(22 * var(--u)); height: calc(22 * var(--u)); }
+  .vtile.body .art > img { object-fit: contain; object-position: top; }
+  .vtile b { font-size: max(12px, calc(3.2 * var(--u))); color: var(--muted); }
+  .vtile.on { box-shadow: inset 0 0 0 calc(.5 * var(--u)) var(--lumen); }
+  .vtile.on b { color: var(--lumen); }
+  .vtile .vnone { color: var(--faint); font-size: max(11px, calc(2.8 * var(--u))); }
+  .vtile.missing { opacity: .5; }
   /* ON/OFF 버튼 (설정의 화면 뒤집기 · 로그 비율 고정) */
   .switch { flex: none; min-width: calc(14 * var(--u)); padding: .5em 1.2em; background: var(--surface-2); color: var(--muted); font-family: var(--font-num); font-weight: 700; font-size: max(11px, calc(2.8 * var(--u))); letter-spacing: .08em; --cut: calc(.8 * var(--u)); }
   .switch.on { background: var(--lumen); color: #1A1300; }
@@ -1384,7 +1419,7 @@
     text-decoration: none; --cut: calc(1.2 * var(--u));
   }
   .about .feedback:active { background: var(--surface-2); }
-  .about .note { margin: 0; font-size: max(10px, calc(2.5 * var(--u))); color: var(--muted); line-height: 1.55; word-break: keep-all; }
+  .about .note, .chars .note { margin: 0; font-size: max(10px, calc(2.5 * var(--u))); color: var(--muted); line-height: 1.55; word-break: keep-all; }
 
   @media (prefers-reduced-motion: reduce) {
     .bar .ghost, .bar .fill, .q, .burst, .trait .mark { transition: none; }
@@ -1399,6 +1434,7 @@
   <div class="toast chamfer" id="toast" hidden></div>
   <div class="logov" id="log" data-a="logbg" hidden></div>
   <div class="settings chamfer" id="settings" hidden></div>
+  <div class="artpop" id="artpop" data-a="artpopclose" hidden></div>
 </div>
 
 <script>
@@ -1426,6 +1462,7 @@
   //     { kind: 'dual', labels: [a, b], start, max }  두 종류 토큰 (타오: 둘 다 최대면 조화 ON, 한쪽이라도 2 이하면 OFF)
   //     { kind: 'stance', states: [{ id, label }] }   하나만 켤 수 있는 상태 (리타). 특성 마크 = 전부 켜기(빛의 루멘)
   //   이미지: {id}_body / {id}_face / {id}_trait, stance 상태는 {id}_{상태id} (예: rita_guardian.png)
+  //   artCount: { body, face } 고를 수 있는 일러스트 수 (없으면 2). 2번부터는 {id}_body2, {id}_face3 … (CMYK 두상 4)
   const ASSET_DIR = 'assets/characters';
   const ASSET_EXTS = ['webp', 'png']; // 실제 그림이 모두 webp → webp부터 찾아 없는 png 요청(404)을 건너뜀
   const DEFAULT_HP = 5000;
@@ -1435,13 +1472,15 @@
   const HAND_COLORS = ['#4DA3FF', '#3DCB8A', '#FFD23F', '#FF9838', '#FF4D4D'];
   const MIN_EMPTY_SLOTS = 3; // 선택 화면에 항상 남겨 둘 빈 칸 수 (추가 캐릭터 자리)
   const ROSTER_ROWS = 4;     // 역삼각형 줄 수 (캐릭터가 늘면 윗줄이 길어짐)
-  const MERGE_MS = 1000;      // 이 시간 안에 같은 종류로 연속 입력하면 기록/되돌리기에서 한 번으로 묶음
+  // 이 시간 안에 같은 종류로 이어 누르면 기록/되돌리기에서 한 번으로 묶음: 체력·토큰 1초, FP(1P·2P 함께) 2초
+  const MERGE_MS = 1000;
+  const FP_MERGE_MS = 2000;
 
   const CHARACTERS = [
     { id: 'nia', name: '니아', color: '#5BE37D', trait: '오버리밋' },
     { id: 'root', name: '루트', color: '#6CCBFF', trait: '차지' },
     { id: 'delphi', name: '델피', color: '#19C2B0', trait: '다운 스탠스', counter: { kind: 'count', label: '개러지', start: 3, max: 3 } },
-    { id: 'kiss', name: '키스 더 래빗', color: '#FFD23F', trait: '예고' },
+    { id: 'kiss', name: '키스', color: '#FFD23F', trait: '예고' },
     { id: 'wolf', name: '울프', color: '#4A9AD4', trait: '위압', counter: { kind: 'count', label: '하울링', start: 0, max: 5, hi: 'full', tapReset: true, spendOnTrait: true } },
     { id: 'viola', name: '비올라', color: '#B78CFF', trait: '매튜드', traitByCount: true, traitSpends: true, counter: { kind: 'count', label: '은연', start: 0, max: 3, hi: 'min1', tapReset: true } },
     { id: 'rev', name: '레브', color: '#7A4DC4', trait: '암야', counter: { kind: 'count', label: '단검', start: 0, max: 6 } },
@@ -1455,7 +1494,7 @@
     { id: 'chimera', name: '키메라', color: '#A2714C', hands: [5, 5, 5, 6, 6], trait: '섭리의 궤', traitHand: 1, traitOn: true, counter: { kind: 'count', label: '편린', start: 0, max: 9, hi: 'full' } },
     { id: 'muyoung', name: '무영', color: '#3D6EF2', hp: 4500, trait: '청염', autoTrait: 2500, counter: { kind: 'count', label: '귀섬', start: 3, max: 5, tapReset: true } },
     { id: 'finf', name: '핀프', color: '#9AA3B5', hp: 5500, trait: 'X-05 솔다트', traitByCount: true, counter: { kind: 'count', label: '파츠', start: 4, max: 4, hi: 'zero' } },
-    { id: 'cmyk', noTraitLog: true, name: 'CMYK', color: '#FF5AA0', hands: [10, 10, 10, 10, 10], traitFixed: true, counter: { kind: 'count', label: '뉴 싱글', start: 10, max: 10 } },
+    { id: 'cmyk', noTraitLog: true, name: 'CMYK', artCount: { face: 4 }, color: '#FF5AA0', hands: [10, 10, 10, 10, 10], traitFixed: true, counter: { kind: 'count', label: '뉴 싱글', start: 10, max: 10 } },
     { id: 'minyeong', name: '미녕이', color: '#F3E3BE', trait: '하이텐션' },
   ].map((c, i, all) => ({
     hp: DEFAULT_HP,
@@ -1478,14 +1517,14 @@
   const ROUND_SECONDS = 10;            // 가운데 카운트다운 기본값 (10초 / 30초 중 고름: state.roundSeconds)
   const roundSec = () => (state.roundSeconds === 30 ? 30 : ROUND_SECONDS);
   const SUDDEN_DEATH_HP = 1000;
-  const BURST_MS = 1600;
+  const BURST_MS = 1600;       // 체력 옆 합계를 보여 주는 시간 (합치는 기준은 체력 묶음과 같은 MERGE_MS)
   const STORE_KEY = 'lumencalc.v6';
   const LOG_ARCHIVE_MAX = 10;   // 새 게임 때 자동 보관하는 지난 로그 수
   const DELETE_HOLD_MS = 1000;  // ALL DELETE 길게 누르는 시간
   // 버전·빌드 날짜는 APK를 빌드할 때만 올림 (빌드마다 끝자리 +1, 캐릭터 정식 추가 때 가운데 자리 +1)
   // 버전 탭의 '버그 제보 · 건의 사항' 링크 (APK에서는 Capacitor가 바깥 주소를 시스템 브라우저로 엶)
   const FEEDBACK_URL = 'https://forms.gle/ThJPMxAxXwBPvzcq5';
-  const APP = { name: '루멘 카운터', version: '1.0.1', build: '2026-10-17' };
+  const APP = { name: '루멘 카운터', version: '1.0.2', build: '2026-10-18' };
 
   // ================= 아이콘 =================
   const I = {
@@ -1511,17 +1550,42 @@
 
   // ================= 이미지 (없으면 대체 그림) =================
   const failed = new Set();
-  const artSrc = (id, kind) => ASSET_EXTS.map((e) => `${ASSET_DIR}/${id}_${kind}.${e}`).find((u) => !failed.has(u)) || null;
+  // 반신(body)·두상(face)은 캐릭터마다 일러스트 1번 / 2번 …(artCount) 중에서 고름 (설정 > 일러스트 탭, state.artPick).
+  // n번 파일 = {id}_{kind}{n} (1번은 번호 없이 {id}_{kind}). 고른 파일이 없으면 1번으로, 그것도 없으면 대체 그림
+  const ART_PICK_KINDS = ['body', 'face'];
+  const KIND_LABEL = { body: '반신', face: '두상' };
+  const artCount = (c, kind) => (c.artCount && c.artCount[kind]) || 2;
+  const artFile = (kind, n) => (n > 1 ? `${kind}${n}` : kind);
+  const artPick = (id, kind) => {
+    const n = ART_PICK_KINDS.includes(kind) && state.artPick && state.artPick[id] ? Number(state.artPick[id][kind]) || 1 : 1;
+    return CHAR_BY_ID[id] && n >= 1 && n <= artCount(CHAR_BY_ID[id], kind) ? n : 1;
+  };
+  const artSrc = (id, kind) => {
+    const n = artPick(id, kind);
+    const names = n > 1 ? [artFile(kind, n), kind] : [kind];
+    for (const n of names) for (const e of ASSET_EXTS) { const u = `${ASSET_DIR}/${id}_${n}.${e}`; if (!failed.has(u)) return u; }
+    return null;
+  };
   const artImg = (c, kind) => {
     const src = artSrc(c.id, kind);
     return src ? `<img src="${src}" data-id="${c.id}" data-kind="${kind}" alt="" draggable="false">` : '';
   };
+  // 그림을 못 불러오면: 앱 그림(data-kind)은 다음 후보(png · 1번)로, 일러스트 고르기 창 미리보기(data-vkind)는
+  // 그 번호 파일만 보여 주므로 png까지 없으면 칸에 '없음'. 실패한 주소는 기억해서 다시 요청하지 않음
   document.addEventListener('error', (e) => {
     const img = e.target;
-    if (!(img instanceof HTMLImageElement) || !img.dataset.kind) return;
-    failed.add(img.getAttribute('src'));
-    const next = artSrc(img.dataset.id, img.dataset.kind);
-    if (next) img.src = next; else img.remove();
+    if (!(img instanceof HTMLImageElement) || !(img.dataset.kind || img.dataset.vkind)) return;
+    const src = img.getAttribute('src');
+    failed.add(src);
+    if (img.dataset.kind) {
+      const next = artSrc(img.dataset.id, img.dataset.kind);
+      if (next) img.src = next; else img.remove();
+      return;
+    }
+    if (/\.webp$/.test(src) && !failed.has(src.replace(/\.webp$/, '.png'))) { img.src = src.replace(/\.webp$/, '.png'); return; }
+    const t = img.closest('.vtile');
+    if (t) t.classList.add('missing');
+    img.remove();
   }, true);
   const faceArt = (c, withName, cls = 'art') => `
     <div class="${cls}">
@@ -1540,6 +1604,7 @@
     dockSize: 0, // 펼친 폴드폰의 아래 로그 경계: 0 기본 · 1 데미지/토큰 사이가 화면 절반 · 2 계산기·로그 절반
     dockLock: false, // true면 아래 로그를 눌러도 경계가 바뀌지 않음 (설정의 '로그 비율 고정')
     flip: false, // 화면 뒤집기(180°): 폰을 반대 방향으로 눕혀 쓸 때
+    artPick: {}, // 캐릭터별 그림 선택 { id: { body: 1|2, face: 1|2 } } (없으면 1번)
   });
   let state = freshState();
   try {
@@ -1623,9 +1688,9 @@
     requestWakeLock();
   }
 
-  const ui = { armed: null, toast: '', logOpen: false, logView: 'current', settingsOpen: false, settingsTab: 'settings', burst: [null, null], round: { end: null, done: false }, fpPop: false };
+  const ui = { armed: null, toast: '', logOpen: false, logView: 'current', settingsOpen: false, settingsTab: 'settings', burst: [null, null], round: { end: null, done: false }, fpPop: false, artPop: null };
   // 화면이 바뀔 때(새 게임·불러오기·전체 삭제) 열린 창·합계 표시·카운트다운을 처음 상태로
-  const resetUi = () => Object.assign(ui, { burst: [null, null], armed: null, undid: false, logOpen: false, settingsOpen: false, logView: 'current', round: { end: null, done: false }, fpPop: false });
+  const resetUi = () => Object.assign(ui, { burst: [null, null], armed: null, undid: false, logOpen: false, settingsOpen: false, logView: 'current', round: { end: null, done: false }, fpPop: false, artPop: null });
 
   // ================= helpers =================
   const $ = (id) => document.getElementById(id);
@@ -1685,11 +1750,11 @@
     state.log.unshift({ t: Date.now(), turn: state.turn, side, ch, text, value, kind, hid: actionHid });
     if (state.log.length > 300) state.log.pop();
   }
-  // 같은 key의 입력이 MERGE_MS 안에 이어지면 되돌리기 지점을 새로 만들지 않음 → true 반환
-  function record(key, label) {
+  // 같은 key의 입력이 ms(기본 MERGE_MS) 안에 이어지면 되돌리기 지점을 새로 만들지 않음 → true 반환
+  function record(key, label, ms = MERGE_MS) {
     const now = Date.now();
     const h = state.history[state.history.length - 1];
-    if (h && h.key === key && now - h.t < MERGE_MS) { h.t = now; actionHid = h.id; return true; }
+    if (h && h.key === key && now - h.t < ms) { h.t = now; actionHid = h.id; return true; }
     snapshot(label);
     Object.assign(state.history[state.history.length - 1], { key, t: now });
     return false;
@@ -1707,6 +1772,11 @@
     addLog(side, text, value, kind);
     Object.assign(state.log[0], { key, presses: press != null ? [press] : null });
     return state.log[0];
+  }
+  // 체력 묶음 줄: 합친 값의 부호로 피해(빨강) / 회복(초록) / ±0
+  function hpRowKind(row) {
+    const net = row.presses.reduce((a, b) => a + b, 0);
+    Object.assign(row, net < 0 ? { text: '피해', kind: 'dmg' } : net > 0 ? { text: '회복', kind: 'heal' } : { text: '체력', kind: 'hp0' });
   }
   const fmtTime = (ms) => { const d = new Date(ms); return `${two(d.getHours())}:${two(d.getMinutes())}:${two(d.getSeconds())}`; };
   const fmtArchiveName = (d) => `${two(d.getMonth() + 1)}${two(d.getDate())}${two(d.getHours())}${two(d.getMinutes())}`;
@@ -2027,7 +2097,7 @@
       const c = charOf(p);
       const pct = p.maxHp ? Math.max(0, Math.min(100, (p.hp / p.maxHp) * 100)) : 0;
       setText(g$('hp' + i), p.hp);
-      setText(g$('hpmax' + i), '/' + p.maxHp);
+      setText(g$('hpmax' + i), i === 0 ? '/' + p.maxHp : p.maxHp + '/'); // 2P는 좌우 대칭이라 '5000/ 3500'
       const hand = g$('hand' + i);
       setText(hand, handLimit(p));
       hand.style.setProperty('--hc', HAND_COLORS[hpBand(p)]);
@@ -2064,8 +2134,8 @@
       const b = ui.burst[i];
       const bEl = g$('burst' + i);
       const live = b && Date.now() - b.t < BURST_MS;
-      setClass(bEl, 'burst num' + (b ? (b.amt < 0 ? ' dmg' : ' heal') : '') + (live ? ' show' : ''));
-      if (live) setText(bEl.firstElementChild, signed(b.amt));
+      setClass(bEl, 'burst num' + (b ? (b.amt < 0 ? ' dmg' : b.amt > 0 ? ' heal' : '') : '') + (live ? ' show' : ''));
+      if (live) setText(bEl.firstElementChild, b.amt ? signed(b.amt) : '±0');
     });
     fitDirty = false;
     renderFpPop();
@@ -2087,6 +2157,25 @@
     setText(toast, ui.toast);
     renderLog();
     renderSettings();
+    renderArtPop();
+  }
+  // 일러스트 고르기 창 (설정 > 일러스트의 반신/두상 버튼): 그 캐릭터의 1번 … artCount번 미리보기 중 하나를 누르면 바로 적용하고 닫힘
+  function renderArtPop() {
+    const el = $('artpop'), p = ui.artPop, c = p && CHAR_BY_ID[p.id];
+    setProp(el, 'hidden', !c);
+    if (!c) { htmlCache.delete(el); return; }
+    const cur = artPick(c.id, p.kind);
+    const tiles = Array.from({ length: artCount(c, p.kind) }, (_, k) => k + 1).map((n) => {
+      const src = `${ASSET_DIR}/${c.id}_${artFile(p.kind, n)}.${ASSET_EXTS[0]}`;
+      return `<button class="vtile ${p.kind}${n === cur ? ' on' : ''}" data-a="artpick" data-id="${c.id}" data-kind="${p.kind}" data-set="${n}" aria-label="${n}번">
+          <span class="art${p.kind === 'face' ? ' dia' : ''}"><span class="vnone">없음</span><img src="${src}" data-vkind="${p.kind}" alt="" draggable="false"></span>
+          <b class="num">${n}번</b></button>`;
+    }).join('');
+    setHtml(el, `
+      <div class="artpanel chamfer">
+        <header><b>${esc(c.name)} · ${KIND_LABEL[p.kind]}</b><button data-a="artpopclose" aria-label="닫기">✕</button></header>
+        <div class="vtiles">${tiles}</div>
+      </div>`);
   }
 
   function updateClock() {
@@ -2158,20 +2247,29 @@
   // chars: 그 로그 게임의 [1P, 2P] 캐릭터 id. 예전 줄(ch 없음)은 이걸로 이름을 찾음
   function logRowParts(r, chars) {
     const c = r.side != null ? CHAR_BY_ID[r.ch || (chars && chars[r.side])] : null;
-    const net = r.presses ? r.presses.reduce((a, b) => a + b, 0) : null;
+    // FP 묶음(fpx)의 누른 값은 [1P/2P, 값] 쌍, 나머지는 숫자
+    const net = r.presses && r.kind !== 'fpx' ? r.presses.reduce((a, b) => a + b, 0) : null;
     let tag;
     let tagCls = 'state';
+    let fpSides = null; // FP 묶음 줄: [[0 또는 1, '결과 FP'], …] → 화면에서 1P 파랑 · 2P 빨강으로
     if (r.kind === 'dmg' || r.kind === 'heal') { tag = `${r.text} ${signed(net)}`; tagCls = r.kind === 'dmg' ? 'minus' : 'plus'; }
-    else if (r.kind === 'fp') { tag = `FP ${signed(net)}`; tagCls = 'lfp'; }
+    else if (r.kind === 'hp0') { tag = '체력 ±0'; }
+    else if (r.kind === 'fp') { tag = `FP ${signed(net)}`; tagCls = 'lfp'; } // 예전 저장(한쪽만 묶던 줄)
+    else if (r.kind === 'fpx') {
+      // 바뀐 쪽의 결과 FP (오른쪽 결과값과 같은 숫자). 누른 값 목록은 따로 표시하지 않음
+      const used = [0, 1].filter((k) => r.presses.some(([s]) => s === k));
+      fpSides = used.map((k) => [k, Array.isArray(r.value) ? r.value[k] : '']);
+      tag = `FP ${fpSides.map(([k, v]) => `${k + 1}P ${v}`).join(' · ')}`; tagCls = 'lfp';
+    }
     else if (r.kind === 'fpr') { tag = r.text; tagCls = 'lfp'; }
     else if (r.kind === 'count') { tag = `${r.text} ${signed(net)}`; tagCls = 'token'; }
     else if (r.kind === 'turn') { tag = r.text; tagCls = 'turn'; }
     else if (r.kind === 'start') { tag = r.text; tagCls = 'start'; }
     else tag = r.text;
     return {
-      time: r.t ? fmtTime(r.t) : '--:--:--', turn: `T${r.turn}`, tag, tagCls,
+      time: r.t ? fmtTime(r.t) : '--:--:--', turn: `T${r.turn}`, tag, tagCls, fpSides,
       who: r.side != null ? `${r.side + 1}P` : '', name: c ? c.name : '',
-      presses: r.presses && r.presses.length > 1 ? r.presses.map(signed).join(' · ') : '',
+      presses: r.presses && r.presses.length > 1 && r.kind !== 'fpx' ? r.presses.map(signed).join(' · ') : '',
       value: Array.isArray(r.value) ? r.value.map(String) : r.value != null ? String(r.value) : null,
     };
   }
@@ -2191,11 +2289,14 @@
     const side = r.side != null ? ` p${r.side + 1}` : '';
     const who = x.who ? `<span class="who">${x.who}${x.name ? `<b>${esc(x.name)}</b>` : ''}</span>` : '';
     const { tag, tagCls } = x;
+    // FP 묶음 줄: 'FP'는 노랑(태그 색), 1P 값은 파랑, 2P 값은 빨강
+    const tagHtml = x.fpSides
+      ? `FP ${x.fpSides.map(([k, v]) => `<span class="f${k + 1}">${k + 1}P ${esc(v)}</span>`).join(' · ')}` : esc(tag);
     const presses = x.presses ? `<span class="presses">${x.presses}</span>` : '';
     return `
       <div class="lrow${side}${r.undone ? ' undone' : ''}">
         <div class="ltime num">${x.time}<small>${x.turn}</small></div>
-        <div class="laction">${who}<span class="tag ${tagCls}">${esc(tag)}</span>${presses}${r.undone ? '<span class="undid">되돌림</span>' : ''}</div>
+        <div class="laction">${who}<span class="tag ${tagCls}">${tagHtml}</span>${presses}${r.undone ? '<span class="undid">되돌림</span>' : ''}</div>
         <div class="lvalue num">${Array.isArray(x.value) ? `<span class="v1">${esc(x.value[0])}</span><i>/</i><span class="v2">${esc(x.value[1])}</span>` : x.value != null ? esc(x.value) : '—'}</div>
       </div>`;
   }
@@ -2357,7 +2458,7 @@
 
   // 사용법: "항목: 설명" 한 줄씩 (앞부분은 굵게 표시). 캐릭터별 특성·토큰 규칙은 넣지 않음
   const HELP = [
-    ['상단 메뉴', ['NEW GAME: 캐릭터 선택으로 (두 번 눌러 확인)', 'LOG: 기록 보기', 'SETTING: 설정 · 사용법 · 버전', '화면 뒤집기 (SETTING): 화면을 180° 돌림 (폰을 반대로 눕혀 쓸 때)',
+    ['상단 메뉴', ['NEW GAME: 캐릭터 선택으로 (두 번 눌러 확인)', 'LOG: 기록 보기', 'SETTING: 설정 · 일러스트 · 사용법 · 버전', '화면 뒤집기 (SETTING): 화면을 180° 돌림 (폰을 반대로 눕혀 쓸 때)',
       'UNDO: 마지막 행동 취소 (되돌린 직후 은은하게 빛나요)']],
     ['캐릭터 선택', ['캐릭터 칸: 처음 누른 쪽이 1P, 두 번째가 2P (같은 캐릭터를 두 번 누르면 미러전)',
       '1P SELECT / 2P SELECT: 지금 고를 차례',
@@ -2370,7 +2471,7 @@
     ['타이머 · 턴', ['가운데 마름모: 탭 = 카운트다운 시작 / 처음으로', '10 / 30: 카운트다운 길이',
       '경기 시간: 탭 = 시작 / 일시정지, 길게 = 처음으로 (설정에서 바꾸기)', 'TURN: 탭 = +1, 길게 = −1']],
     ['로그', ['로그 이름: 게임을 시작한 날짜 · 시간', '로그 이름 길게(1초): 그 게임 이어하기',
-      '새 게임 · 앱 다시 열기: 지금 로그 자동 보관 (최근 10개)', '1초 안에 같은 입력: 한 줄로 묶임 (되돌리기도 한 번에)',
+      '새 게임 · 앱 다시 열기: 지금 로그 자동 보관 (최근 10개)', '이어 누르기: 한 줄로 묶임 (되돌리기도 한 번에). 체력은 1초 안 · 피해와 회복을 합친 값(−500, +100 → 피해 −400), FP는 2초 안 · 1P와 2P 함께 결과값으로',
       '되돌린 기록: 흐리게 "되돌림"으로 표시', 'ALL DELETE 길게(1초): 모든 로그 삭제', 'TXT EXPORT: 모든 로그를 텍스트 파일로 저장', '펼친 폴드폰 · 태블릿: 게임 화면 아래에 이번 게임의 로그가 늘 보여요', '아래 로그 누르기 · SETTING의 아래 로그 비율: 경계 위치 3단계 (기본 → 데미지와 토큰 · 특성 사이가 화면 절반 → 계산기와 로그 절반씩)', 'SETTING의 로그 비율 고정 ON: 아래 로그를 눌러도 비율이 바뀌지 않아요']],
   ];
   const helpItem = (t) => { const k = t.indexOf(': '); return k < 0 ? esc(t) : `<b>${esc(t.slice(0, k))}</b> ${esc(t.slice(k + 2))}`; };
@@ -2398,6 +2499,14 @@
           <div class="presets">${DOCK_SIZES.map((t, k) => `<button class="chamfer${k === (state.dockSize || 0) ? ' on' : ''}" data-a="dock" data-set="${k}">${t}</button>`).join('')}</div>
           <div class="setrow follow"><div><b>로그 비율 고정</b><small>켜면 아래 로그를 눌러도 비율이 바뀌지 않아요. 위 버튼으로는 바꿀 수 있어요.</small></div>
           <button class="switch chamfer${state.dockLock ? ' on' : ''}" data-a="docklock" aria-pressed="${!!state.dockLock}">${state.dockLock ? 'ON' : 'OFF'}</button></div></section>` : ''}
+      </div>` : tab === 'chars' ? `
+      <div class="setbody chars">
+        ${CHARACTERS.map((c) => `<div class="charrow">
+          <div class="facering dia">${faceArt(c, false, 'art dia')}</div>
+          <b>${esc(c.name)}</b>
+          ${ART_PICK_KINDS.map((k) => `<button class="seg" data-a="artpop" data-id="${c.id}" data-kind="${k}" aria-label="${esc(c.name)} ${KIND_LABEL[k]} 일러스트 고르기">
+            <span>${KIND_LABEL[k]}</span><b class="num">${artPick(c.id, k)}번</b></button>`).join('')}
+        </div>`).join('')}
       </div>` : tab === 'about' ? `
       <div class="setbody about">
         <div class="brand"><span class="mk dia"></span><div><b>${esc(APP.name)}</b><small>오프라인 대전용 체력 · 토큰 계산기</small></div></div>
@@ -2414,6 +2523,7 @@
       <header>
         <nav class="tabs">
           <button class="${tab === 'settings' ? 'on' : ''}" data-a="stab" data-v="settings">설정</button>
+          <button class="${tab === 'chars' ? 'on' : ''}" data-a="stab" data-v="chars">일러스트</button>
           <button class="${tab === 'help' ? 'on' : ''}" data-a="stab" data-v="help">사용법</button>
           <button class="${tab === 'about' ? 'on' : ''}" data-a="stab" data-v="about">버전</button>
         </nav>
@@ -2509,37 +2619,39 @@
       const d = Number(v);
       const next = Math.max(0, Math.min(p.maxHp, p.hp + d));
       if (next === p.hp) return;
-      const key = `hp${i}${d < 0 ? '-' : '+'}`;
-      const merged = record(key, `${i + 1}P ${d < 0 ? '피해' : '회복'}`);
+      // 피해·회복은 한 묶음: 1초 안에 이어 누르면 합친 값 한 줄 (−500, +100 → 피해 −400)
+      const key = `hp${i}`;
+      const merged = record(key, `${i + 1}P 체력`);
       const real = next - p.hp;
       const beforeHp = p.hp;
       p.hp = next;
-      logEntry(merged, key, i, d < 0 ? '피해' : '회복', bothHp(), d < 0 ? 'dmg' : 'heal', real);
+      const row = logEntry(merged, key, i, '피해', bothHp(), 'dmg', real);
+      hpRowKind(row);
       autoTrait(i, beforeHp);
       autoToken(i, beforeHp);
       const now = Date.now();
       const b = ui.burst[i];
-      const same = b && (b.amt < 0) === (real < 0) && now - b.t < BURST_MS;
-      ui.burst[i] = same ? { amt: b.amt + real, t: now } : { amt: real, t: now };
+      ui.burst[i] = b && now - b.t < MERGE_MS ? { amt: b.amt + real, t: now } : { amt: real, t: now }; // 로그 묶음과 같은 기준으로 합침
       clearTimeout(burstTimers[i]);
       burstTimers[i] = setTimeout(refresh, BURST_MS + 20);
     },
+    // FP는 1P·2P 한 묶음: 2초 안이면 양쪽 입력이 한 줄 (로그는 결과값 "FP 1P +3 · 2P −2", 되돌리기도 한 번)
     fp(i, v) {
-      const merged = record(`fp${i}`, `${i + 1}P FP`);
+      const merged = record('fp', 'FP', FP_MERGE_MS);
       state.players[i].fp += Number(v);
-      logEntry(merged, `fp${i}`, i, 'FP', bothFp(), 'fp', Number(v));
+      logEntry(merged, 'fp', null, 'FP', bothFp(), 'fpx', [i, Number(v)]);
     },
     // FP 팝업 (가운데 FP 버튼). 고르면 바로 그 값, 팝업은 ✕로 닫을 때까지 열려 있음
     fppop() { if (state.screen === 'game') ui.fpPop = true; },
     fpclose() { ui.fpPop = false; },
     logexport() { exportLogs(); },
-    // + / − 와 같은 묶음: 1초 안에 이어서 누르면 기록·되돌리기가 한 번 (로그 "FP +3", 누른 값 "+1 · +2")
+    // + / − 와 같은 묶음: 2초 안에 이어서 누르면(1P·2P 모두) 기록·되돌리기가 한 번
     fpset(i, v) {
       const p = state.players[i], next = Number(v), d = next - p.fp;
       if (!d) return;
-      const merged = record(`fp${i}`, `${i + 1}P FP`);
+      const merged = record('fp', 'FP', FP_MERGE_MS);
       p.fp = next;
-      logEntry(merged, `fp${i}`, i, 'FP', bothFp(), 'fp', d);
+      logEntry(merged, 'fp', null, 'FP', bothFp(), 'fpx', [i, d]);
     },
     // 현재 FP 숫자 탭 → 0 (되돌리기 한 번, 로그 "FP 초기화 (±n)")
     fpreset(i) {
@@ -2683,7 +2795,7 @@
       state.timer = state.timer.since ? { left, since: null } : { left, since: Date.now() };
     },
     clockReset() { state.timer = { left: state.matchSeconds, since: null }; },
-    settings() { ui.settingsOpen = !ui.settingsOpen; ui.logOpen = false; },
+    settings() { ui.settingsOpen = !ui.settingsOpen; ui.logOpen = false; ui.artPop = null; },
     stab(_, v) { ui.settingsTab = v; },
     // 경기 시간 변경: 이미 흐른 시간은 유지하고 남은 시간만 늘리거나 줄임 (바로 적용)
     mtime(_, v, d) {
@@ -2719,6 +2831,14 @@
       applyView(); fitDirty = true;
     },
     docklock() { state.dockLock = !state.dockLock; },
+    // 일러스트 고르기: 반신/두상 버튼 → 창, 창의 미리보기 → 그 번호로 정하고 닫힘
+    artpop(_, v, d) { ui.artPop = { id: d.id, kind: d.kind }; },
+    artpopclose() { ui.artPop = null; },
+    artpick(_, v, d) {
+      state.artPick = { ...state.artPick, [d.id]: { ...(state.artPick || {})[d.id], [d.kind]: Number(d.set) } };
+      ui.artPop = null;
+      if (state.screen === 'game') buildGame(); // 계산기 이름표 그림을 바꾸려고 골격을 다시 만듦
+    },
     flip() { state.flip = !state.flip; applyView(); },
     lview(_, v) { ui.logView = v; },
     reselect() {
@@ -2864,7 +2984,7 @@
     if (longFired && btn.dataset.long) { longFired = false; return; }
     const fn = actions[btn.dataset.a];
     if (!fn) return;
-    if (btn.dataset.a === 'logbg' && e.target !== btn) return; // 패널 안쪽은 닫지 않음
+    if ((btn.dataset.a === 'logbg' || btn.id === 'artpop') && e.target !== btn) return; // 패널 안쪽(빈 곳)은 닫지 않음
     const i = btn.dataset.p != null ? Number(btn.dataset.p) : null;
     actionHid = null;
     const r = fn(i, btn.dataset.v, btn.dataset);
