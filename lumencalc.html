@@ -134,7 +134,8 @@
   - 선택 화면 왼쪽 위 RECORD(상대가 비어 있으면 고른 1P · 2P나 방금 게임으로 채움),
     LOG 창 ✕ 옆 RECORD(보고 있는 로그의 1P = 나, 2P = 상대로 채움)로 엶. 창의 ✕ 옆 NEW GAME = 두 번 눌러 캐릭터 선택으로.
   - 왼쪽 = 입력(날짜 · 나 ⇄ 상대 캐릭터), 오른쪽 = 목록. ⇄ = 나 · 상대 자리 바꾸기(2P 쪽이 나일 때).
-  - 승 / 패 / 무효를 누르면 바로 한 줄 저장. '나'는 남고 '상대'는 비워짐. 무효는 판수 · 승률에서 뺌(서든데스가 있어 무승부 없음).
+  - 승 / 패 / 무효를 누르면 바로 한 줄 저장. '나'는 남고 '상대'는 비워짐.
+    무효는 순수 기록용: 기록 목록 · 날짜별 경기에만 보이고 전적(○전 ○승 ○패) · 승률 · 막대에는 넣지 않음(서든데스가 있어 무승부 없음).
   - 나 · 상대 칸을 누르면 캐릭터 선택 화면과 같은 마름모 로스터(나 파랑 · 상대 빨강 테두리). 승 · 패 · 무효 아래 = 전체 승률.
   - 목록 탭: 기록(✕ 두 번 = 삭제) · 날짜별(펼치면 그날 1R, 2R …) · 캐릭터별(내 캐릭터 → 상대별, 승률 높은 순).
   - TXT EXPORT, ALL DELETE 1초. 저장은 'lumencalc.records.v1' 따로(바뀔 때만) → 로그 ALL DELETE · 새 게임과 상관없이 남음.
@@ -1159,7 +1160,7 @@
     --cut: calc(1 * var(--u));
   }
 
-  /* 로그 · 전적 창과 같은 높이(위아래 4u), 뒤 화면은 같은 어둡기(.setbg) */
+  /* 로그 · 전적 창과 같은 높이(위아래 4u), 뒤 화면은 같은 어둡기(.dimbg) */
   .settings {
     position: absolute;
     inset: calc(4 * var(--u)) 24cqw;
@@ -1179,7 +1180,7 @@
     font-family: var(--font-display);
     font-size: max(14px, calc(4.2 * var(--u)));
   }
-  .settings header button { font-family: var(--font-body); font-size: max(11px, calc(2.8 * var(--u))); color: var(--muted); padding: .4em .9em; background: var(--surface-2); }
+  .settings header > button { font-family: var(--font-body); font-size: max(11px, calc(2.8 * var(--u))); color: var(--muted); padding: .4em .9em; background: var(--surface-2); }
 
   /* GAME LOG */
   .logov {
@@ -1455,8 +1456,9 @@
   /* =================== 전적 메모 (RECORD) =================== */
   /* 디지메모리체커 RECORD와 같은 흐름(승 / 패 / 무효를 누르면 바로 저장, 기록 · 날짜별 · 캐릭터별, ✕ 두 번 삭제, ALL DELETE).
      덱 이름 대신 캐릭터를 고름 → 글자 입력이 없어 가로 화면 그대로. 왼쪽 = 입력, 오른쪽 = 목록 */
-  .recbg { position: absolute; inset: 0; z-index: 6; background: rgba(8, 11, 20, .9); } /* 뒤 화면 어둡게(LOG 창과 같게), 누르면 닫힘 */
-  .recbg.setbg { z-index: 5; } /* 설정 창 뒤 (설정 창도 z-index 5, 문서 순서상 위) */
+  /* 설정 · 전적 창 뒤 화면 어둡게(LOG 창과 같은 어둡기), 누르면 닫힘. 설정은 z 5(설정 창도 5, 문서 순서상 창이 위), 전적은 z 6 */
+  .dimbg { position: absolute; inset: 0; z-index: 6; background: rgba(8, 11, 20, .9); }
+  #setbg { z-index: 5; }
   /* LOG 창과 같은 틀: 둥근 모서리 · 머리줄(제목 왼쪽, [글자 버튼] ✕ 오른쪽) */
   .settings.record { inset: calc(4 * var(--u)) max(16px, 7cqw); z-index: 7; border-radius: calc(2 * var(--u)); }
   .settings.record header { padding: calc(1.6 * var(--u)) calc(2.4 * var(--u)); font-family: var(--font-body); font-size: inherit; }
@@ -1464,10 +1466,6 @@
   .settings.record header b small { margin-left: .6em; font-family: var(--font-body); font-weight: 600; letter-spacing: 0; font-size: .8em; color: var(--muted); }
   /* 머리줄 오른쪽: NEW GAME(두 번 눌러 캐릭터 선택으로) · ✕ 닫기 */
   .rhtools { display: flex; align-items: center; }
-  /* .settings header button 기본 모양을 지우고 LOG 창 머리줄 버튼과 같게 */
-  .settings.record header .hbtn { padding: .5em 1.2em; background: var(--surface-2); font-family: var(--font-num); font-size: max(11px, calc(2.6 * var(--u))); color: var(--text); }
-  .settings.record header .hbtn.armed { background: var(--dmg); color: #fff; }
-  .settings.record header .lclose { padding: 0; background: none; font-family: inherit; font-size: max(15px, calc(4 * var(--u))); color: var(--muted); }
   .rmain { display: grid; grid-template-columns: minmax(0, 40%) minmax(0, 1fr); min-height: 0; }
   .rform { display: grid; align-content: start; gap: calc(1.8 * var(--u)); padding: calc(2.2 * var(--u)) 2cqw; border-right: 1px solid var(--line); overflow: hidden; }
   .rdate { display: flex; align-items: center; justify-content: space-between; gap: 2cqw; font-size: max(10px, calc(2.6 * var(--u))); color: var(--muted); }
@@ -1492,7 +1490,7 @@
   .rswap { display: grid; place-items: center; align-content: center; gap: calc(.3 * var(--u)); width: calc(10 * var(--u)); min-width: 36px; padding: calc(1.6 * var(--u)) 0; background: var(--surface-2); color: var(--text); font-size: max(14px, calc(4 * var(--u))); line-height: 1; --cut: calc(1 * var(--u)); }
   .rswap small { font-size: max(9px, calc(2.2 * var(--u))); font-weight: 700; color: var(--muted); }
   .rswap:active { background: var(--surface-3); }
-  /* 승 / 패 / 무효: 누르면 바로 저장 (무효는 참고용, 판수 · 승률에서 빠짐) */
+  /* 승 / 패 / 무효: 누르면 바로 저장 (무효는 순수 기록용, 전적 · 승률에서 빠짐) */
   .rresbtns { display: grid; grid-template-columns: 1fr 1fr .62fr; gap: calc(1 * var(--u)); --cut: calc(1 * var(--u)); }
   .rresbtns button { height: max(40px, calc(11 * var(--u))); font-weight: 700; font-size: max(15px, calc(4.2 * var(--u))); letter-spacing: .04em; } /* 제목 글꼴(Black Han Sans)은 작으면 '패'가 뭉개져 보여 본문 굵은 글꼴 */
   .rresbtns button:active { filter: brightness(1.35); }
@@ -1562,10 +1560,10 @@
   <div class="logdock" id="logdock" data-a="dock" hidden></div>
   <div class="toast chamfer" id="toast" hidden></div>
   <div class="logov" id="log" data-a="logbg" hidden></div>
-  <div class="recbg setbg" id="setbg" data-a="settings" hidden></div>
+  <div class="dimbg" id="setbg" data-a="settings" hidden></div>
   <div class="settings chamfer" id="settings" hidden></div>
   <div class="artpop" id="artpop" data-a="artpopclose" hidden></div>
-  <div class="recbg" id="recbg" data-a="record" hidden></div>
+  <div class="dimbg" id="recbg" data-a="record" hidden></div>
   <div class="settings record" id="record" hidden></div>
   <div class="artpop" id="recpick" data-a="recpickclose" hidden></div>
 </div>
@@ -2634,7 +2632,7 @@
       '여는 곳: 캐릭터 선택 화면 왼쪽 위 RECORD, LOG 창 ✕ 옆 RECORD (보고 있는 로그의 1P = 나, 2P = 상대로 채워요)',
       '나 · 상대: 누르면 캐릭터 선택 화면처럼 고르기. ⇄ = 나와 상대 자리 바꾸기 (2P 쪽이 나일 때)',
       '승 / 패 / 무효: 누르면 바로 저장. 나는 그대로, 상대는 비워져요', 'NEW GAME (✕ 옆): 두 번 눌러 캐릭터 선택으로',
-      '무효: 참고용 기록, 판수 · 승률에 넣지 않아요', '기록 · 날짜별 · 캐릭터별: 줄을 누르면 그날의 경기(1R, 2R …) · 상대 캐릭터별 전적이 펼쳐져요',
+      '무효: 순수 기록용. 기록에만 남고 전적 · 승률에는 넣지 않아요', '기록 · 날짜별 · 캐릭터별: 줄을 누르면 그날의 경기(1R, 2R …) · 상대 캐릭터별 전적이 펼쳐져요',
       '✕ 두 번: 그 기록 삭제', 'ALL DELETE 길게(1초): 모든 전적 삭제 (로그 ALL DELETE와는 따로)', 'TXT EXPORT: 전적을 텍스트 파일로 저장']],
   ];
   const helpItem = (t) => { const k = t.indexOf(': '); return k < 0 ? esc(t) : `<b>${esc(t.slice(0, k))}</b> ${esc(t.slice(k + 2))}`; };
@@ -2702,7 +2700,7 @@
   //   저장한 뒤 '나'는 남고 '상대'는 비워짐. 목록 = 기록 · 날짜별 · 캐릭터별, ✕ 두 번 = 삭제, ALL DELETE 1초 = 모두 삭제.
   //   여는 곳: 선택 화면 왼쪽 위 RECORD, LOG 창 ✕ 옆 RECORD(보고 있는 로그의 1P = 나, 2P = 상대로 채움).
   //   창의 ✕ 옆 NEW GAME = 두 번 눌러 캐릭터 선택으로 (계산기 툴바 NEW GAME과 같음).
-  //   무효(N)는 참고용: 판수 · 승률에 넣지 않음 (서든데스가 있어 무승부는 없음).
+  //   무효(N)는 순수 기록용: 기록 목록 · 날짜별 경기에만 보이고, 전적(○전 ○승 ○패) · 승률 · 막대에는 넣지 않음.
   // 게임 로그와 따로 저장(REC_KEY, 바뀔 때만) → 로그 ALL DELETE · 새 게임과 상관없이 남음.
   // 기록 한 줄: { id, date: 'YYYY-MM-DD', me, opp(캐릭터 id), res: 'W' | 'L' | 'N' }
   const REC_KEY = 'lumencalc.records.v1';
@@ -2712,22 +2710,25 @@
     const saved = JSON.parse(localStorage.getItem(REC_KEY) || 'null');
     if (saved && Array.isArray(saved.list)) rec.list = saved.list.filter((r) => r && r.id && r.date);
   } catch (e) {}
-  const saveRec = () => { try { localStorage.setItem(REC_KEY, JSON.stringify(rec)); } catch (e) { flashToast('저장 공간이 부족해요', 2000); } };
+  let recRev = 0; // 전적이 바뀔 때마다 +1 → 목록 · 전체 승률을 다시 그릴지 판단
+  const saveRec = () => { recRev++; try { localStorage.setItem(REC_KEY, JSON.stringify(rec)); } catch (e) { flashToast('저장 공간이 부족해요', 2000); } };
   const fmtDay = (d) => `${d.getFullYear()}-${two(d.getMonth() + 1)}-${two(d.getDate())}`;
   ui.rec = { open: false, view: 'list', form: { me: null, opp: null, date: null }, pick: null, openGrp: new Set(), armDel: null };
   const recName = (id) => (CHAR_BY_ID[id] ? CHAR_BY_ID[id].name : '?');
   const recFace = (id) => `<span class="facering dia">${CHAR_BY_ID[id] ? faceArt(CHAR_BY_ID[id], false, 'art dia') : '<span class="art dia"></span>'}</span>`;
   // 최신이 위: 날짜, 같은 날이면 넣은 순서의 반대
   const sortedRecs = () => rec.list.slice().sort((a, b) => (a.date === b.date ? b.id - a.id : a.date < b.date ? 1 : -1));
-  // 판수 · 승률은 승 · 패만 (무효는 따로 셈)
+  // 전적 · 승률은 승 · 패만 셈 (무효는 순수 기록용)
   function recCount(list) {
-    const c = { W: 0, L: 0, N: 0 };
+    const c = { W: 0, L: 0 };
     list.forEach((r) => { if (r.res in c) c[r.res]++; });
     c.n = c.W + c.L;
     c.rate = c.n ? Math.round((c.W / c.n) * 100) : 0;
     return c;
   }
-  const wlText = (c) => `${c.n}전 ${c.W}승 ${c.L}패${c.N ? ` · 무효 ${c.N}` : ''}`;
+  const wlText = (c) => `${c.n}전 ${c.W}승 ${c.L}패`;
+  // 캐릭터별 묶음: 무효만 있는 캐릭터는 빼고, 판수가 많은 순
+  const charGroups = (list, key) => groupBy(list, key).map(([id, rs]) => [id, rs, recCount(rs)]).filter(([, , c]) => c.n).sort((a, b) => b[2].n - a[2].n);
   const pct = (c) => (c.n ? `${c.rate}%` : '—');
   const resBar = (c) => `<div class="rbar">${['W', 'L'].map((k) => (c[k] ? `<span class="${k}" style="flex:${c[k]}"></span>` : '')).join('')}</div>`;
   const resTag = (r) => `<span class="rres ${r.res}">${REC_RES[r.res] || ''}</span>`;
@@ -2746,10 +2747,9 @@
   }
   // 1P = 나, 2P = 상대
   function recFill(chars) {
-    if (!chars || chars.some((c) => !CHAR_BY_ID[c])) return false;
-    Object.assign(ui.rec.form, { me: chars[0], opp: chars[1] });
-    return true;
+    if (chars && chars.every((c) => CHAR_BY_ID[c])) Object.assign(ui.rec.form, { me: chars[0], opp: chars[1] });
   }
+  const closeRecord = () => Object.assign(ui.rec, { open: false, pick: null, armDel: null });
   function openRecord() {
     Object.assign(ui.rec, { open: true, pick: null, armDel: null });
     ui.rec.form.date = null; // 날짜 칸은 열 때마다 오늘로 (바꾸면 닫을 때까지 그 날짜)
@@ -2761,7 +2761,7 @@
     const el = $('record'), R = ui.rec;
     setProp(el, 'hidden', !R.open);
     setProp($('recbg'), 'hidden', !R.open);
-    if (!R.open) { if (el.firstChild) el.innerHTML = ''; renderRecPick(); return; }
+    if (!R.open) { if (el.firstChild) { el.innerHTML = ''; recListSig = null; } renderRecPick(); return; }
     if (!el.firstChild) {
       el.innerHTML = `
         <header><b>RECORD<small>전적 메모</small></b><div class="rhtools" id="rhtools"></div></header>
@@ -2793,11 +2793,16 @@
     setHtml($('rvs'), `${side('me', '나')}<button class="rswap chamfer" data-a="recswap" aria-label="나와 상대 자리 바꾸기">⇄<small>바꾸기</small></button>${side('opp', '상대')}`);
     setHtml($('rtabs'), [['list', '기록'], ['date', '날짜별'], ['char', '캐릭터별']]
       .map(([v, t]) => `<button class="${R.view === v ? 'on' : ''}" data-a="recview" data-v="${v}">${t}</button>`).join(''));
-    const c = recCount(rec.list);
-    setHtml($('rtotal'), `<span class="tl">전체 승률</span><span class="tr num">${c.n ? `${c.rate}<small>%</small>` : '—'}</span><span class="tw">${wlText(c)}</span>${resBar(c)}`);
-    setHtml($('rlist'), recListHtml());
+    const sig = `${recRev}|${R.view}|${R.armDel}|${[...R.openGrp]}`;
+    if (sig !== recListSig) {
+      recListSig = sig;
+      const c = recCount(rec.list);
+      setHtml($('rtotal'), `<span class="tl">전체 승률</span><span class="tr num">${c.n ? `${c.rate}<small>%</small>` : '—'}</span><span class="tw">${wlText(c)}</span>${resBar(c)}`);
+      setHtml($('rlist'), recListHtml());
+    }
     renderRecPick();
   }
+  let recListSig = null;
   // 묶음 한 줄(이름 · 전적 · 승률 · 비율 막대) + 누르면 펼쳐지는 세부
   function sumGroup(key, nameHtml, rs, subHtml) {
     const c = recCount(rs), open = ui.rec.openGrp.has(key);
@@ -2818,9 +2823,11 @@
         rs.slice().reverse().map((r, k) => `<div class="rsubrow round"><span class="rnd">${k + 1}R</span>${vsHtml(r.me, r.opp)}${resTag(r)}</div>`).join(''))).join('');
     }
     // 캐릭터별: 많이 쓴 내 캐릭터부터, 펼치면 상대 캐릭터별 (승률 높은 순)
-    return groupBy(list, (r) => r.me).sort((a, b) => b[1].length - a[1].length).map(([me, rs]) => sumGroup(`c:${me}`, `${recFace(me)}${esc(recName(me))}`, rs,
-      groupBy(rs, (r) => r.opp).map(([opp, os]) => [opp, recCount(os)]).sort((a, b) => (b[1].n > 0) - (a[1].n > 0) || b[1].rate - a[1].rate || b[1].n - a[1].n)
-        .map(([opp, c]) => `<div class="rsubrow"><span class="rvsname"><i>VS</i>${recFace(opp)}<b>${esc(recName(opp))}</b></span><span class="swl">${wlText(c)}</span><span class="srate">${pct(c)}</span>${resBar(c)}</div>`).join(''))).join('');
+    const groups = charGroups(list, (r) => r.me);
+    if (!groups.length) return '<div class="rempty">아직 승 · 패 전적이 없어요.</div>';
+    return groups.map(([me, rs]) => sumGroup(`c:${me}`, `${recFace(me)}${esc(recName(me))}`, rs,
+      charGroups(rs, (r) => r.opp).sort((a, b) => b[2].rate - a[2].rate || b[2].n - a[2].n)
+        .map(([opp, , c]) => `<div class="rsubrow"><span class="rvsname"><i>VS</i>${recFace(opp)}<b>${esc(recName(opp))}</b></span><span class="swl">${wlText(c)}</span><span class="srate">${pct(c)}</span>${resBar(c)}</div>`).join(''))).join('');
   }
   // 캐릭터 고르기 창 (나 / 상대 칸을 누르면): 캐릭터 선택 화면과 같은 마름모 로스터. 나 = 파랑 · 상대 = 빨강 테두리.
   // 고르면 바로 넣고 닫힘
@@ -2838,28 +2845,31 @@
   // 전적 TXT: 전체 · 내 캐릭터별 · 날짜별 요약 + 한 줄씩 (최신이 위)
   function recordsToText() {
     const now = new Date(), list = sortedRecs();
-    const out = [`${APP.name} ${APP.version} · 전적 내보내기 ${fmtDay(now)} ${fmtTime(now)}`, `전체 ${wlText(recCount(list))} · 승률 ${pct(recCount(list))}`, '', '[내 캐릭터별]'];
-    groupBy(list, (r) => r.me).sort((a, b) => b[1].length - a[1].length).forEach(([me, rs]) => out.push(`  ${recName(me)}: ${wlText(recCount(rs))} · ${pct(recCount(rs))}`));
+    const all = recCount(list);
+    const out = [`${APP.name} ${APP.version} · 전적 내보내기 ${fmtDay(now)} ${fmtTime(now)}`, `전체 ${wlText(all)} · 승률 ${pct(all)}`, '', '[내 캐릭터별]'];
+    charGroups(list, (r) => r.me).forEach(([me, , c]) => out.push(`  ${recName(me)}: ${wlText(c)} · ${pct(c)}`));
     out.push('', '[날짜별]');
-    groupBy(list, (r) => r.date).forEach(([date, rs]) => out.push(`  ${date}: ${wlText(recCount(rs))} · ${pct(recCount(rs))}`));
+    groupBy(list, (r) => r.date).forEach(([date, rs]) => { const c = recCount(rs); out.push(`  ${date}: ${wlText(c)} · ${pct(c)}`); });
     out.push('', '='.repeat(40));
     list.forEach((r) => out.push(`${r.date}  ${REC_RES[r.res]}  ${recName(r.me)}  VS  ${recName(r.opp)}`));
     return out.join('\n');
   }
+  // ALL DELETE(1초 누르기, 길게 누르기 처리기에서 부름)
   function deleteAllRecords() {
-    if (!rec.list.length) { flashToast('지울 전적이 없어요'); refresh(); return; }
-    rec.list = [];
-    Object.assign(ui.rec, { armDel: null, openGrp: new Set() });
-    saveRec();
-    flashToast('모든 전적을 지웠어요', 1600);
-    buzz(15);
+    if (rec.list.length) {
+      rec.list = [];
+      Object.assign(ui.rec, { armDel: null, openGrp: new Set() });
+      saveRec();
+      flashToast('모든 전적을 지웠어요', 1600);
+      buzz(15);
+    } else flashToast('지울 전적이 없어요');
     refresh();
   }
   let recArmTimer = null;
   const recActions = {
     // 선택 화면의 RECORD · 창의 ✕(열려 있으면 닫기). 상대가 비어 있으면 고른 1P · 2P(또는 방금 게임)로 나 · 상대를 채움
     record() {
-      if (ui.rec.open) { Object.assign(ui.rec, { open: false, pick: null, armDel: null }); return; }
+      if (ui.rec.open) { closeRecord(); return; }
       if (!ui.rec.form.opp) recFill(recentGame());
       openRecord();
     },
@@ -2872,14 +2882,7 @@
     },
     // NEW GAME (전적 창 ✕ 옆): 두 번 눌러 캐릭터 선택으로 — 계산기 툴바 NEW GAME과 같은 동작
     recnew() {
-      const done = twoStep('recnew', '한 번 더 누르면 캐릭터 선택으로', () => {
-        Object.assign(ui.rec, { open: false, pick: null, armDel: null });
-        state.screen = 'select';
-        clearPicks();
-        ui.round = { end: null, done: false };
-        show();
-      });
-      if (done) return 'shown';
+      if (twoStep('recnew', '한 번 더 누르면 캐릭터 선택으로', () => { closeRecord(); goSelect(); })) return 'shown';
     },
     recview(_, v) { Object.assign(ui.rec, { view: v, openGrp: new Set(), armDel: null }); const l = $('rlist'); if (l) l.scrollTop = 0; },
     recgrp(_, v) { const s = ui.rec.openGrp; if (!s.delete(v)) s.add(v); },
@@ -2965,6 +2968,14 @@
     addLog(null, '턴 1 시작', null, 'turn');
     show();
     requestWakeLock();
+  }
+
+  // NEW GAME (툴바 · 전적 창): 캐릭터 선택으로, 1P·2P 모두 비움
+  function goSelect() {
+    state.screen = 'select';
+    clearPicks();
+    ui.round = { end: null, done: false };
+    show();
   }
 
   // ================= 두 번 눌러 확인 =================
@@ -3230,13 +3241,7 @@
     flip() { state.flip = !state.flip; applyView(); },
     lview(_, v) { ui.logView = v; },
     reselect() {
-      const done = twoStep('reselect', '한 번 더 누르면 캐릭터 선택으로', () => {
-        state.screen = 'select';
-        clearPicks(); // 캐릭터 선택으로 돌아가면 1P·2P 모두 비움
-        ui.round = { end: null, done: false };
-        show();
-      });
-      if (done) return 'shown';
+      if (twoStep('reselect', '한 번 더 누르면 캐릭터 선택으로', goSelect)) return 'shown';
     },
   };
 
