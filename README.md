@@ -14,7 +14,7 @@
 | 어디서 | 상태 | 링크 |
 |---|---|---|
 | 원스토어 | 출시 (판매 중) | https://m.onestore.co.kr/v2/ko-kr/app/0001010466 |
-| 웹 (GitHub Pages) | 바로 사용 · 홈 화면에 설치(PWA) | https://chwidragon.github.io/LumenCalculator/ |
+| 웹 (GitHub Pages) | 바로 사용 · 홈 화면에 설치(PWA) | https://chwidragon.github.io/LumenCounter/lumencalc.html |
 | GitHub APK | [`lumencalc.apk`](lumencalc.apk) | 캐릭터 그림을 뺀 버전 |
 
 - 스토어 버전에는 캐릭터 일러스트가 들어 있습니다. 웹과 GitHub APK는 일러스트 대신 캐릭터 색으로 만든 대체 그림이 나옵니다.
