@@ -15,8 +15,8 @@ android {
         applicationId "com.chwidragon.lumencalc"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 43
-        versionName "1.0.3" // lumencalc.html의 APP.version과 맞춤
+        versionCode 44
+        versionName "1.0.4" // lumencalc.html의 APP.version과 맞춤
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -40,7 +40,8 @@ android {
     }
     buildTypes {
         release {
-            // R8: 쓰지 않는 코드·리소스를 빼고 최적화(DEX 축소). 이름 바꾸기(난독화)는 proguard-rules.pro에서 끔
+            // R8 전체 모드: 쓰지 않는 코드·리소스를 빼고 최적화 · 난독화 · 클래스 리패키징 (규칙은 proguard-rules.pro,
+            // 리소스 축소 최적화는 gradle.properties의 android.r8.optimizedResourceShrinking)
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
