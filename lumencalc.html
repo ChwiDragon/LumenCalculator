@@ -60,8 +60,11 @@
        누르면 그쪽만 해제. 해제 터치 영역 = 옆 칸 아래쪽 62% 중 로스터 바깥 테두리(볼록 껍질) 밖.
      둘 다 고르면 'GAME START' + 옆에 초기화(↻) 버튼(1P·2P 모두 해제).
      앱 실행 · NEW GAME · ALL DELETE로 선택 화면에 오면 항상 빈 상태에서 시작.
-     오른쪽 위: LOG / SETTING, 왼쪽 위: NAME / RECORD 글자 버튼(계산기 툴바 버튼과 같은 크기).
-       NAME = 캐릭터 칸 아래쪽에 이름 표시 켜기/끄기(state.names, 저장됨). 캐릭터가 늘어날 것을 대비해 빈 칸을 항상 3개 이상 남김.
+     오른쪽 위: LOG / SETTING, 왼쪽 위: LIMITATION / RECORD 글자 버튼(계산기 툴바 버튼과 같은 크기).
+       LIMITATION = 시즌 카드 제한 창(종제한 · 금지 · 에라타, 스크립트의 LIMIT_SEASON · LIMITS).
+       제목 SELECT YOUR CHARACTER를 누르면 캐릭터 칸 아래쪽에 이름 표시 켜기/끄기(state.names, 저장됨).
+       이름 표시는 .app[data-names]로 보이고 숨기기만 함 → 선택 화면을 다시 그리지 않음(효과 · 그림이 다시 시작되지 않음).
+       캐릭터가 늘어날 것을 대비해 빈 칸을 항상 3개 이상 남김.
   2) 계산기: 왼쪽 1P / 오른쪽 2P 좌우 대칭, 가운데 열은 양쪽과 같은 줄(CSS subgrid)을 씀:
      툴바(NEW GAME / LOG / SETTING) = 이름판 줄, UNDO = 체력 숫자 줄, FP 버튼 · 카운트다운 마름모 · 10/30 버튼 = 데미지·FP 줄,
      경기 시간 + TURN(가운데 열 폭 전체) = 특성·토큰 줄 아래.
@@ -394,7 +397,7 @@
   /* 반신 그림은 선택 칸(마름모) 뒤에 그림 → 그림이 선택 칸을 가리지 않음. 이름판만 선택 칸보다 앞.
      선택 해제는 로스터 바깥(좌우 아래 빈 모서리)을 눌렀을 때만 — 클릭 처리에서 inRoster()로 거름 */
   .fighter .body { pointer-events: none; }
-  .fighter:not(.empty) .plate { z-index: 2; pointer-events: none; }
+  .fighter:not(.empty) .plate { z-index: 3; pointer-events: none; }
   /* 선택 해제 터치 영역: 옆 칸의 아래쪽 62%만 (위쪽 모서리 제외). 그중 로스터 모양 안쪽은 inRoster()로 제외 */
   button.fighter { pointer-events: none; }
   .fighter .unzone { position: absolute; left: 0; right: 0; bottom: 0; height: 62%; pointer-events: auto; }
@@ -422,8 +425,9 @@
   .fighter:not(.empty) .name { color: var(--cc); text-shadow: 0 0 calc(2 * var(--u)) rgba(6, 8, 16, .9); } /* 캐릭터 상징색 */
   .fighter.empty .name { color: var(--muted); font-size: max(14px, calc(4.4 * var(--u))); }
   .fighter .ptag { font-size: max(15px, calc(4.6 * var(--u))); }
-  /* 지금 고르는 쪽 화면 바깥 모서리 빛 (1P 왼쪽 파랑, 2P 오른쪽 빨강). 터치는 통과 */
-  .selglow { position: absolute; inset: 0; z-index: 3; pointer-events: none; opacity: 0; transition: opacity .3s; }
+  /* 지금 고르는 쪽 화면 바깥 모서리 빛 (1P 왼쪽 파랑, 2P 오른쪽 빨강). 터치는 통과.
+     쌓는 순서: 반신 그림 < 빛(1) < 칸 · 버튼(.pickcol 2) < 이름판(3) → 버튼 · 칸은 빛에 덮이지 않음 */
+  .selglow { position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: 0; transition: opacity .3s; }
   .selglow.p1, .selglow.p2 { opacity: 1; }
   .selglow.p1 { background: linear-gradient(90deg, rgba(42, 107, 255, .5), rgba(42, 107, 255, .12) 7%, transparent 18%); }
   .selglow.p2 { background: linear-gradient(270deg, rgba(255, 36, 64, .5), rgba(255, 36, 64, .12) 7%, transparent 18%); }
@@ -433,7 +437,7 @@
   .pickcol {
     position: absolute;
     inset: 0;
-    z-index: 1;
+    z-index: 2;
     display: grid;
     grid-template-rows: auto minmax(0, 1fr) auto;
     padding: calc(3.4 * var(--u)) 0 calc(3 * var(--u));
@@ -443,7 +447,7 @@
   /* 마름모 모양만 눌리고, 빈 곳은 뒤의 전신(다시 고르기)으로 통과 */
   .pickcol button { pointer-events: auto; }
   .pickhead { text-align: center; }
-  /* 오른쪽 위 [LOG | SETTING] · 왼쪽 위 [NAME | RECORD]: 좌우 대칭, 모두 계산기 툴바 버튼과 같은 크기·글꼴 */
+  /* 오른쪽 위 [LOG | SETTING] · 왼쪽 위 [LIMITATION | RECORD]: 좌우 대칭, 모두 계산기 툴바 버튼과 같은 크기·글꼴 */
   .selbar {
     position: absolute;
     top: calc(2.6 * var(--u));
@@ -473,9 +477,12 @@
     white-space: nowrap;
   }
   .seltools button:active { background: var(--surface-2); color: var(--text); }
-  /* NAME: 캐릭터 칸에 이름 표시 켜기 / 끄기 (state.names, 저장됨). 켜짐 = 계산기 툴바의 열린 버튼(.on)과 같은 모양 */
-  .seltools button.on { background: var(--surface-3); color: var(--lumen); }
-  /* 캐릭터 칸 아래쪽에 어두운 띠 + 이름(캐릭터 상징색). 마름모 모양으로 잘림, 터치는 칸으로 통과 */
+  /* 제목(SELECT YOUR CHARACTER)을 누르면 캐릭터 칸에 이름 표시 켜기 / 끄기 (state.names, 저장됨) — 제목 모양은 그대로 */
+  .titlebtn { font: inherit; letter-spacing: inherit; color: inherit; line-height: inherit; }
+  /* 캐릭터 칸 아래쪽에 어두운 띠 + 이름(캐릭터 상징색). 마름모 모양으로 잘림, 터치는 칸으로 통과.
+     늘 그려 두고 .app[data-names="1"]일 때만 보임 (선택 화면 · 전적 캐릭터 고르기 창 공용) */
+  .slot .sname { display: none; }
+  .app[data-names="1"] .slot .sname { display: block; }
   .slot .sname {
     position: absolute; left: 0; right: 0; top: 62%; z-index: 1;
     padding: calc(3.4 * var(--u)) 0 calc(4 * var(--u));
@@ -629,10 +636,12 @@
   .plate .line #badges0, .plate .line #badges1 { align-self: center; }
   .side .plate .ptag { font-size: max(16px, calc(5.2 * var(--u))); flex: none; }
   .side.p2 .plate .line { flex-direction: row-reverse; }
+  /* 이름(캐릭터 상징색): 글자 높이를 1P / 2P와 같게. 아래선이 같고, 크기는 글꼴 차이만큼 줄임
+     (Chakra Petch 대문자 높이 ≈ 0.71em, Black Han Sans 글자 높이 ≈ 0.76em → 5.2u × 0.71 ÷ 0.76 ≈ 4.85u) */
   .plate .cname {
     min-width: 0;
     font-family: var(--font-display);
-    font-size: max(16px, calc(5.4 * var(--u)));
+    font-size: max(15px, calc(4.85 * var(--u)));
     line-height: 1.1;
     white-space: nowrap;
     overflow: hidden;
@@ -1301,7 +1310,7 @@
   .lempty { text-align: center; color: var(--muted); padding: calc(6 * var(--u)) 0; font-size: max(14px, calc(3.6 * var(--u))); }
   .lrow {
     display: grid;
-    grid-template-columns: calc(16 * var(--u)) minmax(0, 1fr) auto;
+    grid-template-columns: minmax(calc(16 * var(--u)), max-content) minmax(0, 1fr) auto; /* 시각 칸: 작은 화면에서 글자 최소 크기만큼은 넓힘 */
     align-items: center;
     gap: calc(2 * var(--u));
     padding: calc(1.4 * var(--u)) calc(2 * var(--u));
@@ -1461,16 +1470,31 @@
      덱 이름 대신 캐릭터를 고름 → 글자 입력이 없어 가로 화면 그대로. 왼쪽 = 입력, 오른쪽 = 목록 */
   /* 설정 · 전적 창 뒤 화면 어둡게(LOG 창과 같은 어둡기), 누르면 닫힘. 설정은 z 5(설정 창도 5, 문서 순서상 창이 위), 전적은 z 6 */
   .dimbg { position: absolute; inset: 0; z-index: 6; background: rgba(8, 11, 20, .9); }
+  /* LIMITATION 창 (시즌 카드 제한): 캐릭터 카드 두 줄. 택1(종제한) · 금지 · 에라타 표시 */
+  .limitbody { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: calc(1.6 * var(--u)); padding: calc(2 * var(--u)) calc(2.4 * var(--u)); }
+  .llegend { grid-column: 1 / -1; margin: 0; display: flex; flex-wrap: wrap; gap: calc(.8 * var(--u)) calc(3 * var(--u)); color: var(--muted); font-size: max(12px, calc(3.2 * var(--u))); }
+  .lcard { display: grid; align-content: start; gap: calc(1 * var(--u)); padding: calc(1.4 * var(--u)) calc(1.8 * var(--u)) calc(1.8 * var(--u)); border-radius: calc(1.2 * var(--u)); background: var(--surface-2); border-left: 3px solid var(--cc); }
+  .lcard h4 { margin: 0 0 calc(.4 * var(--u)); display: flex; align-items: center; gap: .6em; color: var(--cc); font-size: max(16px, calc(4.3 * var(--u))); }
+  .lcard h4 .facering { flex: none; width: calc(8.5 * var(--u)); height: calc(8.5 * var(--u)); display: grid; }
+  .lgroup { display: flex; flex-wrap: wrap; align-items: center; gap: calc(.8 * var(--u)); font-size: max(15px, calc(3.8 * var(--u))); line-height: 1.5; }
+  .llegend .lgroup { font-size: inherit; }
+  .lk { flex: none; padding: .05em .55em; border-radius: calc(.8 * var(--u)); font-size: .8em; font-weight: 700; background: color-mix(in srgb, var(--lumen) 22%, transparent); color: #FFD98A; }
+  .ban .lk { background: color-mix(in srgb, var(--dmg) 26%, transparent); color: #FFB3AD; }
+  .err .lk { background: color-mix(in srgb, var(--p1) 24%, transparent); color: #A9D2FF; }
+  .lchip { padding: .1em .6em; border-radius: calc(.8 * var(--u)); background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); white-space: nowrap; }
+  .ban .lchip { color: #FFA69F; text-decoration: line-through; }
+  .lor { font-style: normal; font-family: var(--font-num); font-weight: 700; font-size: .7em; color: var(--muted); }
   #setbg { z-index: 5; }
   /* LOG 창과 같은 틀: 둥근 모서리 · 머리줄(제목 왼쪽, [글자 버튼] ✕ 오른쪽) */
-  .settings.record { inset: calc(4 * var(--u)) max(16px, 7cqw); z-index: 7; border-radius: calc(2 * var(--u)); }
-  .settings.record header { padding: calc(1.6 * var(--u)) calc(2.4 * var(--u)); font-family: var(--font-body); font-size: inherit; }
-  .settings.record header b { font-family: var(--font-num); font-weight: 700; letter-spacing: .08em; font-size: max(13px, calc(3.6 * var(--u))); }
-  .settings.record header b small { margin-left: .6em; font-family: var(--font-body); font-weight: 600; letter-spacing: 0; font-size: .8em; color: var(--muted); }
+  /* 넓은 창(.wide: 전적 · LIMITATION): 설정 창 틀에 LOG 창과 같은 둥근 모서리 · 머리줄 */
+  .settings.wide { inset: calc(4 * var(--u)) max(16px, 7cqw); z-index: 7; border-radius: calc(2 * var(--u)); }
+  .settings.wide header { padding: calc(1.6 * var(--u)) calc(2.4 * var(--u)); font-family: var(--font-body); font-size: inherit; }
+  .settings.wide header b { font-family: var(--font-num); font-weight: 700; letter-spacing: .08em; font-size: max(13px, calc(3.6 * var(--u))); }
+  .settings.wide header b small { margin-left: .6em; font-family: var(--font-body); font-weight: 600; letter-spacing: 0; font-size: .8em; color: var(--muted); }
   /* 머리줄 오른쪽: NEW GAME(두 번 눌러 캐릭터 선택으로) · ✕ 닫기 */
   .rhtools { display: flex; align-items: center; }
   .rmain { display: grid; grid-template-columns: minmax(0, 40%) minmax(0, 1fr); min-height: 0; }
-  .rform { display: grid; align-content: start; gap: calc(1.8 * var(--u)); padding: calc(2.2 * var(--u)) 2cqw; border-right: 1px solid var(--line); overflow: hidden; }
+  .rform { display: grid; align-content: start; gap: calc(1.6 * var(--u)); padding: calc(2 * var(--u)) 2cqw; border-right: 1px solid var(--line); overflow: hidden; }
   .rdate { display: flex; align-items: center; justify-content: space-between; gap: 2cqw; font-size: max(10px, calc(2.6 * var(--u))); color: var(--muted); }
   .rdate input {
     min-width: 0; height: max(28px, calc(7 * var(--u))); padding: 0 calc(1.4 * var(--u));
@@ -1483,7 +1507,7 @@
   .rvs { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: calc(1.2 * var(--u)); }
   .rchar { display: grid; justify-items: center; gap: calc(.6 * var(--u)); padding: calc(1.2 * var(--u)) calc(.6 * var(--u)); background: var(--surface-2); --cut: calc(1.2 * var(--u)); }
   .rchar:active { background: var(--surface-3); }
-  .rchar .facering { width: calc(13 * var(--u)); height: calc(13 * var(--u)); display: grid; background: var(--surface-3); }
+  .rchar .facering { width: calc(12 * var(--u)); height: calc(12 * var(--u)); display: grid; background: var(--surface-3); }
   .rchar small { font-family: var(--font-num); font-weight: 700; font-size: max(9px, calc(2.2 * var(--u))); letter-spacing: .1em; }
   .rchar.me small { color: var(--p1); }
   .rchar.opp small { color: var(--p2); }
@@ -1496,11 +1520,11 @@
   /* 승 / 패 / 무효: 누르면 바로 저장 (무효는 순수 기록용, 전적 · 승률에서 빠짐) */
   .rresbtns { display: grid; grid-template-columns: 1fr 1fr; gap: calc(1 * var(--u)); --cut: calc(1 * var(--u)); }
   .rresbtns.sub { grid-template-columns: 1fr 1fr 1fr; margin-top: calc(-.8 * var(--u)); } /* 승 / 패 아래: 부전승 · 무효 · 부전패 */
-  .rresbtns button { height: max(40px, calc(11 * var(--u))); font-weight: 700; font-size: max(15px, calc(4.2 * var(--u))); letter-spacing: .04em; } /* 제목 글꼴(Black Han Sans)은 작으면 '패'가 뭉개져 보여 본문 굵은 글꼴 */
+  .rresbtns button { height: max(34px, calc(11 * var(--u))); font-weight: 700; font-size: max(15px, calc(4.2 * var(--u))); letter-spacing: .04em; } /* 제목 글꼴(Black Han Sans)은 작으면 '패'가 뭉개져 보여 본문 굵은 글꼴 */
   .rresbtns button:active { filter: brightness(1.35); }
   .rresbtns .W { background: color-mix(in srgb, var(--p1) 24%, var(--surface-2)); color: #A9D2FF; }
   .rresbtns .L { background: color-mix(in srgb, var(--dmg) 26%, var(--surface-2)); color: #FFB3AD; }
-  .rresbtns.sub button { height: max(32px, calc(8 * var(--u))); font-size: max(12px, calc(3 * var(--u))); }
+  .rresbtns.sub button { height: max(26px, calc(8 * var(--u))); font-size: max(12px, calc(3 * var(--u))); }
   .rresbtns .N { background: var(--surface-2); color: var(--muted); }
   .rresbtns .B { background: color-mix(in srgb, var(--p1) 12%, var(--surface-2)); color: #A9D2FF; }
   .rresbtns .F { background: color-mix(in srgb, var(--dmg) 13%, var(--surface-2)); color: #FFB3AD; }
@@ -1523,7 +1547,7 @@
   .rbar .W { background: var(--p1); }
   .rbar .L { background: var(--dmg); }
   /* 기록 한 줄: 날짜 | 나 vs 상대 | 결과 | ✕ */
-  .rrow { flex: none; display: grid; grid-template-columns: calc(13 * var(--u)) minmax(0, 1fr) auto auto; align-items: center; gap: calc(1.4 * var(--u)); padding: calc(.8 * var(--u)) calc(.8 * var(--u)) calc(.8 * var(--u)) calc(1.8 * var(--u)); border-radius: calc(1.2 * var(--u)); background: var(--surface-2); font-size: max(14px, calc(3.7 * var(--u))); }
+  .rrow { flex: none; display: grid; grid-template-columns: minmax(calc(13 * var(--u)), max-content) minmax(0, 1fr) auto auto; align-items: center; gap: calc(1.4 * var(--u)); padding: calc(.8 * var(--u)) calc(.8 * var(--u)) calc(.8 * var(--u)) calc(1.8 * var(--u)); border-radius: calc(1.2 * var(--u)); background: var(--surface-2); font-size: max(14px, calc(3.7 * var(--u))); }
   .rrow .rd { color: var(--muted); font-size: .8em; }
   .rvsname { display: flex; align-items: center; gap: .45em; min-width: 0; white-space: nowrap; overflow: hidden; }
   .rvsname .facering { flex: none; width: calc(7 * var(--u)); height: calc(7 * var(--u)); display: grid; }
@@ -1578,8 +1602,10 @@
   <div class="dimbg" id="setbg" data-a="settings" hidden></div>
   <div class="settings chamfer" id="settings" hidden></div>
   <div class="artpop" id="artpop" data-a="artpopclose" hidden></div>
+  <div class="dimbg" id="limitbg" data-a="limit" hidden></div>
+  <div class="settings wide" id="limit" hidden></div>
   <div class="dimbg" id="recbg" data-a="record" hidden></div>
-  <div class="settings record" id="record" hidden></div>
+  <div class="settings wide" id="record" hidden></div>
   <div class="artpop" id="recpick" data-a="recpickclose" hidden></div>
 </div>
 
@@ -1652,6 +1678,22 @@
   }));
 
   const CHAR_BY_ID = Object.fromEntries(CHARACTERS.map((c) => [c.id, c]));
+
+  // 시즌 카드 제한 (캐릭터 선택 화면 왼쪽 위 LIMITATION 창). 시즌이 바뀌면 LIMIT_SEASON과 이 목록만 고침.
+  //   ['카드', '카드', …] = 종제한: 이 묶음 중 1장만 덱에 넣을 수 있음
+  //   { ban: '카드' } = 금지,  { errata: '카드' } = 에라타(카드 내용이 바뀜)
+  //   창에는 CHARACTERS 순서로, 목록에 있는 캐릭터만 나옴
+  const LIMIT_SEASON = 'CB04';
+  const LIMITS = {
+    nia: [['래피! 스크류!', '라이! 래피! 봄버!']],
+    root: [['차징 배리어', '파워풀 스윕']],
+    delphi: [['델드밀', '스트레이트 킥', '리펜지 어퍼'], ['템페스트 플립', '파키 디펜스', '록 암바']],
+    kiss: [['시프 기믹', '래빗 일루젼', '광증의 매드니스', '세츠메이 킥']],
+    wolf: [{ ban: '라이트닝 라스' }, ['제트 라이징', '체이싱 팽', '스플릿 커터'], ['로우킥', '컷다운'], ['처형의 밤', '레이 바즈라', '프라이 엔드']],
+    viola: [['템프 드 두', '나이트메어 주테'], ['프렐류드', '페인 프리즌']],
+    chimera: [['제트 라이징', '템페스트 플립', '라이! 래피! 로켓!']],
+    minyeong: [{ errata: '네메시스' }, { errata: '달빛암바' }, ['달빛펀치', '달빛암바', '콩콩러시']],
+  };
   // 저장된 캐릭터 값 정리: 예전 저장(목록 번호)은 id로 바꾸고, 목록에 없는 id는 비움
   // → 나중에 캐릭터를 목록 중간에 추가해도 저장된 게임·로그가 다른 캐릭터로 바뀌지 않음
   const normChar = (x) => (typeof x === 'number' ? (CHARACTERS[x] ? CHARACTERS[x].id : null) : (CHAR_BY_ID[x] ? x : null));
@@ -1670,7 +1712,7 @@
   // 버전·빌드 날짜는 APK를 빌드할 때만 올림 (빌드마다 끝자리 +1, 캐릭터 정식 추가 때 가운데 자리 +1)
   // 버전 탭의 '버그 제보 · 건의 사항' 링크 (APK에서는 Capacitor가 바깥 주소를 시스템 브라우저로 엶)
   const FEEDBACK_URL = 'https://forms.gle/ThJPMxAxXwBPvzcq5';
-  const APP = { name: '루멘 카운터', version: '1.0.4', build: '2026-10-20' };
+  const APP = { name: '루멘 카운터', version: '1.0.5', build: '2026-10-24' };
 
   // ================= 아이콘 =================
   const I = {
@@ -1751,7 +1793,7 @@
     dockLock: false, // true면 아래 로그를 눌러도 경계가 바뀌지 않음 (설정의 '로그 비율 고정')
     flip: false, // 화면 뒤집기(180°): 폰을 반대 방향으로 눕혀 쓸 때
     artPick: {}, // 캐릭터별 그림 선택 { id: { body: 1|2, face: 1|2 } } (없으면 1번)
-    names: false, // 캐릭터 선택 화면의 칸에 이름 표시 (왼쪽 위 NAME)
+    names: false, // 캐릭터 선택 화면의 칸에 이름 표시 (제목 SELECT YOUR CHARACTER를 눌러 켜고 끔)
   });
   let state = freshState();
   try {
@@ -1835,10 +1877,10 @@
     requestWakeLock();
   }
 
-  const ui = { armed: null, toast: '', logOpen: false, logView: 'current', settingsOpen: false, settingsTab: 'settings', burst: [null, null], round: { end: null, done: false }, fpPop: false, artPop: null };
+  const ui = { armed: null, toast: '', limitOpen: false, logOpen: false, logView: 'current', settingsOpen: false, settingsTab: 'settings', burst: [null, null], round: { end: null, done: false }, fpPop: false, artPop: null };
   // 화면이 바뀔 때(새 게임·불러오기·전체 삭제) 열린 창·합계 표시·카운트다운을 처음 상태로
   const resetUi = () => {
-    Object.assign(ui, { burst: [null, null], armed: null, undid: false, logOpen: false, settingsOpen: false, logView: 'current', round: { end: null, done: false }, fpPop: false, artPop: null });
+    Object.assign(ui, { burst: [null, null], armed: null, undid: false, logOpen: false, settingsOpen: false, limitOpen: false, logView: 'current', round: { end: null, done: false }, fpPop: false, artPop: null });
     if (ui.rec) Object.assign(ui.rec, { open: false, pick: null, armDel: null }); // 전적 창 (고른 나 · 상대는 남김)
   };
 
@@ -1975,7 +2017,7 @@
   }
 
   // 로스터 HTML (캐릭터 선택 화면 · 전적 창의 캐릭터 고르기 공용)
-  // sel(id) → [1P(파랑) 테두리, 2P(빨강) 테두리], act = 칸을 눌렀을 때의 동작. 이름 표시는 NAME 토글(state.names)을 따름
+  // sel(id) → [1P(파랑) 테두리, 2P(빨강) 테두리], act = 칸을 눌렀을 때의 동작. 이름 표시는 제목 토글(state.names)을 따름
   function rosterHtml(sel, act, cls = '') {
     const { W, slots } = rosterLayout();
     const tiles = slots.map((s) => {
@@ -1984,7 +2026,7 @@
       if (!c) return `<div class="slot dia empty" style="${pos}" aria-hidden="true"><div class="art dia"></div></div>`;
       const [s1, s2] = sel(c.id);
       return `<button class="slot dia${s1 ? ' s1' : ''}${s2 ? ' s2' : ''}" style="${pos}" data-a="${act}" data-v="${c.id}" aria-label="${esc(c.name)}">
-                <div class="art dia">${faceArt(c, true)}${state.names ? `<span class="sname" style="--cc:${c.color}">${esc(c.name)}</span>` : ''}</div>
+                <div class="art dia">${faceArt(c, true)}<span class="sname" style="--cc:${c.color}">${esc(c.name)}</span></div>
               </button>`;
     }).join('');
     return `<div class="roster${cls}" style="--cols:${W * 2};--w:${W}">${tiles}</div>`;
@@ -2003,10 +2045,10 @@
       ${fighterHtml(0)}
       <div class="selglow${n == null ? '' : ` p${n + 1}`}" aria-hidden="true"></div>
       <div class="pickcol">
-        <div class="pickhead"><h1>SELECT YOUR CHARACTER</h1></div>
+        <div class="pickhead"><h1><button class="titlebtn" data-a="names" aria-label="캐릭터 이름 표시 켜기 / 끄기">SELECT YOUR CHARACTER</button></h1></div>
         <div class="selbar left">
           <div class="seltools chamfer">
-            <button class="${state.names ? 'on' : ''}" data-a="names" aria-pressed="${!!state.names}" aria-label="캐릭터 이름 표시">NAME</button>
+            <button data-a="limit" aria-label="${LIMIT_SEASON} 시즌 종제한 · 금지 · 에라타">LIMITATION</button>
             <button data-a="record" aria-label="전적 메모">RECORD</button>
           </div>
         </div>
@@ -2037,7 +2079,7 @@
         <div class="plate">
           <div class="facering dia">${faceArt(c, false, 'art dia')}</div>
           <div class="who">
-            <div class="line"><span class="ptag">${i + 1}P</span><span class="cname">${esc(c.name)}</span><span id="badges${i}"></span></div>
+            <div class="line"><span class="ptag">${i + 1}P</span><span class="cname" style="color:${c.color}">${esc(c.name)}</span><span id="badges${i}"></span></div>
           </div>
         </div>
         <div class="hpline">
@@ -2323,6 +2365,33 @@
     renderSettings();
     renderArtPop();
     renderRecord();
+    renderLimit();
+  }
+  // LIMITATION 창: 시즌 카드 제한(LIMITS)을 캐릭터별 카드로. 내용이 고정이라 열 때 한 번만 그림 (닫으면 비움)
+  function renderLimit() {
+    const el = $('limit');
+    setProp(el, 'hidden', !ui.limitOpen);
+    setProp($('limitbg'), 'hidden', !ui.limitOpen);
+    if (!ui.limitOpen) { if (el.firstChild) el.innerHTML = ''; return; }
+    if (el.firstChild) return;
+    const chip = (t) => `<span class="lchip">${esc(t)}</span>`;
+    const line = (x) => (Array.isArray(x)
+      ? `<div class="lgroup"><span class="lk">택1</span>${x.map(chip).join('<i class="lor">OR</i>')}</div>`
+      : x.ban ? `<div class="lgroup ban"><span class="lk">금지</span>${chip(x.ban)}</div>`
+        : `<div class="lgroup err"><span class="lk">에라타</span>${chip(x.errata)}</div>`);
+    const cards = CHARACTERS.filter((c) => LIMITS[c.id]).map((c) => `
+      <section class="lcard" style="--cc:${c.color}">
+        <h4><span class="facering dia">${faceArt(c, false, 'art dia')}</span>${esc(c.name)}</h4>
+        ${LIMITS[c.id].map(line).join('')}
+      </section>`).join('');
+    el.innerHTML = `
+      <header><b>LIMITATION<small>${LIMIT_SEASON} 시즌 카드 제한</small></b><button class="lclose" data-a="limit" aria-label="닫기">✕</button></header>
+      <div class="setbody limitbody">
+        <p class="llegend"><span class="lgroup"><span class="lk">택1</span>종제한 : 같은 묶음 중 1장만 투입 가능</span>
+          <span class="lgroup ban"><span class="lk">금지</span>투입 불가</span>
+          <span class="lgroup err"><span class="lk">에라타</span>효과 변경</span></p>
+        ${cards}
+      </div>`;
   }
   // 일러스트 고르기 창 (설정 > 일러스트의 반신/두상 버튼): 그 캐릭터의 1번 … artCount번 미리보기 중 하나를 누르면 바로 적용하고 닫힘
   function renderArtPop() {
@@ -2633,7 +2702,7 @@
     ['캐릭터 선택', ['캐릭터 칸: 처음 누른 쪽이 1P, 두 번째가 2P (같은 캐릭터를 두 번 누르면 미러전)',
       '1P SELECT / 2P SELECT: 지금 고를 차례',
       '고른 캐릭터 칸 · 좌우 아래 캐릭터: 누르면 그쪽 선택 취소', '↻: 1P · 2P 선택 모두 취소',
-      'GAME START: 둘 다 고르면 나타나요', 'NAME (왼쪽 위): 캐릭터 칸에 이름 표시 켜기 / 끄기', 'RECORD (왼쪽 위): 전적 메모']],
+      'GAME START: 둘 다 고르면 나타나요', 'SELECT YOUR CHARACTER (제목): 누르면 캐릭터 칸에 이름 표시 켜기 / 끄기', 'LIMITATION (왼쪽 위): 이번 시즌 종제한 · 금지 · 에라타', 'RECORD (왼쪽 위): 전적 메모']],
     ['체력', ['빨간 / 초록 버튼: 피해 / 회복', '연달아 누르기: 체력 옆에 합계 표시',
       '이름 옆 마름모: 체력 구간에 맞는 최대 손패', '서든데스: 양쪽 체력이 모두 0이면 가운데에 나타나요 (양쪽 체력 1000 · FP 0)']],
     ['FP · 특성 · 토큰', ['+ / −: FP 1씩 조절', '가운데 FP 숫자: 누르면 0', 'FP 버튼: 양쪽 −9~+9 팝업 (가운데 ✕로 닫기)',
@@ -2775,9 +2844,9 @@
   function recFill(chars) {
     if (chars && chars.every((c) => CHAR_BY_ID[c])) Object.assign(ui.rec.form, { me: chars[0], opp: chars[1] });
   }
-  // 창(로그 · 설정 · 전적)은 한 번에 하나만. which = 'log' | 'settings' | 'rec' | null(모두 닫기)
+  // 창(로그 · 설정 · 전적 · LIMITATION)은 한 번에 하나만. which = 'log' | 'settings' | 'rec' | 'limit' | null(모두 닫기)
   function openPanel(which) {
-    Object.assign(ui, { logOpen: which === 'log', settingsOpen: which === 'settings', artPop: null });
+    Object.assign(ui, { logOpen: which === 'log', settingsOpen: which === 'settings', limitOpen: which === 'limit', artPop: null });
     if (which) ui.fpPop = false;
     Object.assign(ui.rec, { open: which === 'rec', pick: null, armDel: null });
   }
@@ -2961,9 +3030,14 @@
   };
 
   // ================= 화면 전환 =================
-  // 아래 로그 경계 단계·화면 뒤집기를 CSS에 알림 (게임 화면 크기가 바뀌므로 숫자 맞춤 전에)
+  // 아래 로그 경계 단계·화면 뒤집기·이름 표시를 CSS에 알림 (게임 화면 크기가 바뀌므로 숫자 맞춤 전에)
   const DOCK_SIZES = ['기본', '데미지 · 토큰 사이 절반', '절반씩'];
-  const applyView = () => { const app = $('app'); app.dataset.dock = String(state.dockSize || 0); app.dataset.flip = state.flip ? '1' : '0'; };
+  const applyView = () => {
+    const app = $('app');
+    app.dataset.dock = String(state.dockSize || 0);
+    app.dataset.flip = state.flip ? '1' : '0';
+    app.dataset.names = state.names ? '1' : '0'; // 캐릭터 칸 이름 표시
+  };
   function show() {
     applyView();
     setProp($('select'), 'hidden', state.screen !== 'select');
@@ -3259,7 +3333,8 @@
       ui.undid = true;
     },
     log() { openPanel(ui.logOpen ? null : 'log'); ui.logView = 'current'; },
-    names() { state.names = !state.names; },
+    names() { state.names = !state.names; applyView(); }, // 보이기 / 숨기기만 (다시 그리지 않음)
+    limit() { openPanel(ui.limitOpen ? null : 'limit'); },
     logbg() { ui.logOpen = false; },
     // 아래 로그 경계: 로그를 누르면 다음 단계, 설정의 버튼(data-set)은 그 단계로
     dock(_, v, d) {
