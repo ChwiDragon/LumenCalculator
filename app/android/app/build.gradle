@@ -15,7 +15,7 @@ android {
         applicationId "com.chwidragon.lumencalc"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 46
+        versionCode 47
         versionName "1.0.6" // lumencalc.html의 APP.version과 맞춤
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
