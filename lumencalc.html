@@ -61,7 +61,7 @@
      둘 다 고르면 'GAME START' + 옆에 초기화(↻) 버튼(1P·2P 모두 해제).
      앱 실행 · NEW GAME · ALL DELETE로 선택 화면에 오면 항상 빈 상태에서 시작.
      오른쪽 위: LOG / SETTING, 왼쪽 위: LIMITATION / RECORD 글자 버튼(계산기 툴바 버튼과 같은 크기).
-       LIMITATION = 시즌 카드 제한 창(종제한 · 금지 · 에라타, 스크립트의 LIMIT_SEASON · LIMITS).
+       LIMITATION = 시즌 카드 제한 창(종제한 · 금지 · 에라타, 스크립트의 LIMIT_SEASON · LIMITS): 제한 캐릭터 두상 줄 → 누른 캐릭터의 제한 목록.
        제목 SELECT YOUR CHARACTER를 누르면 캐릭터 칸 아래쪽에 이름 표시 켜기/끄기(state.names, 저장됨).
        이름 표시는 .app[data-names]로 보이고 숨기기만 함 → 선택 화면을 다시 그리지 않음(효과 · 그림이 다시 시작되지 않음).
        캐릭터가 늘어날 것을 대비해 빈 칸을 항상 3개 이상 남김.
@@ -78,16 +78,17 @@
   - 손패 한도: 체력 구간 5000~4001 / 4000~3001 / 3000~2001 / 2000~1001 / 1000 이하.
     기본 6/7/8/9/9, 리타 6/7/8/9/10, 키메라 5/5/5/6/6(특성 ON이면 +1), CMYK 10×5.
     시작 체력 기본 5000, 무영 4500, 핀프 5500.
-  - FP: 데미지 버튼 옆 + / −. 가운데 현재 FP 숫자를 탭하면 0으로 초기화(되돌리기 가능).
+  - FP: 데미지 버튼 옆 + / −. 가운데 현재 FP 숫자를 탭하면 0(+ / −와 같은 FP 묶음으로 로그 · 되돌리기),
+    두 번 탭하거나 1초 누르면 FP 팝업.
     카운트다운 위 FP 버튼 = FP 팝업: 양쪽 −9~+9. ±1~4는 데미지 버튼 자리, ±5~9는 그 위·아래 줄 다섯 칸(모두 같은 크기,
-    다섯째 칸 ±5는 FP 칸 위·아래). 누르면 바로 그 값(+ / −와 같이 2초 안이면 기록 묶음). 0 = FP 칸 자리, 가운데 ✕ 마름모 = 닫기.
+    다섯째 칸 ±5는 FP 칸 위·아래). 누르면 바로 그 값(+ / −와 같이 3초 안이면 기록 묶음). 0 = FP 칸 자리, 가운데 ✕ 마름모 = 닫기.
   - 카운트다운(10초/30초, 아래 버튼으로 바꿈): 탭=시작, 도는 중(또는 끝난 뒤) 탭=처음으로 돌아가 멈춤, 0이 되고 5초 뒤 저절로 처음으로.
     멈춰 있을 때는 숫자 대신 초시계 그림. 길게 누르기 없음. 효과음 없음.
   - 경기 시간: 탭=시작/일시정지, 길게=초기화. 남은 1분부터 노란색, 10초부터 빨간색. 설정에서 분 단위로 바꾸면 즉시 적용.
   - TURN: 탭 +1, 길게 −1.
   - 서든데스: 양쪽 체력이 모두 0이면 가운데(카운트다운 자리)에 '서든데스' 버튼이 나타남.
     탭 → 양쪽 체력 1000 · FP 0, 버튼 사라짐. 되돌리기로 취소 가능(버튼 다시 나타남).
-  - 같은 종류를 이어 누르면 되돌리기·로그에서 한 번으로 묶는다: 체력·토큰 1초(MERGE_MS), FP 2초(FP_MERGE_MS).
+  - 같은 종류를 이어 누르면 되돌리기·로그에서 한 번으로 묶는다: 체력·토큰 1초(MERGE_MS), FP 3초(FP_MERGE_MS).
     같은 종류 = 같은 플레이어의 체력(피해·회복 합쳐서 한 줄: −500, +100 → 피해 −400) / FP(1P·2P 함께 한 줄, 결과값 표시) / 같은 토큰.
   - 특성 마크: 탭하면 밝게(ON)/어둡게(OFF). 강조 효과는 은은하게(움직이는 효과 금지).
     린·이제벨·이오몽·CMYK는 게임 시작부터 특성 ON 고정(탭해도 안 꺼짐).
@@ -506,8 +507,7 @@
     display: grid;
     grid-template-columns: repeat(var(--cols), calc(var(--d) / 2));
     grid-auto-rows: calc(var(--d) / 2);
-    column-gap: calc(.5 * var(--u));
-    row-gap: calc(.9 * var(--u));
+    gap: 0; /* 칸 사이 간격 없이 맞물림 → 칸 테두리(.slot의 --ring)가 사이를 채움 */
     justify-content: center;
     align-content: center;
     min-height: 0;
@@ -525,6 +525,7 @@
   .slot .art { width: 100%; height: 100%; }
   .slot .face-fb { font-size: calc(5.4 * var(--u)); line-height: 1; }
   .slot .face-fb small { font-family: var(--font-body); font-weight: 700; font-size: max(10px, calc(2.6 * var(--u))); line-height: 1.15; max-width: 60%; word-break: keep-all; color: rgba(8, 10, 20, .75); }
+  .slot:not(.empty) { --ring: #FFDD7A; } /* 캐릭터 칸 얇은 테두리: 밝은 노랑 */
   .slot.empty { --ring: rgba(42, 52, 82, .55); }
   .slot.empty .art { background: rgba(19, 26, 43, .7); }
   .slot.s1 { --ring: var(--p1); }
@@ -627,6 +628,8 @@
     height: calc(10 * var(--u));
     box-sizing: border-box;
     display: grid;
+    padding: calc(.45 * var(--u)); /* 얇은 테두리: 1P 파랑 · 2P 빨강 (선택 화면 칸과 같은 두께) */
+    background: var(--pc);
   }
   .plate .facering .face-fb { font-size: calc(3.6 * var(--u)); }
   .plate .who { flex: 1; min-width: 0; display: grid; gap: calc(.5 * var(--u)); }
@@ -1470,13 +1473,24 @@
      덱 이름 대신 캐릭터를 고름 → 글자 입력이 없어 가로 화면 그대로. 왼쪽 = 입력, 오른쪽 = 목록 */
   /* 설정 · 전적 창 뒤 화면 어둡게(LOG 창과 같은 어둡기), 누르면 닫힘. 설정은 z 5(설정 창도 5, 문서 순서상 창이 위), 전적은 z 6 */
   .dimbg { position: absolute; inset: 0; z-index: 6; background: rgba(8, 11, 20, .9); }
-  /* LIMITATION 창 (시즌 카드 제한): 캐릭터 카드 두 줄. 택1(종제한) · 금지 · 에라타 표시 */
-  .limitbody { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: calc(1.6 * var(--u)); padding: calc(2 * var(--u)) calc(2.4 * var(--u)); }
-  .llegend { grid-column: 1 / -1; margin: 0; display: flex; flex-wrap: wrap; gap: calc(.8 * var(--u)) calc(3 * var(--u)); color: var(--muted); font-size: max(12px, calc(3.2 * var(--u))); }
+  /* LIMITATION 창 (시즌 카드 제한): 설명 줄 / 제한 캐릭터 두상 줄 / 고른 캐릭터의 제한 목록. 택1(종제한) · 금지 · 에라타 표시 */
+  .limitbody { display: flex; flex-direction: column; gap: calc(1.4 * var(--u)); min-height: 0; overflow: hidden; padding: calc(1.8 * var(--u)) calc(2.4 * var(--u)) calc(2 * var(--u)); }
+  /* 두상 줄: 넘치면 좌우로 끌어서 스크롤 (끌기 스크롤은 JS, 화면 회전 대응) */
+  .lfaces { flex: none; display: flex; gap: calc(1.6 * var(--u)); overflow-x: auto; scrollbar-width: thin; touch-action: none; padding-bottom: calc(.4 * var(--u)); }
+  .lfaces::before, .lfaces::after { content: ""; flex: 1 0 0; } /* 넘치지 않을 때는 가운데 정렬 */
+  .lface { flex: none; display: grid; justify-items: center; gap: calc(.6 * var(--u)); padding: calc(.6 * var(--u)) calc(.4 * var(--u)); border-radius: calc(1 * var(--u)); opacity: .6; transition: opacity .15s; }
+  .lface .facering { width: calc(19 * var(--u)); height: calc(19 * var(--u)); display: grid; padding: calc(.5 * var(--u)); box-sizing: border-box; background: var(--line); }
+  /* 제한 목록: 넘치면 위아래로 끌어서 스크롤 */
+  .lcards { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: thin; touch-action: none; }
+  .lpick { margin: 0; padding: calc(4 * var(--u)) 0; text-align: center; color: var(--muted); font-size: max(13px, calc(3.3 * var(--u))); }
+  .lface b { font-size: max(13px, calc(3.4 * var(--u))); color: var(--cc); white-space: nowrap; }
+  .lface.on { opacity: 1; }
+  .lface.on .facering { background: #FFDD7A; } /* 고른 캐릭터: 선택 화면 칸과 같은 노란 테두리 */
+  .lface:active { opacity: .85; }
+  .llegend { margin: 0; display: flex; flex-wrap: wrap; gap: calc(.8 * var(--u)) calc(3 * var(--u)); color: var(--muted); font-size: max(12px, calc(3.2 * var(--u))); }
   .lcard { display: grid; align-content: start; gap: calc(1 * var(--u)); padding: calc(1.4 * var(--u)) calc(1.8 * var(--u)) calc(1.8 * var(--u)); border-radius: calc(1.2 * var(--u)); background: var(--surface-2); border-left: 3px solid var(--cc); }
-  .lcard h4 { margin: 0 0 calc(.4 * var(--u)); display: flex; align-items: center; gap: .6em; color: var(--cc); font-size: max(16px, calc(4.3 * var(--u))); }
-  .lcard h4 .facering { flex: none; width: calc(8.5 * var(--u)); height: calc(8.5 * var(--u)); display: grid; }
-  .lgroup { display: flex; flex-wrap: wrap; align-items: center; gap: calc(.8 * var(--u)); font-size: max(15px, calc(3.8 * var(--u))); line-height: 1.5; }
+  .lcard h4 { margin: 0 0 calc(.4 * var(--u)); color: var(--cc); font-size: max(16px, calc(4.3 * var(--u))); }
+  .lgroup { display: flex; flex-wrap: wrap; align-items: center; gap: calc(.7 * var(--u)); font-size: max(13px, calc(3.2 * var(--u))); line-height: 1.5; }
   .llegend .lgroup { font-size: inherit; }
   .lk { flex: none; padding: .05em .55em; border-radius: calc(.8 * var(--u)); font-size: .8em; font-weight: 700; background: color-mix(in srgb, var(--lumen) 22%, transparent); color: #FFD98A; }
   .ban .lk { background: color-mix(in srgb, var(--dmg) 26%, transparent); color: #FFB3AD; }
@@ -1644,9 +1658,9 @@
   const HAND_COLORS = ['#4DA3FF', '#3DCB8A', '#FFD23F', '#FF9838', '#FF4D4D'];
   const MIN_EMPTY_SLOTS = 3; // 선택 화면에 항상 남겨 둘 빈 칸 수 (추가 캐릭터 자리)
   const ROSTER_ROWS = 4;     // 역삼각형 줄 수 (캐릭터가 늘면 윗줄이 길어짐)
-  // 이 시간 안에 같은 종류로 이어 누르면 기록/되돌리기에서 한 번으로 묶음: 체력·토큰 1초, FP(1P·2P 함께) 2초
+  // 이 시간 안에 같은 종류로 이어 누르면 기록/되돌리기에서 한 번으로 묶음: 체력·토큰 1초, FP(1P·2P 함께) 3초
   const MERGE_MS = 1000;
-  const FP_MERGE_MS = 2000;
+  const FP_MERGE_MS = 3000;
 
   const CHARACTERS = [
     { id: 'nia', name: '니아', color: '#5BE37D', trait: '오버리밋' },
@@ -1712,7 +1726,7 @@
   // 버전·빌드 날짜는 APK를 빌드할 때만 올림 (빌드마다 끝자리 +1, 캐릭터 정식 추가 때 가운데 자리 +1)
   // 버전 탭의 '버그 제보 · 건의 사항' 링크 (APK에서는 Capacitor가 바깥 주소를 시스템 브라우저로 엶)
   const FEEDBACK_URL = 'https://forms.gle/ThJPMxAxXwBPvzcq5';
-  const APP = { name: '루멘 카운터', version: '1.0.5', build: '2026-10-24' };
+  const APP = { name: '루멘 카운터', version: '1.0.6', build: '2026-10-25' };
 
   // ================= 아이콘 =================
   const I = {
@@ -1877,7 +1891,7 @@
     requestWakeLock();
   }
 
-  const ui = { armed: null, toast: '', limitOpen: false, logOpen: false, logView: 'current', settingsOpen: false, settingsTab: 'settings', burst: [null, null], round: { end: null, done: false }, fpPop: false, artPop: null };
+  const ui = { armed: null, toast: '', limitOpen: false, limitSel: null, logOpen: false, logView: 'current', settingsOpen: false, settingsTab: 'settings', burst: [null, null], round: { end: null, done: false }, fpPop: false, artPop: null };
   // 화면이 바뀔 때(새 게임·불러오기·전체 삭제) 열린 창·합계 표시·카운트다운을 처음 상태로
   const resetUi = () => {
     Object.assign(ui, { burst: [null, null], armed: null, undid: false, logOpen: false, settingsOpen: false, limitOpen: false, logView: 'current', round: { end: null, done: false }, fpPop: false, artPop: null });
@@ -2128,7 +2142,7 @@
   const fpHtml = (i) => `
     <div class="fp chamfer">
       <button class="dbtn" data-a="fp" data-p="${i}" data-v="1" aria-label="${i + 1}P FP 증가">${I.plus}</button>
-      <span class="val num" id="fp${i}" data-a="fpreset" data-p="${i}" role="button" aria-label="${i + 1}P FP 0으로 초기화">0</span>
+      <span class="val num" id="fp${i}" data-a="fpreset" data-p="${i}" data-long="fppop" data-long-ms="1000" role="button" aria-label="${i + 1}P FP: 탭하면 0, 두 번 탭하거나 1초 누르면 FP 창">0</span>
       <button class="dbtn" data-a="fp" data-p="${i}" data-v="-1" aria-label="${i + 1}P FP 감소">${I.minus}</button>
     </div>`;
   const pipsHtml = (max, id) => (max && max <= 10
@@ -2367,31 +2381,35 @@
     renderRecord();
     renderLimit();
   }
-  // LIMITATION 창: 시즌 카드 제한(LIMITS)을 캐릭터별 카드로. 내용이 고정이라 열 때 한 번만 그림 (닫으면 비움)
+  // LIMITATION 창: 위 = 제한이 있는 캐릭터 두상 줄(CHARACTERS 순서, 넘치면 좌우 스크롤),
+  //   아래 = 누른 캐릭터(ui.limitSel, 창을 열 때마다 없음 · 다시 누르면 해제)의 제한 목록(넘치면 상하 스크롤)
   function renderLimit() {
     const el = $('limit');
     setProp(el, 'hidden', !ui.limitOpen);
     setProp($('limitbg'), 'hidden', !ui.limitOpen);
-    if (!ui.limitOpen) { if (el.firstChild) el.innerHTML = ''; return; }
-    if (el.firstChild) return;
+    if (!ui.limitOpen) { if (el.firstChild) el.innerHTML = ''; htmlCache.delete(el); return; }
+    const chars = CHARACTERS.filter((c) => LIMITS[c.id]);
+    const sel = CHAR_BY_ID[ui.limitSel] && LIMITS[ui.limitSel] ? CHAR_BY_ID[ui.limitSel] : null; // 처음엔 고른 캐릭터 없음
     const chip = (t) => `<span class="lchip">${esc(t)}</span>`;
     const line = (x) => (Array.isArray(x)
       ? `<div class="lgroup"><span class="lk">택1</span>${x.map(chip).join('<i class="lor">OR</i>')}</div>`
       : x.ban ? `<div class="lgroup ban"><span class="lk">금지</span>${chip(x.ban)}</div>`
         : `<div class="lgroup err"><span class="lk">에라타</span>${chip(x.errata)}</div>`);
-    const cards = CHARACTERS.filter((c) => LIMITS[c.id]).map((c) => `
-      <section class="lcard" style="--cc:${c.color}">
-        <h4><span class="facering dia">${faceArt(c, false, 'art dia')}</span>${esc(c.name)}</h4>
-        ${LIMITS[c.id].map(line).join('')}
-      </section>`).join('');
-    el.innerHTML = `
+    const faces = chars.map((c) => `<button class="lface${c === sel ? ' on' : ''}" style="--cc:${c.color}" data-a="limitsel" data-v="${c.id}" aria-label="${esc(c.name)} 제한 보기">
+        <span class="facering dia">${faceArt(c, false, 'art dia')}</span><b>${esc(c.name)}</b></button>`).join('');
+    setHtml(el, `
       <header><b>LIMITATION<small>${LIMIT_SEASON} 시즌 카드 제한</small></b><button class="lclose" data-a="limit" aria-label="닫기">✕</button></header>
-      <div class="setbody limitbody">
+      <div class="limitbody">
         <p class="llegend"><span class="lgroup"><span class="lk">택1</span>종제한 : 같은 묶음 중 1장만 투입 가능</span>
           <span class="lgroup ban"><span class="lk">금지</span>투입 불가</span>
           <span class="lgroup err"><span class="lk">에라타</span>효과 변경</span></p>
-        ${cards}
-      </div>`;
+        <nav class="lfaces">${faces}</nav>
+        <div class="lcards">${sel ? `
+          <section class="lcard" style="--cc:${sel.color}">
+            <h4>${esc(sel.name)}</h4>
+            ${LIMITS[sel.id].map(line).join('')}
+          </section>` : '<p class="lpick">캐릭터 두상을 누르면 그 캐릭터의 제한 목록이 나와요</p>'}</div>
+      </div>`);
   }
   // 일러스트 고르기 창 (설정 > 일러스트의 반신/두상 버튼): 그 캐릭터의 1번 … artCount번 미리보기 중 하나를 누르면 바로 적용하고 닫힘
   function renderArtPop() {
@@ -2495,7 +2513,7 @@
       fpSides = used.map((k) => [k, Array.isArray(r.value) ? r.value[k] : '']);
       tag = `FP ${fpSides.map(([k, v]) => `${k + 1}P ${v}`).join(' · ')}`; tagCls = 'lfp';
     }
-    else if (r.kind === 'fpr') { tag = r.text; tagCls = 'lfp'; }
+    else if (r.kind === 'fpr') { tag = r.text; tagCls = 'lfp'; } // 예전 저장('FP 초기화 (±n)' 줄)
     else if (r.kind === 'count') { tag = `${r.text} ${signed(net)}`; tagCls = 'token'; }
     else if (r.kind === 'turn') { tag = r.text; tagCls = 'turn'; }
     else if (r.kind === 'start') { tag = r.text; tagCls = 'start'; }
@@ -2702,15 +2720,15 @@
     ['캐릭터 선택', ['캐릭터 칸: 처음 누른 쪽이 1P, 두 번째가 2P (같은 캐릭터를 두 번 누르면 미러전)',
       '1P SELECT / 2P SELECT: 지금 고를 차례',
       '고른 캐릭터 칸 · 좌우 아래 캐릭터: 누르면 그쪽 선택 취소', '↻: 1P · 2P 선택 모두 취소',
-      'GAME START: 둘 다 고르면 나타나요', 'SELECT YOUR CHARACTER (제목): 누르면 캐릭터 칸에 이름 표시 켜기 / 끄기', 'LIMITATION (왼쪽 위): 이번 시즌 종제한 · 금지 · 에라타', 'RECORD (왼쪽 위): 전적 메모']],
+      'GAME START: 둘 다 고르면 나타나요', 'SELECT YOUR CHARACTER (제목): 누르면 캐릭터 칸에 이름 표시 켜기 / 끄기', 'LIMITATION (왼쪽 위): 이번 시즌 종제한 · 금지 · 에라타 (두상을 누르면 그 캐릭터의 제한 목록)', 'RECORD (왼쪽 위): 전적 메모']],
     ['체력', ['빨간 / 초록 버튼: 피해 / 회복', '연달아 누르기: 체력 옆에 합계 표시',
       '이름 옆 마름모: 체력 구간에 맞는 최대 손패', '서든데스: 양쪽 체력이 모두 0이면 가운데에 나타나요 (양쪽 체력 1000 · FP 0)']],
-    ['FP · 특성 · 토큰', ['+ / −: FP 1씩 조절', '가운데 FP 숫자: 누르면 0', 'FP 버튼: 양쪽 −9~+9 팝업 (가운데 ✕로 닫기)',
+    ['FP · 특성 · 토큰', ['+ / −: FP 1씩 조절', '가운데 FP 숫자: 누르면 0, 두 번 탭 · 1초 누르기 = FP 팝업', 'FP 버튼: 양쪽 −9~+9 팝업 (가운데 ✕로 닫기)',
       '특성 마크: 누르면 ON(밝게) / OFF(어둡게)', '토큰 + / −: 개수 조절 (조건을 채우면 칸이 강조돼요)']],
     ['타이머 · 턴', ['가운데 마름모: 탭 = 카운트다운 시작 / 처음으로', '10 / 30: 카운트다운 길이',
       '경기 시간: 탭 = 시작 / 일시정지, 길게 = 처음으로 (설정에서 바꾸기)', 'TURN: 탭 = +1, 길게 = −1']],
     ['로그', ['로그 이름: 게임을 시작한 날짜 · 시간', '로그 이름 길게(1초): 그 게임 이어하기',
-      '새 게임 · 앱 다시 열기: 지금 로그 자동 보관 (최근 10개)', '이어 누르기: 한 줄로 묶임 (되돌리기도 한 번에). 체력은 1초 안 · 피해와 회복을 합친 값(−500, +100 → 피해 −400), FP는 2초 안 · 1P와 2P 함께 결과값으로',
+      '새 게임 · 앱 다시 열기: 지금 로그 자동 보관 (최근 10개)', '이어 누르기: 한 줄로 묶임 (되돌리기도 한 번에). 체력은 1초 안 · 피해와 회복을 합친 값(−500, +100 → 피해 −400), FP는 3초 안 · 1P와 2P 함께 결과값으로',
       '되돌린 기록: 흐리게 "되돌림"으로 표시', 'ALL DELETE 길게(1초): 모든 로그 삭제', 'TXT EXPORT: 모든 로그를 텍스트 파일로 저장', '펼친 폴드폰 · 태블릿: 게임 화면 아래에 이번 게임의 로그가 늘 보여요', '아래 로그 누르기 · SETTING의 아래 로그 비율: 경계 위치 3단계 (기본 → 데미지와 토큰 · 특성 사이가 화면 절반 → 계산기와 로그 절반씩)', 'SETTING의 로그 비율 고정 ON: 아래 로그를 눌러도 비율이 바뀌지 않아요']],
     ['전적 메모', ['RECORD: 날짜 · 나 · 상대 캐릭터 · 승패를 남기는 개인 전적 메모 (로그와 별개)',
       '여는 곳: 캐릭터 선택 화면 왼쪽 위 RECORD, LOG 창 ✕ 옆 RECORD (보고 있는 로그의 1P = 나, 2P = 상대로 채워요)',
@@ -3107,6 +3125,15 @@
 
   // ================= actions =================
   const burstTimers = [null, null];
+  const DBL_TAP_MS = 300; // 현재 FP 숫자 두 번 탭 판정 시간
+  let fpTap = null;       // 현재 FP 숫자 첫 탭 { i, at, prev(누르기 전 FP), histLen, row(그때 쓴 FP 기록 줄) }
+  // 두 번 탭: 첫 탭이 만든 0을 되돌림. 새 기록 줄 · 되돌리기 지점을 만들었으면 지우고, 기존 묶음에 합쳐졌으면 그 누름만 뺌
+  function undoFpReset(t) {
+    if (!t.row) return; // 첫 탭 때 이미 0이었음
+    state.players[t.i].fp = t.prev;
+    if (state.history.length > t.histLen) { state.history.pop(); state.log = state.log.filter((r) => r !== t.row); }
+    else { t.row.presses.pop(); t.row.value = bothFp(); }
+  }
   const actions = {
     pick(_, v) {
       const n = nextPick();
@@ -3145,7 +3172,7 @@
       clearTimeout(burstTimers[i]);
       burstTimers[i] = setTimeout(refresh, BURST_MS + 20);
     },
-    // FP는 1P·2P 한 묶음: 2초 안이면 양쪽 입력이 한 줄 (로그는 결과값 "FP 1P +3 · 2P −2", 되돌리기도 한 번)
+    // FP는 1P·2P 한 묶음: 3초 안이면 양쪽 입력이 한 줄 (로그는 결과값 "FP 1P +3 · 2P −2", 되돌리기도 한 번)
     fp(i, v) {
       const merged = record('fp', 'FP', FP_MERGE_MS);
       state.players[i].fp += Number(v);
@@ -3155,7 +3182,7 @@
     fppop() { if (state.screen === 'game') ui.fpPop = true; },
     fpclose() { ui.fpPop = false; },
     logexport() { exportLogs(); },
-    // + / − 와 같은 묶음: 2초 안에 이어서 누르면(1P·2P 모두) 기록·되돌리기가 한 번
+    // + / − 와 같은 묶음: 3초 안에 이어서 누르면(1P·2P 모두) 기록·되돌리기가 한 번
     fpset(i, v) {
       const p = state.players[i], next = Number(v), d = next - p.fp;
       if (!d) return;
@@ -3163,14 +3190,16 @@
       p.fp = next;
       logEntry(merged, 'fp', null, 'FP', bothFp(), 'fpx', [i, d]);
     },
-    // 현재 FP 숫자 탭 → 0 (되돌리기 한 번, 로그 "FP 초기화 (±n)")
+    // 현재 FP 숫자: 탭 = 바로 0 (+ / − 와 같은 FP 묶음 · 로그 'FP 1P 0'), 두 번 탭 = FP 창 (1초 누르기도 FP 창: data-long)
+    //   두 번째 탭이 DBL_TAP_MS 안에 오면 첫 탭의 0을 흔적 없이 되돌리고(기록 줄 · 되돌리기 지점도) FP 창을 엶
     fpreset(i) {
+      const now = Date.now(), t = fpTap;
+      if (t && t.i === i && now - t.at < DBL_TAP_MS) { fpTap = null; undoFpReset(t); actions.fppop(); return; }
       const p = state.players[i];
+      fpTap = { i, at: now, prev: p.fp, histLen: state.history.length, row: null };
       if (!p.fp) return;
-      snapshot(`${i + 1}P FP 초기화`);
-      const text = `FP 초기화 (${signed(p.fp)})`;
-      p.fp = 0;
-      addLog(i, text, bothFp(), 'fpr');
+      actions.fpset(i, 0);
+      fpTap.row = state.log.find((r) => r.key === 'fp' && r.hid === actionHid) || null;
     },
     trait(i) {
       const p = state.players[i];
@@ -3334,7 +3363,8 @@
     },
     log() { openPanel(ui.logOpen ? null : 'log'); ui.logView = 'current'; },
     names() { state.names = !state.names; applyView(); }, // 보이기 / 숨기기만 (다시 그리지 않음)
-    limit() { openPanel(ui.limitOpen ? null : 'limit'); },
+    limit() { ui.limitSel = null; openPanel(ui.limitOpen ? null : 'limit'); },
+    limitsel(_, v) { ui.limitSel = ui.limitSel === v ? null : v; }, // LIMITATION 창: 두상을 누르면 그 캐릭터의 제한 목록 (다시 누르면 해제)
     logbg() { ui.logOpen = false; },
     // 아래 로그 경계: 로그를 누르면 다음 단계, 설정의 버튼(data-set)은 그 단계로
     dock(_, v, d) {
@@ -3412,7 +3442,7 @@
       const fn = actions[el.dataset.long];
       actionHid = null;
       if (fn) { fn(); refresh(); buzz(30); }
-    }, 550);
+    }, Number(el.dataset.longMs) || 550); // 길게 누르기 시간: data-long-ms (없으면 0.55초)
   });
   ['pointerup', 'pointercancel'].forEach((t) => document.addEventListener(t, () => clearTimeout(longTimer)));
   document.addEventListener('contextmenu', (e) => e.preventDefault());
@@ -3441,7 +3471,7 @@
   // 가로 고정(APK)·가로 뷰포트에서는 회전 없이 그대로 같은 방식(관성 포함)으로 스크롤 → 어느 쪽이든 똑같이 동작.
   let dragScrolled = false;
   (() => {
-    const SEL = '.llist, .ltabs, .setbody, .rlist';
+    const SEL = '.llist, .ltabs, .setbody, .rlist, .lfaces, .lcards';
     const PORTRAIT_MQ = matchMedia('(orientation: portrait)'); // 끄는 동안 매번 새로 만들지 않음
     // 화면(손가락) 이동 → 앱 기준 이동. 90°: 앱 x = 화면 y, 앱 y = −화면 x / −90°(세로+뒤집기): 반대 / 180°(가로+뒤집기): 둘 다 반대
     const toApp = (dx, dy) => (PORTRAIT_MQ.matches ? (state.flip ? [-dy, dx] : [dy, -dx]) : (state.flip ? [-dx, -dy] : [dx, dy]));

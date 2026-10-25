@@ -28,6 +28,13 @@
 -repackageclasses
 -allowaccessmodification
 
+# 릴리스에서는 Capacitor 등의 디버그 로그(Log.v/d/i) 호출과 그 문자열 만들기를 통째로 뺌 (경고 · 오류 로그는 남김)
+-assumenosideeffects class android.util.Log {
+    public static int v(...);
+    public static int d(...);
+    public static int i(...);
+}
+
 # Capacitor: 리플렉션으로 찾는 플러그인 클래스 · @PluginMethod 메서드는 Capacitor 라이브러리 자체 규칙
 # (node_modules/@capacitor/android/capacitor/proguard-rules.pro, consumerProguardFiles)이 지켜 줌 → 나머지는 축소 · 난독화.
 # 플러그인 목록(capacitor.plugins.json)은 비어 있고, 기본 플러그인은 클래스 리터럴로 등록되므로 이름이 바뀌어도 됨.
