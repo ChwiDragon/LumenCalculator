@@ -28,6 +28,17 @@
 -repackageclasses
 -allowaccessmodification
 
+# 라이브러리(AndroidX 등 Kotlin 코드)의 null 검사 호출을 뺌: 검사에 걸리는 경우는 어차피 바로 오류로 끝나는 잘못된 호출뿐이고,
+# 빼면 호출마다 붙던 매개변수 이름 문자열과 호출 코드가 사라져 DEX가 줄어듦 (R8이 흔히 쓰는 설정)
+-assumenosideeffects class kotlin.jvm.internal.Intrinsics {
+    public static void checkNotNullParameter(...);
+    public static void checkNotNullExpressionValue(...);
+    public static void checkParameterIsNotNull(...);
+    public static void checkExpressionValueIsNotNull(...);
+    public static void checkReturnedValueIsNotNull(...);
+    public static void checkFieldIsNotNull(...);
+}
+
 # 릴리스에서는 Capacitor 등의 디버그 로그(Log.v/d/i) 호출과 그 문자열 만들기를 통째로 뺌 (경고 · 오류 로그는 남김)
 -assumenosideeffects class android.util.Log {
     public static int v(...);

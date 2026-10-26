@@ -119,7 +119,13 @@
   - 되돌리기한 행동의 로그 줄은 바로 지우지 않고 흐리게(취소선 + '되돌림') 남김.
     다음에 새 기록(피해·FP·토큰·턴 등 무엇이든)이 생기면 그때 되돌린 줄이 모두 지워짐.
   - ALL DELETE 1초 → 모든 로그 삭제 + 게임 초기화(선택 화면).
-  - TXT EXPORT → 모든 로그(보관 + 지금)를 게임별 텍스트 파일로. APK는 안드로이드 저장 창(MainActivity LumenNative.saveText, 권한 없음), 브라우저는 다운로드.
+  - TXT EXPORT → 로그 목록의 게임(보관 + 지금, 최근 10개)을 게임별 텍스트 파일로. APK는 안드로이드 저장 창(MainActivity LumenNative.saveText, 권한 없음), 브라우저는 다운로드.
+    파일 끝에 불러오기용 데이터 한 줄('LUMENCOUNTER-DATA ' + JSON, v2: 로그 = 게임들 · 마지막 상황, 전적 = rows 배열 + 정리된 승패. v1도 읽음).
+  - TXT IMPORT → 내보낸 TXT를 골라 확인 창에서(지금 비어 있으면 불러오기 하나). 파일 안의 종류대로 로그 또는 전적.
+    로그 = 덮어쓰기만(로그 목록 전체, 지금 로그 · 진행 중인 게임도 비우고 선택 화면).
+    전적 = 덮어쓰기(기본, 기록 줄 + 정리된 승패) / 합치기(기록 줄만. 날짜마다 파일의 그날 판들이 순서까지 지금 그날 기록 안에 그대로 있으면 건너뜀,
+    아니면 그날 판을 모두 더함 · 정리된 승패는 중복을 알 수 없어 더하지 않음).
+    손상된 값(정리된 승패 · 기록 줄 · 로그 줄 · 마지막 상황)은 걸러냄. 파일 고르기는 input type=file(APK는 Capacitor의 파일 선택 창).
   - 앱을 다시 열면: 진행 중이던 게임은 로그에 보관하고 캐릭터 선택부터 시작(1P·2P 선택도 비움).
   - 정사각형에 가까운 화면(긴 변 : 짧은 변 ≤ 3 : 2 — 펼친 폴드폰, 4:3 태블릿)의 계산기 화면에서만:
     위 = 게임 화면(2 : 1 띠, 화면 높이의 60% 이상), 아래 = 이번 게임의 로그 줄만(#logdock, 같은 --u. 탭·머리줄·버튼 없음).
@@ -144,8 +150,13 @@
     (날짜별 묶음은 '○전 ○승 ○패 · 부전승 n · 부전패 n'), 판수 · 승률 · 캐릭터별에는 넣지 않음.
   - 캐릭터 고르기 창 오른쪽 아래 뒤로가기 = 창 닫기.
   - 나 · 상대 칸을 누르면 캐릭터 선택 화면과 같은 마름모 로스터(나 파랑 · 상대 빨강 테두리). 승 · 패 · 무효 아래 = 전체 승률.
-  - 목록 탭: 기록(✕ 두 번 = 삭제) · 날짜별(펼치면 그날 1R, 2R …) · 캐릭터별(내 캐릭터 → 상대별, 승률 높은 순).
-  - TXT EXPORT, ALL DELETE 1초. 저장은 'lumencalc.records.v1' 따로(바뀔 때만) → 로그 ALL DELETE · 새 게임과 상관없이 남음.
+  - 기록 탭은 최근 30줄만 그리고 맨 아래 '더 보기'로 30줄씩 더(REC_PAGE) → 기록이 수천 줄이어도 가벼움.
+  - 목록 탭: 기록(✕ 두 번 = 삭제) · 날짜별(펼치면 그날 1R, 2R …) · 캐릭터별(내 캐릭터 → 상대별 승률 높은 순. 판수순 기본, 탭을 다시 누르면 승률순 ↔ 판수순).
+  - 정리된 기록: CLEAR LOG(1초) · 설정의 '전적 기록 수 제한'(기본 무제한, 줄이면 확인 창)으로 지운 줄은 승 · 패 수만 rec.base에 남음
+    → 전체 승률 · 날짜별 · 캐릭터별 · 분석 · TXT에 계속 들어감(그래서 기록 줄 수 ≠ 전체 판수일 수 있음).
+  - ANALYSIS(NEW GAME 왼쪽) = 전적 분석 창: 맨 위 전체 / 내 캐릭터 두상. 판수 · 승패 · 승률 · 최근 10판 승률 · 최고 연승, 최고 픽률 · 최고 승률(전체만, 1위 + 2~5위 작게),
+    날짜별 승률 막대(SVG, 최근 10일 · 스크롤 없음), 많이 만난 상대 · 상성 좋은 / 나쁜 상대(10판 이상부터, 상성은 3판 이상 만난 상대만, 각 5명), 최근 흐름 20판.
+  - TXT EXPORT(맨 위 전체 · 캐릭터별 · 상대별 → 날짜별 → 기록 줄), TXT IMPORT(합치기 / 덮어쓰기, 데이터 줄 없는 예전 전적 TXT는 기록 줄을 읽음), CLEAR LOG · ALL DELETE 1초. 저장은 'lumencalc.records.v1' 따로(바뀔 때만) → 로그 ALL DELETE · 새 게임과 상관없이 남음.
 
  ■ 웹 (GitHub Pages · 홈 화면 설치 PWA)
   - manifest.webmanifest · sw.js · pwa/ 아이콘. 서비스 워커는 https 웹에서만 등록(APK·아티팩트·파일로 열기 제외, 이 파일 맨 아래).
@@ -1542,7 +1553,7 @@
   .rresbtns .N { background: var(--surface-2); color: var(--muted); }
   .rresbtns .B { background: color-mix(in srgb, var(--p1) 12%, var(--surface-2)); color: #A9D2FF; }
   .rresbtns .F { background: color-mix(in srgb, var(--dmg) 13%, var(--surface-2)); color: #FFB3AD; }
-  /* 오른쪽: 기록 · 날짜별 · 캐릭터별 탭 + 목록 + TXT EXPORT · ALL DELETE */
+  /* 오른쪽: 기록 · 날짜별 · 캐릭터별 탭 + 목록 + TXT IMPORT · EXPORT · CLEAR LOG · ALL DELETE */
   .rside { display: flex; flex-direction: column; min-height: 0; }
   .rtabs { display: grid; grid-template-columns: repeat(3, 1fr); flex: none; border-bottom: 1px solid var(--line); }
   .rtabs button { padding: calc(1.5 * var(--u)) 0; color: var(--muted); font-weight: 700; font-size: max(13px, calc(3.4 * var(--u))); box-shadow: inset 0 -2px 0 transparent; }
@@ -1585,7 +1596,7 @@
   .rsum .arr { color: var(--muted); font-size: .8em; transition: transform .15s; }
   .rsum[aria-expanded="true"] .arr { transform: rotate(180deg); }
   .rgrp > .rbar { margin: 0 calc(1.8 * var(--u)) calc(1.2 * var(--u)); }
-  .swl { font-size: .95em; color: var(--muted); white-space: nowrap; }
+  .swl { font-size: .95em; white-space: nowrap; } /* 전 · 승 · 패 글자색 = 승률과 같게 */
   .srate { text-align: right; font-family: var(--font-num); font-weight: 700; }
   .rsub { display: grid; gap: calc(.4 * var(--u)); padding: 0 calc(1 * var(--u)) calc(1.2 * var(--u)); }
   .rsubrow { display: grid; grid-template-columns: minmax(0, 1fr) auto calc(12 * var(--u)); align-items: center; gap: calc(1.4 * var(--u)); padding: calc(.7 * var(--u)) calc(1.4 * var(--u)); border-radius: calc(.8 * var(--u)); background: var(--surface); font-size: max(13px, calc(3.4 * var(--u))); }
@@ -1600,6 +1611,84 @@
   .rpbtn { position: absolute; bottom: calc(3 * var(--u)); right: calc(3 * var(--u)); min-width: calc(24 * var(--u)); padding: calc(2 * var(--u)) calc(2 * var(--u)); background: var(--surface-2); color: var(--text); font-weight: 700; font-size: max(13px, calc(3.4 * var(--u))); --cut: calc(1 * var(--u)); }
   .rpbtn:active { filter: brightness(1.3); }
   .artpanel header b .ptag { margin-right: .7em; font-size: max(11px, calc(2.8 * var(--u))); }
+  /* CLEAR LOG(승패 · 승률은 남기고 기록 줄만 정리) · 전적 목록 위 안내 · 캐릭터별 탭 정렬 표시 */
+  .ldel.soft { color: #FFD98A; }
+  .rmore { flex: none; display: flex; justify-content: center; align-items: baseline; gap: .6em; padding: calc(1.2 * var(--u)); border-radius: calc(1.2 * var(--u)); background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); color: var(--lumen); font-weight: 700; font-size: max(13px, calc(3.3 * var(--u))); }
+  .rmore small { font-weight: 400; color: var(--muted); font-size: .8em; }
+  .rmore:active { background: var(--surface-3); }
+  .rnote { flex: none; padding: calc(.6 * var(--u)) calc(1.4 * var(--u)); color: var(--muted); font-size: max(11px, calc(2.8 * var(--u))); text-align: center; }
+  .rtabs button small { margin-left: .4em; font-size: .75em; color: var(--muted); }
+  .rsum:is(div) { cursor: default; }
+  /* 확인 창: 가장 위(알림 글자보다도 위), 뒤를 누르면 취소 */
+  .cfwrap { position: absolute; inset: 0; z-index: 10; display: grid; place-items: center; padding: calc(4 * var(--u)); background: rgba(8, 11, 20, .72); }
+  .cfbox { width: min(100%, calc(110 * var(--u))); max-height: 100%; overflow-y: auto; display: grid; gap: calc(1.6 * var(--u)); padding: calc(3 * var(--u)) calc(3.4 * var(--u)) calc(2.6 * var(--u)); border-radius: calc(2 * var(--u)); background: var(--surface); box-shadow: 0 0 0 1px var(--line), 0 calc(2 * var(--u)) calc(8 * var(--u)) rgba(0,0,0,.6); }
+  .cfbox b { font-size: max(15px, calc(4.2 * var(--u))); }
+  .cfbox p { margin: 0; color: var(--muted); font-size: max(13px, calc(3.4 * var(--u))); line-height: 1.55; word-break: keep-all; }
+  .cfbtns { display: flex; justify-content: flex-end; gap: calc(1.4 * var(--u)); margin-top: calc(.6 * var(--u)); --cut: calc(.8 * var(--u)); }
+  .cfbtns button { min-width: calc(20 * var(--u)); padding: .6em 1.2em; background: var(--surface-2); font-weight: 700; font-size: max(13px, calc(3.3 * var(--u))); }
+  .cfbtns .ok { background: var(--lumen); color: #1A1300; }
+  .cfbtns .warn { color: #FFA69F; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--dmg) 55%, transparent); }
+  .cfnotes { margin: 0; padding: 0; list-style: none; display: grid; gap: calc(.8 * var(--u)); font-size: max(12px, calc(3.1 * var(--u))); line-height: 1.5; color: var(--muted); word-break: keep-all; }
+  .cfnotes b { margin-right: .6em; color: var(--lumen); }
+  .cfnotes .warn b { color: #FFA69F; }
+  /* 전적 분석 창 (RECORD 위) */
+  .anbg, .settings.anal { z-index: 8; }
+  .hbtn.anbtn { color: var(--lumen); } /* RECORD 창 머리줄의 ANALYSIS: 노란 글자 */
+  .settings.anal { grid-template-rows: auto 1fr; }
+  .afaces { display: flex; gap: calc(2.4 * var(--u)); overflow-x: auto; scrollbar-width: none; touch-action: none; padding-bottom: calc(1.2 * var(--u)); border-bottom: 1px solid var(--line); }
+  .aface { flex: none; display: grid; justify-items: center; gap: calc(.5 * var(--u)); min-width: max(48px, calc(13 * var(--u))); padding: calc(.6 * var(--u)) calc(.4 * var(--u)); opacity: .55; transition: opacity .15s; }
+  .aface .facering, .aface .aall { width: max(38px, calc(10 * var(--u))); height: max(38px, calc(10 * var(--u))); display: grid; padding: calc(.4 * var(--u)); box-sizing: border-box; background: var(--line); }
+  .aface .aall { place-items: center; clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); background: var(--surface-2); font-family: var(--font-num); font-weight: 700; font-size: max(10px, calc(2.4 * var(--u))); color: var(--lumen); }
+  .aface b { font-size: max(11px, calc(2.8 * var(--u))); color: var(--cc, var(--text)); white-space: nowrap; }
+  .aface.on { opacity: 1; }
+  .aface.on .facering, .aface.on .aall { background: #FFDD7A; color: #1A1300; }
+  .abody { min-height: 0; overflow-y: auto; scrollbar-width: thin; touch-action: none; display: grid; align-content: start; grid-auto-rows: max-content; gap: calc(1.4 * var(--u)); padding: calc(1.6 * var(--u)) calc(2.4 * var(--u)) calc(2.4 * var(--u)); }
+  .akpis { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: calc(1 * var(--u)); }
+  .akpi { display: grid; align-content: start; gap: calc(.4 * var(--u)); padding: calc(1.2 * var(--u)) calc(1.6 * var(--u)); border-radius: calc(1.2 * var(--u)); background: var(--surface-2); min-width: 0; }
+  .akpi > span { font-size: max(10px, calc(2.5 * var(--u))); font-weight: 700; color: var(--lumen); }
+  .akpi > b { font-family: var(--font-num); font-weight: 700; font-size: max(17px, calc(5.4 * var(--u))); line-height: 1.1; white-space: nowrap; }
+  .akpi > b i { font-style: normal; font-family: var(--font-body); font-size: .5em; color: var(--muted); margin: 0 .15em; }
+  .akpi > b em { font-style: normal; } .akpi > b em.W { color: #A9D2FF; } .akpi > b em.L { color: #FFA69F; }
+  .akpi > small { font-size: max(10px, calc(2.4 * var(--u))); line-height: 1.4; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .akpi > small.kbar { display: flex; align-items: center; height: 1.4em; } /* 승률 막대 = 옆 칸 아래 글자 줄과 같은 자리 · 글자 높이 */
+  .akpi > small .rbar { flex: 1; height: .9em; }
+  .aheroes { display: grid; grid-template-columns: 1fr 1fr; gap: calc(1 * var(--u)); align-items: start; }
+  .acol { display: grid; gap: calc(.4 * var(--u)); }
+  /* 1위 아래 2~5위: 작게 한 줄씩 */
+  .aminor { display: grid; grid-template-columns: calc(3 * var(--u)) auto minmax(0, 1fr) auto auto; align-items: center; gap: calc(1 * var(--u)); padding: calc(.4 * var(--u)) calc(1.2 * var(--u)); border-radius: calc(.8 * var(--u)); background: var(--surface-2); text-align: left; font-size: max(12px, calc(3 * var(--u))); }
+  .aminor .rk { color: var(--muted); font-weight: 700; text-align: center; }
+  .aminor .facering { width: calc(5.6 * var(--u)); height: calc(5.6 * var(--u)); display: grid; }
+  .aminor b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--cc); }
+  .aminor .swl { font-size: .85em; color: var(--muted); }
+  .aminor .aval { font-family: var(--font-num); font-weight: 700; min-width: 3em; text-align: right; }
+  .ahero { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; grid-template-rows: auto auto auto; align-items: center; column-gap: calc(1.4 * var(--u)); padding: calc(1.2 * var(--u)) calc(1.8 * var(--u)); border-radius: calc(1.2 * var(--u)); text-align: left;
+    background: linear-gradient(90deg, color-mix(in srgb, var(--cc) 22%, var(--surface-2)), var(--surface-2) 70%); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cc) 45%, transparent); }
+  .ahero .facering { grid-row: 1 / 4; width: calc(12 * var(--u)); height: calc(12 * var(--u)); display: grid; }
+  .ahero .ht { font-size: max(10px, calc(2.5 * var(--u))); font-weight: 700; color: var(--lumen); }
+  .ahero b { font-size: max(15px, calc(4.2 * var(--u))); line-height: 1.2; color: var(--cc); }
+  .ahero small { font-size: max(11px, calc(2.8 * var(--u))); color: var(--muted); }
+  .ahero > :is(.ht, b, small) { grid-column: 2; }
+  .ahero .hv { grid-column: 3; grid-row: 1 / 4; font-family: var(--font-num); font-weight: 700; font-size: max(22px, calc(7 * var(--u))); }
+  .ahero .hv i { font-style: normal; font-size: .5em; color: var(--muted); }
+  .acard { display: grid; align-content: start; gap: calc(.6 * var(--u)); padding: calc(1.2 * var(--u)) calc(1.4 * var(--u)); border-radius: calc(1.2 * var(--u)); background: var(--surface-2); min-width: 0; }
+  .acard h5 { margin: 0 0 calc(.2 * var(--u)); font-size: max(12px, calc(3 * var(--u))); color: var(--lumen); }
+  .acard h5 small { margin-left: .6em; font-weight: 400; color: var(--muted); font-size: .85em; }
+  .agrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: calc(1 * var(--u)); }
+  .agrid.two { grid-template-columns: 1fr 1fr; }
+  .arow { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: calc(1 * var(--u)); padding: calc(.5 * var(--u)) calc(.6 * var(--u)); border-radius: calc(.8 * var(--u)); background: var(--surface); font-size: max(12px, calc(3.1 * var(--u))); }
+  .arow .facering { width: calc(6.4 * var(--u)); height: calc(6.4 * var(--u)); display: grid; }
+  .arow b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .arow .swl { font-size: .85em; }
+  .arow .aval { font-family: var(--font-num); font-weight: 700; min-width: 3.2em; text-align: right; }
+  .anone { margin: 0; padding: calc(1 * var(--u)) 0; color: var(--faint); font-size: max(11px, calc(2.8 * var(--u))); text-align: center; }
+  .achart svg { display: block; width: 100%; height: calc(34 * var(--u)); min-height: 120px; }
+  .achart text { font-family: var(--font-num); font-size: 11px; text-anchor: middle; fill: var(--muted); }
+  .achart text.v { fill: var(--text); font-weight: 700; font-size: 12px; }
+  .achart text.l50 { text-anchor: start; font-size: 9px; fill: var(--faint); }
+  .achart .up rect { fill: var(--p1); } .achart .dn rect { fill: var(--dmg); }
+  .achart .g50 { stroke: var(--faint); stroke-dasharray: 4 4; } .achart .g0 { stroke: var(--line); }
+  .aflow { display: flex; flex-wrap: wrap; gap: calc(.6 * var(--u)); font-size: max(12px, calc(3 * var(--u))); }
+  .anote { margin: 0; padding-left: 1.2em; display: grid; gap: calc(.3 * var(--u)); color: var(--faint); font-size: max(10px, calc(2.5 * var(--u))); line-height: 1.5; word-break: keep-all; }
 
   @media (prefers-reduced-motion: reduce) {
     .bar .ghost, .bar .fill, .q, .burst, .trait .mark { transition: none; }
@@ -1621,6 +1710,9 @@
   <div class="dimbg" id="recbg" data-a="record" hidden></div>
   <div class="settings wide" id="record" hidden></div>
   <div class="artpop" id="recpick" data-a="recpickclose" hidden></div>
+  <div class="dimbg anbg" id="analbg" data-a="analclose" hidden></div>
+  <div class="settings wide anal" id="anal" hidden></div>
+  <div class="cfwrap" id="confirm" data-a="cfno" hidden></div>
 </div>
 
 <script>
@@ -1726,7 +1818,7 @@
   // 버전·빌드 날짜는 APK를 빌드할 때만 올림 (빌드마다 끝자리 +1, 캐릭터 정식 추가 때 가운데 자리 +1)
   // 버전 탭의 '버그 제보 · 건의 사항' 링크 (APK에서는 Capacitor가 바깥 주소를 시스템 브라우저로 엶)
   const FEEDBACK_URL = 'https://forms.gle/ThJPMxAxXwBPvzcq5';
-  const APP = { name: '루멘 카운터', version: '1.0.6', build: '2026-10-25' };
+  const APP = { name: '루멘 카운터', version: '1.0.7', build: '2026-10-26' };
 
   // ================= 아이콘 =================
   const I = {
@@ -2379,7 +2471,9 @@
     renderSettings();
     renderArtPop();
     renderRecord();
+    renderAnal();
     renderLimit();
+    renderConfirm();
   }
   // LIMITATION 창: 위 = 제한이 있는 캐릭터 두상 줄(CHARACTERS 순서, 넘치면 좌우 스크롤),
   //   아래 = 누른 캐릭터(ui.limitSel, 창을 열 때마다 없음 · 다시 누르면 해제)의 제한 목록(넘치면 상하 스크롤)
@@ -2589,7 +2683,7 @@
         <header><b>GAME LOG</b>${meta}<button class="hbtn" data-a="logrec" aria-label="이 로그의 1P · 2P로 전적 메모 열기">RECORD</button><button class="lclose" data-a="log" aria-label="닫기">✕</button></header>
         <nav class="ltabs">${tabs}</nav>
         <div class="llist">${rows || '<div class="lempty">아직 기록이 없어요.</div>'}</div>
-        <footer><span class="lhint">로그 이름을 1초 누르면 그 게임의 마지막 상황을 불러와요</span><button class="lexp" data-a="logexport" aria-label="모든 로그를 텍스트 파일로 저장">TXT EXPORT</button><button class="ldel" data-hold="logdel"><i class="fill"></i><span>ALL DELETE</span></button></footer>
+        <footer><span class="lhint">로그 이름을 1초 누르면 그 게임의 마지막 상황을 불러와요</span><button class="lexp" data-a="logimport" aria-label="내보낸 텍스트 파일에서 로그 · 전적 불러오기">TXT IMPORT</button><button class="lexp" data-a="logexport" aria-label="모든 로그를 텍스트 파일로 저장">TXT EXPORT</button><button class="ldel" data-hold="logdel"><i class="fill"></i><span>ALL DELETE</span></button></footer>
       </div>`;
   }
   // 로그 한 게임분: 이름 · [1P, 2P] 캐릭터 · 줄(최신이 앞)
@@ -2603,9 +2697,13 @@
   // 보관 로그(오래된 것부터) + 지금 로그를 게임별로, 줄은 시간 순서대로.
   // 앱(APK): 안드로이드 '다른 이름으로 저장' 창(MainActivity의 LumenNative.saveText)에서 사용자가 고른 곳에 저장 — 권한 필요 없음.
   // 브라우저: 파일 다운로드.
+  // 내보내기 = 로그 목록의 게임(보관 + 지금), 최근 LOG_ARCHIVE_MAX개. 지금 로그는 그 순간의 상황을 함께 담음
+  function exportGames() {
+    const cur = state.log.length ? [{ name: state.logName || fmtArchiveName(new Date()), entries: state.log, endedAt: Date.now(), snap: state.screen === 'game' ? gameSnap() : state.lastGame || null }] : [];
+    return [...state.logArchive, ...cur].slice(-LOG_ARCHIVE_MAX);
+  }
   function logsToText() {
-    const games = state.logArchive.map(archiveLogGame);
-    if (state.log.length) games.push(currentLogGame());
+    const data = exportGames(), games = data.map(archiveLogGame);
     const now = new Date();
     const out = [`${APP.name} ${APP.version} · 로그 내보내기 ${now.getFullYear()}-${two(now.getMonth() + 1)}-${two(now.getDate())} ${fmtTime(now)}`, `게임 ${games.length}개`, ''];
     games.forEach((g) => {
@@ -2620,7 +2718,7 @@
       });
       out.push('');
     });
-    return out.join('\n');
+    return out.join('\n') + dataBlock({ type: 'log', games: data });
   }
   let claudeDownloads = null;
   if (window.claude && typeof window.claude.use === 'function') {
@@ -2658,6 +2756,164 @@
     flashToast(r === 'ok' ? `${savingWhat}을 저장했어요` : r === 'cancel' ? '저장을 취소했어요' : '저장하지 못했어요', 1800);
     refresh();
   };
+
+  // ---------- TXT IMPORT (백업 불러오기) ----------
+  // 내보낸 TXT 끝에 불러오기용 데이터 한 줄(DATA_TAG + JSON)을 붙여 둠 → 확인 창 뒤에 지금 것을 그 내용으로 모두 바꿈.
+  //   로그 = 로그 목록(보관 + 지금 · 진행 중인 게임 포함) 덮어쓰기, 전적 = 기록 줄 + 정리된 승패(base) 덮어쓰기.
+  // 로그 · 전적 어느 쪽 버튼으로 골라도 파일 안의 종류대로 불러옴. 데이터 줄이 없는 예전 전적 TXT는 기록 줄을 읽어서 불러옴.
+  const DATA_TAG = 'LUMENCOUNTER-DATA ';
+  //   v2: 전적 기록 = rows [[id, 날짜, 나, 상대, 결과], …] (키 이름을 줄마다 쓰지 않아 파일이 작고 빨리 읽힘). v1(list 객체 배열)도 읽음
+  const dataBlock = (data) => `\n\n# ---- TXT IMPORT로 불러올 때 쓰는 데이터 · 지우거나 고치지 마세요 ----\n${DATA_TAG}${JSON.stringify({ v: 2, app: APP.version, ...data })}\n`;
+  // 파일 고르기: 화면 밖에 붙여 둔 input 하나를 다시 씀 (붙어 있어야 고르기 창이 뜨는 브라우저도 있음, 취소해도 쌓이지 않음).
+  // 읽기는 FileReader (오래된 WebView도 됨). 고른 뒤 값을 비워 같은 파일을 다시 골라도 change가 옴
+  let importInp = null;
+  function importText() {
+    if (!importInp) {
+      importInp = document.createElement('input');
+      importInp.type = 'file';
+      importInp.accept = 'text/plain,.txt';
+      importInp.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0';
+      document.body.appendChild(importInp);
+      importInp.addEventListener('change', () => {
+        const f = importInp.files && importInp.files[0];
+        importInp.value = '';
+        if (!f) return;
+        const rd = new FileReader();
+        rd.onload = () => { const msg = importBackup(String(rd.result || '')); if (msg) flashToast(msg, 2200); refresh(); };
+        rd.onerror = () => { flashToast('파일을 읽지 못했어요', 2000); refresh(); };
+        rd.readAsText(f, 'utf-8');
+      });
+    }
+    importInp.click();
+  }
+  // 불러올 내용을 확인 창으로 물어봄: 덮어쓰기 / 합치기 (지금 비어 있으면 '불러오기' 하나). 문제가 있으면 알림 글자를 돌려줌
+  function importBackup(text) {
+    const at = text.startsWith(DATA_TAG) ? 0 : text.lastIndexOf(`\n${DATA_TAG}`) + 1; // 데이터 줄은 끝에 있음 → 뒤에서 바로 찾기
+    let data = null;
+    if (at > 0 || text.startsWith(DATA_TAG)) {
+      const end = text.indexOf('\n', at);
+      try { data = JSON.parse(text.slice(at + DATA_TAG.length, end < 0 ? undefined : end)); } catch (e) { return '불러오기 데이터가 손상됐어요'; }
+    }
+    if (data && data.type === 'log' && Array.isArray(data.games)) {
+      const games = data.games.filter((g) => g && typeof g.name === 'string' && Array.isArray(g.entries))
+        .map((g) => ({ name: g.name, entries: g.entries.filter(okRow), endedAt: Number(g.endedAt) || 0, snap: okSnap(g.snap) }))
+        .filter((g) => g.entries.length).slice(-LOG_ARCHIVE_MAX);
+      if (!games.length) return '불러올 로그가 없는 파일이에요';
+      const cur = state.logArchive.length + (state.log.length ? 1 : 0);
+      // 로그는 덮어쓰기만 (지금 로그가 있으면 사라진다고 알림)
+      askChoice('로그 불러오기', `파일: ${games.length}게임 · 지금: ${cur}게임`, [cur
+        ? ['덮어쓰기', 'ok', '지금 로그(진행 중인 게임 포함)를 모두 지우고 파일의 게임으로 바꿔요.', () => replaceLogs(games)]
+        : ['불러오기', 'ok', '', () => replaceLogs(games)]]);
+      return '';
+    }
+    const recs = data && data.type === 'record'
+      ? (Array.isArray(data.rows) ? data.rows.filter(Array.isArray).map(([id, date, me, opp, res]) => ({ id, date, me, opp, res })) : Array.isArray(data.list) ? data.list : null)
+      : data ? null : parseRecordText(text);
+    const base = data ? okBase(data.base) : emptyBase();
+    const fileBase = Object.values(base.pairs).reduce((t, [w, l]) => t + w + l, 0);
+    if (!recs || (!recs.length && !fileBase)) return '불러올 수 있는 로그 · 전적이 없는 파일이에요';
+    const cur = rec.list.length, curBase = baseGames();
+    const desc = (n, b) => `기록 ${n}개${b ? ` + 정리된 ${b}판` : ''}`;
+    askChoice('전적 불러오기', `파일: ${desc(recs.length, fileBase)} · 지금: ${desc(cur, curBase)}`, cur || curBase ? [
+      ['덮어쓰기', 'ok', '지금 전적을 모두 지우고 파일 내용(정리된 승패 포함)으로 바꿔요.', () => replaceRecords(recs, base)],
+      ['합치기', '', `지금 전적에 파일의 기록 줄을 더해요. 같은 날짜의 판이 순서까지 모두 같으면 이미 있는 기록으로 보고 건너뛰어요.${fileBase ? ` 파일의 정리된 ${fileBase}판은 이미 있는 판과 구별할 수 없어 더하지 않아요.` : ''}`, () => mergeRecords(recs)],
+    ] : [['불러오기', 'ok', '', () => replaceRecords(recs, base)]]);
+    return '';
+  }
+  // 불러온 로그 한 줄: 객체만, 누른 값 목록 모양이 틀리면 버림 (화면을 그릴 때 오류가 나지 않게)
+  const okRow = (r) => {
+    if (!r || typeof r !== 'object' || Array.isArray(r)) return false;
+    if (r.presses != null && !Array.isArray(r.presses)) delete r.presses;
+    if (r.kind === 'fpx' && !(Array.isArray(r.presses) && r.presses.every(Array.isArray))) r.kind = '';
+    if (r.side != null && r.side !== 0 && r.side !== 1) r.side = null;
+    return true;
+  };
+  // 불러온 게임의 마지막 상황: 캐릭터 값 정리(예전 번호 → id), 모양이 틀리면 없음으로 (불러와도 그 게임 이어하기만 안 됨)
+  const okSnap = (sn) => {
+    if (!sn || !Array.isArray(sn.players) || sn.players.length !== 2 || sn.players.some((x) => !x || typeof x !== 'object')) return null;
+    sn.players.forEach((x) => { x.char = normChar(x.char); });
+    return sn;
+  };
+  // 로그 덮어쓰기: 지금 로그 · 진행 중인 게임은 비우고 선택 화면으로, 불러온 게임은 모두 보관 로그로 (LOG 창을 열어 보여 줌)
+  function replaceLogs(games) {
+    Object.assign(state, { log: [], history: [], logName: null, lastGame: null, screen: 'select', logArchive: games.slice() });
+    clearPicks();
+    resetUi();
+    saveNow();
+    show();
+    openPanel('log');
+    flashToast(`로그 ${games.length}게임을 불러왔어요`, 2000);
+  }
+  // 기록 한 줄 검사: 날짜 · 결과 · 캐릭터(부전승 · 부전패는 없음)가 맞으면 { date, me, opp, res }
+  function cleanRec(r) {
+    if (!r || typeof r !== 'object' || typeof r.date !== 'string' || !/^\d{4}-\d\d-\d\d$/.test(r.date) || !Object.prototype.hasOwnProperty.call(REC_RES, r.res)) return null;
+    const bye = isBye(r.res), x = { date: r.date, me: bye ? null : normChar(r.me), opp: bye ? null : normChar(r.opp), res: r.res };
+    return bye || (x.me && x.opp) ? x : null;
+  }
+  const recIdOk = (id) => Number.isSafeInteger(id) && id > 0;
+  // 전적 덮어쓰기: 기록 줄 + 정리된 승패. 기록 수 제한이 있으면 넘치는 줄은 승패로 정리
+  function replaceRecords(list, base) {
+    const out = [], ids = new Set();
+    let id = Date.now();
+    list.forEach((r) => {
+      const x = cleanRec(r);
+      if (!x) return;
+      x.id = recIdOk(r.id) && !ids.has(r.id) ? r.id : id++;
+      ids.add(x.id);
+      out.push(x);
+    });
+    Object.assign(rec, { list: out, base });
+    const cut = applyRecLimit();
+    Object.assign(ui.rec, { armDel: null, openGrp: new Set() });
+    saveRec();
+    flashToast(`전적을 불러왔어요 · 기록 ${rec.list.length}개${cut ? ` (제한으로 ${cut}개는 승패만 남김)` : ''}`, 2200);
+  }
+  // 전적 합치기: 기록 줄만 더함 (정리된 승패는 어느 판인지 몰라 중복을 거를 수 없으므로 지금 것 그대로).
+  //   날짜마다 비교: 파일의 그날 판들(넣은 순서 · 결과 · 캐릭터)이 지금 그날 기록 안에 순서까지 그대로 이어서 있으면 이미 있는 날 → 건너뜀.
+  //   하나라도 다르거나 순서가 다르면 다른 전적 → 그날 판을 모두 더함 (지금 기록 뒤에, 파일 순서대로).
+  //   '안에 이어서 있으면'까지 보는 건 한 번 합친 뒤 같은 파일을 다시 합쳐도 늘지 않게 하려는 것
+  function mergeRecords(list) {
+    const dayKey = (r) => `${r.res}|${r.me}|${r.opp}`, SEP = '\n';
+    const byDay = (rs) => { const m = new Map(); rs.forEach((r) => { if (!m.has(r.date)) m.set(r.date, []); m.get(r.date).push(r); }); return m; };
+    // 파일 기록: 검사한 뒤 날짜 → 넣은 순서(id, 없으면 파일 순서)로
+    const clean = list.map((r, k) => { const x = cleanRec(r); return x && { ...x, n: recIdOk(r.id) ? r.id : k }; }).filter(Boolean);
+    const file = byDay(clean.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : a.n - b.n)));
+    const now = byDay(sortedRecs().reverse()); // 날짜 · 넣은 순서
+    let id = rec.list.reduce((m, r) => Math.max(m, r.id + 1), Date.now()), added = 0, sameDays = 0;
+    file.forEach((rs, date) => {
+      const cur = now.get(date);
+      if (cur && `${SEP}${cur.map(dayKey).join(SEP)}${SEP}`.includes(`${SEP}${rs.map(dayKey).join(SEP)}${SEP}`)) { sameDays++; return; }
+      rs.forEach(({ date, me, opp, res }) => { rec.list.push({ id: id++, date, me, opp, res }); added++; });
+    });
+    if (!added) { flashToast('새로 더할 전적이 없어요 (모두 이미 있는 날짜의 기록)', 2000); return; }
+    const cut = applyRecLimit();
+    Object.assign(ui.rec, { armDel: null, openGrp: new Set() });
+    saveRec();
+    flashToast(`전적 ${added}개를 더했어요${sameDays ? ` · 이미 있는 ${sameDays}일은 건너뜀` : ''}${cut ? ` (제한으로 ${cut}개는 승패만 남김)` : ''}`, 2400);
+  }
+  // 확인 창 (되돌릴 수 없는 일 전에): 취소 + 고르는 버튼들. btns = [[글자, 'ok' | 'warn', 설명, fn], …] (설명은 버튼 위에 한 줄씩)
+  function askChoice(title, text, btns) { ui.confirm = { title, text, btns }; }
+  const askConfirm = (title, text, ok, fn) => askChoice(title, text, [[ok, 'ok', '', fn]]);
+  function renderConfirm() {
+    const el = $('confirm'), c = ui.confirm;
+    setProp(el, 'hidden', !c);
+    if (!c) { htmlCache.delete(el); return; }
+    const notes = c.btns.filter(([, , d]) => d).map(([t, cls, d]) => `<li class="${cls}"><b>${esc(t)}</b>${esc(d)}</li>`).join('');
+    setHtml(el, `<div class="cfbox" role="alertdialog" aria-modal="true"><b>${esc(c.title)}</b><p>${esc(c.text)}</p>${notes ? `<ul class="cfnotes">${notes}</ul>` : ''}
+      <div class="cfbtns"><button class="chamfer" data-a="cfno">취소</button>${c.btns.map(([t, cls], k) => `<button class="chamfer ${cls}" data-a="cfok" data-v="${k}">${esc(t)}</button>`).join('')}</div></div>`);
+  }
+  // 예전 전적 TXT의 기록 줄: '2026-10-25  승  울프  VS  리타' / '2026-10-25  부전승'
+  function parseRecordText(text) {
+    const RES_BY = Object.fromEntries(Object.entries(REC_RES).map(([k, v]) => [v, k]));
+    const ID_BY = Object.fromEntries(CHARACTERS.map((c) => [c.name, c.id]));
+    const out = [];
+    text.split(/\r?\n/).forEach((l) => {
+      const m = l.match(/^(\d{4}-\d\d-\d\d) {2}(\S+)(?: {2}(.+?) {2}VS {2}(.+))?$/);
+      if (!m || !RES_BY[m[2]]) return;
+      out.push({ date: m[1], res: RES_BY[m[2]], me: ID_BY[m[3]] || null, opp: ID_BY[m[4]] || null });
+    });
+    return out.reverse(); // 파일은 최신이 위 → 넣은 순서대로
+  }
 
   // ALL DELETE: 1초 길게 눌러 모든 로그(현재 + 보관함)와 되돌리기 기록 삭제
   function deleteAllLogs() {
@@ -2698,7 +2954,7 @@
         const kind = b.dataset.hold, v = b.dataset.v;
         end();
         holdFired = true; // 손을 뗄 때 생기는 클릭(탭 보기)은 무시
-        if (kind === 'logdel') deleteAllLogs(); else if (kind === 'logload') loadLog(v); else if (kind === 'recdelall') deleteAllRecords();
+        if (kind === 'logdel') deleteAllLogs(); else if (kind === 'logload') loadLog(v); else if (kind === 'recdelall') deleteAllRecords(); else if (kind === 'recclear') clearRecordLog();
       }, DELETE_HOLD_MS);
     });
     ['pointerup', 'pointercancel'].forEach((t) => document.addEventListener(t, () => { if (btn) end(); }));
@@ -2715,28 +2971,26 @@
 
   // 사용법: "항목: 설명" 한 줄씩 (앞부분은 굵게 표시). 캐릭터별 특성·토큰 규칙은 넣지 않음
   const HELP = [
-    ['상단 메뉴', ['NEW GAME: 캐릭터 선택으로 (두 번 눌러 확인)', 'LOG: 기록 보기 (✕ 옆 RECORD = 이 게임의 전적 메모)', 'SETTING: 설정 · 일러스트 · 사용법 · 버전', '화면 뒤집기 (SETTING): 화면을 180° 돌림 (폰을 반대로 눕혀 쓸 때)',
-      'UNDO: 마지막 행동 취소 (되돌린 직후 은은하게 빛나요)']],
-    ['캐릭터 선택', ['캐릭터 칸: 처음 누른 쪽이 1P, 두 번째가 2P (같은 캐릭터를 두 번 누르면 미러전)',
-      '1P SELECT / 2P SELECT: 지금 고를 차례',
-      '고른 캐릭터 칸 · 좌우 아래 캐릭터: 누르면 그쪽 선택 취소', '↻: 1P · 2P 선택 모두 취소',
-      'GAME START: 둘 다 고르면 나타나요', 'SELECT YOUR CHARACTER (제목): 누르면 캐릭터 칸에 이름 표시 켜기 / 끄기', 'LIMITATION (왼쪽 위): 이번 시즌 종제한 · 금지 · 에라타 (두상을 누르면 그 캐릭터의 제한 목록)', 'RECORD (왼쪽 위): 전적 메모']],
-    ['체력', ['빨간 / 초록 버튼: 피해 / 회복', '연달아 누르기: 체력 옆에 합계 표시',
-      '이름 옆 마름모: 체력 구간에 맞는 최대 손패', '서든데스: 양쪽 체력이 모두 0이면 가운데에 나타나요 (양쪽 체력 1000 · FP 0)']],
-    ['FP · 특성 · 토큰', ['+ / −: FP 1씩 조절', '가운데 FP 숫자: 누르면 0, 두 번 탭 · 1초 누르기 = FP 팝업', 'FP 버튼: 양쪽 −9~+9 팝업 (가운데 ✕로 닫기)',
-      '특성 마크: 누르면 ON(밝게) / OFF(어둡게)', '토큰 + / −: 개수 조절 (조건을 채우면 칸이 강조돼요)']],
-    ['타이머 · 턴', ['가운데 마름모: 탭 = 카운트다운 시작 / 처음으로', '10 / 30: 카운트다운 길이',
-      '경기 시간: 탭 = 시작 / 일시정지, 길게 = 처음으로 (설정에서 바꾸기)', 'TURN: 탭 = +1, 길게 = −1']],
-    ['로그', ['로그 이름: 게임을 시작한 날짜 · 시간', '로그 이름 길게(1초): 그 게임 이어하기',
-      '새 게임 · 앱 다시 열기: 지금 로그 자동 보관 (최근 10개)', '이어 누르기: 한 줄로 묶임 (되돌리기도 한 번에). 체력은 1초 안 · 피해와 회복을 합친 값(−500, +100 → 피해 −400), FP는 3초 안 · 1P와 2P 함께 결과값으로',
-      '되돌린 기록: 흐리게 "되돌림"으로 표시', 'ALL DELETE 길게(1초): 모든 로그 삭제', 'TXT EXPORT: 모든 로그를 텍스트 파일로 저장', '펼친 폴드폰 · 태블릿: 게임 화면 아래에 이번 게임의 로그가 늘 보여요', '아래 로그 누르기 · SETTING의 아래 로그 비율: 경계 위치 3단계 (기본 → 데미지와 토큰 · 특성 사이가 화면 절반 → 계산기와 로그 절반씩)', 'SETTING의 로그 비율 고정 ON: 아래 로그를 눌러도 비율이 바뀌지 않아요']],
-    ['전적 메모', ['RECORD: 날짜 · 나 · 상대 캐릭터 · 승패를 남기는 개인 전적 메모 (로그와 별개)',
-      '여는 곳: 캐릭터 선택 화면 왼쪽 위 RECORD, LOG 창 ✕ 옆 RECORD (보고 있는 로그의 1P = 나, 2P = 상대로 채워요)',
-      '나 · 상대: 누르면 캐릭터 선택 화면처럼 고르기. ⇄ = 나와 상대 자리 바꾸기 (2P 쪽이 나일 때)',
-      '승 / 패 / 무효: 누르면 바로 저장. 나는 그대로, 상대는 비워져요', 'NEW GAME (✕ 옆): 두 번 눌러 캐릭터 선택으로',
-      '무효: 순수 기록용. 기록 탭에만 남고 날짜별 탭 · 전적 · 승률에는 넣지 않아요',
-      '부전승 / 부전패 (승 / 패 아래): 캐릭터 없이 바로 저장. 기록 · 날짜별 탭에 보이고 판수 · 승률에는 넣지 않아요', '뒤로가기 (캐릭터 고르기 창 오른쪽 아래): 창 닫기', '기록 · 날짜별 · 캐릭터별: 줄을 누르면 그날의 경기(1R, 2R …) · 상대 캐릭터별 전적이 펼쳐져요',
-      '✕ 두 번: 그 기록 삭제', 'ALL DELETE 길게(1초): 모든 전적 삭제 (로그 ALL DELETE와는 따로)', 'TXT EXPORT: 전적을 텍스트 파일로 저장']],
+    ['상단 메뉴', ['NEW GAME: 두 번 눌러 캐릭터 선택으로', 'UNDO: 마지막 행동 취소', 'LOG: 게임 기록 보기', 'SETTING: 설정 · 일러스트 · 사용법 · 버전']],
+    ['캐릭터 선택', ['캐릭터 칸: 처음 누른 캐릭터가 1P, 다음이 2P', '고른 캐릭터 · 아래 캐릭터: 누르면 선택 취소', '↻: 1P · 2P 선택 모두 취소',
+      'GAME START: 둘 다 고르면 시작', 'SELECT YOUR CHARACTER: 누르면 캐릭터 이름 표시 켜기 · 끄기',
+      'LIMITATION: 이번 시즌 종제한 · 금지 · 에라타. 두상을 누르면 그 캐릭터의 제한 목록', 'RECORD: 전적 메모']],
+    ['체력', ['빨간 · 초록 버튼: 피해 · 회복', '연달아 누르기: 체력 옆에 합계 표시', '이름 옆 마름모: 지금 체력의 최대 손패',
+      '서든데스: 양쪽 체력이 0이면 가운데에 나타나요. 누르면 양쪽 체력 1000 · FP 0']],
+    ['FP · 특성 · 토큰', ['+ · −: FP 1씩 조절', '가운데 FP 숫자: 누르면 0, 두 번 누르거나 1초 누르면 FP 창', 'FP 버튼: 양쪽 FP를 −9~+9로 바로 입력',
+      '특성 마크: 누르면 ON · OFF', '토큰 + · −: 개수 조절']],
+    ['타이머 · 턴', ['가운데 마름모: 카운트다운 시작 · 처음으로', '10 · 30: 카운트다운 길이', '경기 시간: 누르면 시작 · 일시정지, 길게 누르면 처음으로',
+      'TURN: 누르면 +1, 길게 누르면 −1']],
+    ['로그', ['로그 이름 1초 누르기: 그 게임 이어하기', '보관: 새 게임 · 앱 다시 열기 때 최근 10게임까지 자동 보관',
+      '이어 누르기: 체력은 1초, FP는 3초 안이면 한 줄로 묶이고 되돌리기도 한 번에', 'ALL DELETE 1초 누르기: 모든 로그 삭제',
+      'TXT EXPORT: 로그를 텍스트 파일로 저장', 'TXT IMPORT: 저장한 파일로 로그 목록 바꾸기. 지금 로그는 사라져요',
+      '아래 로그: 펼친 폴드폰 · 태블릿에서 게임 화면 아래에 보여요. 누르면 크기 바꾸기']],
+    ['전적 메모', ['나 · 상대: 눌러서 캐릭터 고르기, ⇄로 자리 바꾸기', '승 · 패: 누르면 바로 저장', '부전승 · 부전패: 캐릭터 없이 저장, 승률에는 안 들어가요',
+      '무효: 기록만 남고 승률에는 안 들어가요', '기록 · 날짜별 · 캐릭터별: 줄을 누르면 자세히', '캐릭터별 탭 다시 누르기: 판수순 · 승률순 바꾸기',
+      'ANALYSIS: 전적 분석. 위쪽 두상을 누르면 그 캐릭터만', '✕ 두 번: 그 기록 삭제', 'CLEAR LOG 1초 누르기: 기록만 지우고 승패 · 승률은 남겨요',
+      'ALL DELETE 1초 누르기: 모든 전적 삭제', 'TXT EXPORT: 전적을 텍스트 파일로 저장', 'TXT IMPORT: 저장한 파일로 덮어쓰기 또는 합치기']],
+    ['SETTING', ['경기 시간: 바꾸면 바로 적용', '화면 뒤집기: 폰을 반대로 눕혀 쓸 때', '아래 로그 비율 · 고정: 펼친 폴드폰 · 태블릿 전용',
+      '전적 기록 수 제한: 넘치면 오래된 기록부터 정리, 승패 · 승률은 남아요', '일러스트: 캐릭터마다 반신 · 두상 그림 고르기']],
   ];
   const helpItem = (t) => { const k = t.indexOf(': '); return k < 0 ? esc(t) : `<b>${esc(t.slice(0, k))}</b> ${esc(t.slice(k + 2))}`; };
   function renderSettings() {
@@ -2760,6 +3014,8 @@
         </section>
         <section class="setsec setrow"><div><b>화면 뒤집기</b><small>화면을 180° 돌려요. 폰을 반대 방향으로 눕혀 쓸 때 켜세요.</small></div>
           <button class="switch chamfer${state.flip ? ' on' : ''}" data-a="flip" aria-pressed="${!!state.flip}">${state.flip ? 'ON' : 'OFF'}</button></section>
+        <section class="setsec"><div class="setrow"><div><b>전적 기록 수 제한</b><small>전적 창에 남겨 두는 기록 줄 수예요. 넘치면 오래된 기록부터 정리되고, 승패 · 승률은 그대로 남아요.</small></div></div>
+          <div class="presets">${REC_LIMITS.map((n) => `<button class="chamfer${n === rec.limit ? ' on' : ''}" data-a="reclimit" data-set="${n}">${n ? `${n}개` : '무제한'}</button>`).join('')}</div></section>
         ${SPLIT_MQ.matches ? `<section class="setsec"><div class="setrow"><div><b>아래 로그 비율</b><small>펼친 폴드폰 · 태블릿에서 게임 화면과 아래 로그의 경계.${state.dockLock ? '' : ' 로그를 눌러도 바뀌어요.'}</small></div></div>
           <div class="presets">${DOCK_SIZES.map((t, k) => `<button class="chamfer${k === (state.dockSize || 0) ? ' on' : ''}" data-a="dock" data-set="${k}">${t}</button>`).join('')}</div>
           <div class="setrow follow"><div><b>로그 비율 고정</b><small>켜면 아래 로그를 눌러도 비율이 바뀌지 않아요. 위 버튼으로는 바꿀 수 있어요.</small></div>
@@ -2816,23 +3072,60 @@
   const dayRecs = (list) => list.filter((r) => r.res !== 'N'); // 날짜별 탭 · 요약 (무효 빼고)
   // 날짜별 묶음의 '부전승 n · 부전패 n' (없으면 빈 글자)
   const byeText = (rs) => ['B', 'F'].map((k) => [k, rs.filter((r) => r.res === k).length]).filter(([, n]) => n).map(([k, n]) => ` · ${REC_RES[k]} ${n}`).join('');
-  const rec = { list: [] };
+  // 정리된 기록(CLEAR LOG · 기록 수 제한)은 줄은 지우고 승 · 패 수만 base에 남김 → 전체 · 캐릭터별 · 날짜별 승률과 분석에 계속 들어감
+  //   base.pairs['나|상대'] = [승, 패], base.days['날짜|나'] = [승, 패]. 무효 · 부전승 · 부전패는 승률에 안 들어가서 남기지 않음
+  //   limit = 남겨 둘 기록 줄 수(0 = 무제한, 설정 탭). 넘치면 오래된 줄부터 base로
+  const emptyBase = () => ({ pairs: {}, days: {} });
+  // 저장 · 불러온 base 검사: 키 모양('나|상대' · '날짜|나')과 값([승, 패] 0 이상 정수)이 맞는 것만 (손상된 파일이 화면을 망가뜨리지 않게)
+  const okMap = (m, keyRe) => Object.fromEntries(Object.entries(m && typeof m === 'object' ? m : {})
+    .filter(([k, v]) => keyRe.test(k) && Array.isArray(v) && v.length === 2 && v.every((x) => Number.isInteger(x) && x >= 0) && v[0] + v[1] > 0));
+  const okBase = (b) => ({ pairs: okMap(b && b.pairs, /^[^|]+\|[^|]+$/), days: okMap(b && b.days, /^\d{4}-\d\d-\d\d\|[^|]+$/) });
+  const rec = { list: [], base: emptyBase(), limit: 0 };
   try {
     const saved = JSON.parse(localStorage.getItem(REC_KEY) || 'null');
-    if (saved && Array.isArray(saved.list)) rec.list = saved.list.filter((r) => r && r.id && r.date);
+    if (saved && Array.isArray(saved.list)) Object.assign(rec, { list: saved.list.filter((r) => r && r.id && r.date), base: okBase(saved.base), limit: Number(saved.limit) || 0 });
   } catch (e) {}
+  const REC_LIMITS = [0, 100, 300, 500, 1000]; // 설정 탭의 기록 수 제한 (0 = 무제한)
   let recRev = 0; // 전적이 바뀔 때마다 +1 → 목록 · 전체 승률을 다시 그릴지 판단
   const saveRec = () => { recRev++; try { localStorage.setItem(REC_KEY, JSON.stringify(rec)); } catch (e) { flashToast('저장 공간이 부족해요', 2000); } };
   const fmtDay = (d) => `${d.getFullYear()}-${two(d.getMonth() + 1)}-${two(d.getDate())}`;
-  ui.rec = { open: false, view: 'list', form: { me: null, opp: null, date: null }, pick: null, openGrp: new Set(), armDel: null };
+  const REC_PAGE = 30; // 기록 탭에 처음 그리는 줄 수 · '더 보기' 한 번에 더하는 줄 수
+  ui.rec = { open: false, view: 'list', charSort: 'n', more: REC_PAGE, form: { me: null, opp: null, date: null }, pick: null, openGrp: new Set(), armDel: null };
+  ui.anal = { open: false, who: null }; // 전적 분석 창 (who = 내 캐릭터 id, null = 전체)
   const recName = (id) => (CHAR_BY_ID[id] ? CHAR_BY_ID[id].name : '?');
+  const recNameB = (id) => `<b style="color:${CHAR_BY_ID[id] ? CHAR_BY_ID[id].color : 'inherit'}">${esc(recName(id))}</b>`; // 전적 · 분석 창의 캐릭터 이름 = 고유색
   const recFace = (id) => `<span class="facering dia">${CHAR_BY_ID[id] ? faceArt(CHAR_BY_ID[id], false, 'art dia') : '<span class="art dia"></span>'}</span>`;
   // 최신이 위: 날짜, 같은 날이면 넣은 순서의 반대
   const sortedRecs = () => rec.list.slice().sort((a, b) => (a.date === b.date ? b.id - a.id : a.date < b.date ? 1 : -1));
-  // 전적 · 승률은 승 · 패만 셈
+  // 기록 줄을 base(승 · 패 수)로 옮김
+  function foldRecs(rs) {
+    const add = (m, k, res) => { const v = m[k] || (m[k] = [0, 0]); v[res === 'W' ? 0 : 1]++; };
+    rs.forEach((r) => { if (r.res === 'W' || r.res === 'L') { add(rec.base.pairs, `${r.me}|${r.opp}`, r.res); add(rec.base.days, `${r.date}|${r.me}`, r.res); } });
+  }
+  const baseGames = () => Object.values(rec.base.pairs).reduce((s, [w, l]) => s + w + l, 0);
+  // 기록 수 제한: 넘치는 오래된 줄을 base로 (돌려준 값 = 정리한 줄 수)
+  function applyRecLimit() {
+    const over = rec.limit ? rec.list.length - rec.limit : 0;
+    if (over <= 0) return 0;
+    const old = sortedRecs().slice(-over);
+    foldRecs(old);
+    const ids = new Set(old.map((r) => r.id));
+    rec.list = rec.list.filter((r) => !ids.has(r.id));
+    return over;
+  }
+  // 승률 계산용: 남은 기록 줄 + base를 같은 모양으로 ({ me, opp, res, n } / { date, me, res, n }, n = 판수)
+  const baseItems = (m, a, b) => Object.entries(m).flatMap(([k, [w, l]]) => { const [x, y] = k.split('|'); return [{ [a]: x, [b]: y, res: 'W', n: w }, { [a]: x, [b]: y, res: 'L', n: l }]; });
+  const pairItems = () => [...rec.list, ...baseItems(rec.base.pairs, 'me', 'opp')];
+  const dayItems = () => [...dayRecs(rec.list), ...baseItems(rec.base.days, 'date', 'me')];
+  // 날짜별 묶음 (최근 날짜부터): { date, c(승 · 패 + base), rs(그날 남은 기록 줄, 최신이 위) }
+  function dateGroups() {
+    const items = groupBy(dayItems(), (r) => r.date), list = new Map(groupBy(dayRecs(sortedRecs()), (r) => r.date));
+    return items.sort(([a], [b]) => (a < b ? 1 : -1)).map(([date, rs]) => ({ date, c: recCount(rs), rs: list.get(date) || [] }));
+  }
+  // 전적 · 승률은 승 · 패만 셈 (base 묶음은 n판)
   function recCount(list) {
     const c = { W: 0, L: 0 };
-    list.forEach((r) => { if (r.res in c) c[r.res]++; });
+    list.forEach((r) => { if (r.res in c) c[r.res] += r.n == null ? 1 : r.n; });
     c.n = c.W + c.L;
     c.rate = c.n ? Math.round((c.W / c.n) * 100) : 0;
     return c;
@@ -2840,11 +3133,12 @@
   const wlText = (c) => `${c.n}전 ${c.W}승 ${c.L}패`;
   // 캐릭터별 묶음: 승 · 패가 없는 캐릭터(무효만 · 부전승/패의 '캐릭터 없음')는 빼고, 판수가 많은 순
   const charGroups = (list, key) => groupBy(list, key).map(([id, rs]) => [id, rs, recCount(rs)]).filter(([, , c]) => c.n).sort((a, b) => b[2].n - a[2].n);
+  const byRate = (a, b) => b[2].rate - a[2].rate || b[2].n - a[2].n;
   const pct = (c) => (c.n ? `${c.rate}%` : '—');
   const resBar = (c) => `<div class="rbar">${['W', 'L'].map((k) => (c[k] ? `<span class="${k}" style="flex:${c[k]}"></span>` : '')).join('')}</div>`;
   const resTag = (r) => `<span class="rres ${r.res}">${REC_RES[r.res] || ''}</span>`;
   const vsHtml = (me, opp) => (me && opp
-    ? `<span class="rvsname">${recFace(me)}<b>${esc(recName(me))}</b><i>VS</i>${recFace(opp)}<b>${esc(recName(opp))}</b></span>`
+    ? `<span class="rvsname">${recFace(me)}${recNameB(me)}<i>VS</i>${recFace(opp)}${recNameB(opp)}</span>`
     : '<span class="rvsname"><i class="nochar">캐릭터 없음</i></span>'); // 부전승 · 부전패
   // 처음 나온 순서대로 묶기
   function groupBy(list, key) {
@@ -2867,10 +3161,12 @@
     Object.assign(ui, { logOpen: which === 'log', settingsOpen: which === 'settings', limitOpen: which === 'limit', artPop: null });
     if (which) ui.fpPop = false;
     Object.assign(ui.rec, { open: which === 'rec', pick: null, armDel: null });
+    ui.anal.open = false;
   }
   function openRecord() {
     openPanel('rec');
     ui.rec.form.date = null; // 날짜 칸은 열 때마다 오늘로 (바꾸면 닫을 때까지 그 날짜)
+    ui.rec.more = REC_PAGE;
   }
 
   // 창 골격은 열 때 한 번(날짜 입력 칸이 그리는 도중 다시 만들어지지 않게), 입력 버튼 · 목록만 바꿔 그림
@@ -2900,7 +3196,7 @@
           <div class="rside">
             <nav class="rtabs" id="rtabs"></nav>
             <div class="rlist" id="rlist"></div>
-            <div class="rfoot"><button class="lexp" data-a="recexport" aria-label="전적을 텍스트 파일로 저장">TXT EXPORT</button><button class="ldel" data-hold="recdelall" aria-label="ALL DELETE 1초 누르기: 모든 전적 삭제"><i class="fill"></i><span>ALL DELETE</span></button></div>
+            <div class="rfoot"><button class="lexp" data-a="recimport" aria-label="내보낸 텍스트 파일에서 전적 · 로그 불러오기">TXT IMPORT</button><button class="lexp" data-a="recexport" aria-label="전적을 텍스트 파일로 저장">TXT EXPORT</button><button class="ldel soft" data-hold="recclear" aria-label="CLEAR LOG 1초 누르기: 승패 · 승률은 남기고 기록 줄만 정리"><i class="fill"></i><span>CLEAR LOG</span></button><button class="ldel" data-hold="recdelall" aria-label="ALL DELETE 1초 누르기: 모든 전적 삭제"><i class="fill"></i><span>ALL DELETE</span></button></div>
           </div>
         </div>`;
       const d = $('rdate');
@@ -2909,47 +3205,53 @@
     }
     const f = R.form;
     const side = (k, label) => `<button class="rchar ${k}${f[k] ? '' : ' empty'}" data-a="recpick" data-v="${k}" aria-label="${label} 캐릭터 고르기">
-        ${recFace(f[k])}<small>${k === 'me' ? 'ME' : 'VS'}</small><b>${f[k] ? esc(recName(f[k])) : label}</b></button>`;
-    setHtml($('rhtools'), `<button class="hbtn${ui.armed === 'recnew' ? ' armed' : ''}" data-a="recnew" aria-label="새 게임 (두 번 눌러 캐릭터 선택으로)">NEW GAME</button><button class="lclose" data-a="record" aria-label="닫기">✕</button>`);
+        ${recFace(f[k])}<small>${k === 'me' ? 'ME' : 'VS'}</small>${f[k] ? recNameB(f[k]) : `<b>${label}</b>`}</button>`;
+    setHtml($('rhtools'), `<button class="hbtn anbtn" data-a="analopen" aria-label="전적 분석 리포트">ANALYSIS</button><button class="hbtn${ui.armed === 'recnew' ? ' armed' : ''}" data-a="recnew" aria-label="새 게임 (두 번 눌러 캐릭터 선택으로)">NEW GAME</button><button class="lclose" data-a="record" aria-label="닫기">✕</button>`);
     setHtml($('rvs'), `${side('me', '나')}<button class="rswap chamfer" data-a="recswap" aria-label="나와 상대 자리 바꾸기">⇄<small>바꾸기</small></button>${side('opp', '상대')}`);
     setHtml($('rtabs'), [['list', '기록'], ['date', '날짜별'], ['char', '캐릭터별']]
-      .map(([v, t]) => `<button class="${R.view === v ? 'on' : ''}" data-a="recview" data-v="${v}">${t}</button>`).join(''));
-    const sig = `${recRev}|${R.view}|${R.armDel}|${[...R.openGrp]}`;
+      .map(([v, t]) => `<button class="${R.view === v ? 'on' : ''}" data-a="recview" data-v="${v}">${t}${v === 'char' && R.view === v ? `<small>${R.charSort === 'rate' ? '승률순' : '판수순'}</small>` : ''}</button>`).join(''));
+    const sig = `${recRev}|${R.view}|${R.charSort}|${R.armDel}|${[...R.openGrp]}|${R.more}`;
     if (sig !== recListSig) {
       recListSig = sig;
-      const c = recCount(rec.list);
+      const c = recCount(pairItems());
       setHtml($('rtotal'), `<span class="tl">전체 승률</span><span class="tr num">${c.n ? `${c.rate}<small>%</small>` : '—'}</span><span class="tw">${wlText(c)}</span>${resBar(c)}`);
       setHtml($('rlist'), recListHtml());
     }
     renderRecPick();
   }
   let recListSig = null;
-  // 묶음 한 줄(이름 · 전적 · 승률 · 비율 막대) + 누르면 펼쳐지는 세부
+  // 묶음 한 줄(이름 · 전적 · 승률 · 비율 막대) + 누르면 펼쳐지는 세부 (subHtml = null이면 펼칠 것 없음: 정리된 기록만 있는 날)
   // extra: 전적 옆에 붙일 글자 (날짜별의 '· 부전승 n · 부전패 n')
-  function sumGroup(key, nameHtml, rs, subHtml, extra = '') {
-    const c = recCount(rs), open = ui.rec.openGrp.has(key);
-    return `<div class="rgrp"><button class="rsum" data-a="recgrp" data-v="${esc(key)}" aria-expanded="${open}"><span class="sn">${nameHtml}</span><span class="swl">${wlText(c)}${extra}</span><span class="srate">${pct(c)}</span><span class="arr">▼</span></button>${resBar(c)}${open ? `<div class="rsub">${subHtml}</div>` : ''}</div>`;
+  function sumGroup(key, nameHtml, c, subHtml, extra = '') {
+    const can = subHtml != null, open = can && ui.rec.openGrp.has(key);
+    const inner = `<span class="sn">${nameHtml}</span><span class="swl">${wlText(c)}${extra}</span><span class="srate">${pct(c)}</span><span class="arr">${can ? '▼' : ''}</span>`;
+    return `<div class="rgrp">${can ? `<button class="rsum" data-a="recgrp" data-v="${esc(key)}" aria-expanded="${open}">${inner}</button>` : `<div class="rsum">${inner}</div>`}${resBar(c)}${open ? `<div class="rsub">${subHtml}</div>` : ''}</div>`;
   }
   const delBtn = (r) => { const armed = ui.rec.armDel === r.id; return `<button class="rdel${armed ? ' armed' : ''}" data-a="recdel" data-v="${r.id}" aria-label="삭제">${armed ? '삭제?' : '✕'}</button>`; };
   function recListHtml() {
-    const list = sortedRecs(), R = ui.rec;
-    if (!list.length) return '<div class="rempty">아직 전적이 없어요.<br>나 · 상대 캐릭터를 고르고 승 / 패를 누르세요.</div>';
+    const list = sortedRecs(), R = ui.rec, kept = baseGames();
+    if (!list.length && !kept) return '<div class="rempty">아직 전적이 없어요.<br>나 · 상대 캐릭터를 고르고 승 / 패를 누르세요.</div>';
     if (R.view === 'list') {
-      return list.map((r) => `<div class="rrow"><span class="rd num">${esc(r.date.slice(2).replace(/-/g, '.'))}</span>${vsHtml(r.me, r.opp)}${resTag(r)}${delBtn(r)}</div>`).join('');
+      const note = kept ? `<div class="rnote">정리된 기록 ${kept}판은 승패 · 승률에만 남아 있어요</div>` : '';
+      // 기록이 수천 줄이어도 가볍게: 최근 R.more줄만 그리고, 맨 아래 '더 보기'로 REC_PAGE줄씩 더
+      const more = list.length - R.more;
+      return note + list.slice(0, R.more).map((r) => `<div class="rrow"><span class="rd num">${esc(r.date.slice(2).replace(/-/g, '.'))}</span>${vsHtml(r.me, r.opp)}${resTag(r)}${delBtn(r)}</div>`).join('')
+        + (more > 0 ? `<button class="rmore" data-a="recmore">더 보기<small>${more}개 남음</small></button>` : '');
     }
     if (R.view === 'date') {
-      // 최근 날짜부터, 펼치면 그날 경기를 넣은 순서대로 1R, 2R … (부전승 · 부전패도 한 라운드, 무효는 넣지 않음)
-      const days = dayRecs(list);
+      // 최근 날짜부터, 펼치면 그날 경기를 넣은 순서대로 1R, 2R … (부전승 · 부전패도 한 라운드, 무효는 넣지 않음). 정리된 기록만 있는 날은 승패만
+      const days = dateGroups();
       if (!days.length) return '<div class="rempty">아직 날짜별로 볼 전적이 없어요.</div>';
-      return groupBy(days, (r) => r.date).map(([date, rs]) => sumGroup(`d:${date}`, `<span class="num">${esc(date)}</span>`, rs,
-        rs.slice().reverse().map((r, k) => `<div class="rsubrow round"><span class="rnd">${k + 1}R</span>${vsHtml(r.me, r.opp)}${resTag(r)}</div>`).join(''), byeText(rs))).join('');
+      return days.map(({ date, c, rs }) => sumGroup(`d:${date}`, `<span class="num">${esc(date)}</span>`, c,
+        rs.length ? rs.slice().reverse().map((r, k) => `<div class="rsubrow round"><span class="rnd">${k + 1}R</span>${vsHtml(r.me, r.opp)}${resTag(r)}</div>`).join('') : null, byeText(rs))).join('');
     }
-    // 캐릭터별: 많이 쓴 내 캐릭터부터, 펼치면 상대 캐릭터별 (승률 높은 순)
-    const groups = charGroups(list, (r) => r.me);
+    // 캐릭터별: 판수순(기본) ↔ 승률순(탭을 다시 누르면), 펼치면 상대 캐릭터별 (승률 높은 순)
+    const groups = charGroups(pairItems(), (r) => r.me);
+    if (R.charSort === 'rate') groups.sort(byRate);
     if (!groups.length) return '<div class="rempty">아직 승 · 패 전적이 없어요.</div>';
-    return groups.map(([me, rs]) => sumGroup(`c:${me}`, `${recFace(me)}${esc(recName(me))}`, rs,
-      charGroups(rs, (r) => r.opp).sort((a, b) => b[2].rate - a[2].rate || b[2].n - a[2].n)
-        .map(([opp, , c]) => `<div class="rsubrow"><span class="rvsname"><i>VS</i>${recFace(opp)}<b>${esc(recName(opp))}</b></span><span class="swl">${wlText(c)}</span><span class="srate">${pct(c)}</span>${resBar(c)}</div>`).join(''))).join('');
+    return groups.map(([me, rs, c]) => sumGroup(`c:${me}`, `${recFace(me)}${recNameB(me)}`, c,
+      charGroups(rs, (r) => r.opp).sort(byRate)
+        .map(([opp, , d]) => `<div class="rsubrow"><span class="rvsname"><i>VS</i>${recFace(opp)}${recNameB(opp)}</span><span class="swl">${wlText(d)}</span><span class="srate">${pct(d)}</span>${resBar(d)}</div>`).join(''))).join('');
   }
   // 캐릭터 고르기 창 (나 / 상대 칸을 누르면): 캐릭터 선택 화면과 같은 마름모 로스터. 나 = 파랑 · 상대 = 빨강 테두리.
   // 고르면 바로 넣고 닫힘. 오른쪽 아래 = 뒤로가기(닫기)
@@ -2967,27 +3269,150 @@
         </div>
       </div>`);
   }
-  // 전적 TXT: 전체 · 내 캐릭터별 · 날짜별 요약 + 한 줄씩 (최신이 위)
+  // ================= 전적 분석 (RECORD 창의 ANALYSIS) =================
+  // 맨 위 = 전체 · 내가 쓴 캐릭터 두상(판수 순). 누르면 그 캐릭터만의 리포트 (최고 픽률 · 최고 승률 순위는 전체에서만).
+  // 판수 · 승률 · 날짜별 · 상대 정보 = 남은 기록 줄 + 정리된 기록(base), 최근 흐름 · 연승 = 남은 기록 줄만(순서가 필요해서)
+  const ANAL_MIN = 3; // 최고 승률(없으면 전부) · 상성 좋은/나쁜 상대(없으면 안내)는 이 판수 이상만
+  const ANAL_TOP = 5; // 순위 · 상대 목록에 보여 줄 캐릭터 수
+  const ANAL_DAYS = 10; // 날짜별 승률 그래프: 최근 이 날수만
+  const ANAL_NEED = 10; // 많이 만난 상대 · 상성은 이 판수 이상부터
+  const pctOf = (a, b) => (b ? Math.round((a / b) * 100) : 0);
+  function renderAnal() {
+    const el = $('anal'), open = ui.anal.open && ui.rec.open;
+    setProp(el, 'hidden', !open);
+    setProp($('analbg'), 'hidden', !open);
+    if (!open) { htmlCache.delete(el); analSig = null; return; }
+    const sig = `${recRev}|${ui.anal.who}`;
+    if (sig === analSig) return;
+    analSig = sig;
+    setHtml(el, analHtml());
+  }
+  let analSig = null;
+  function analHtml() {
+    const wl = (r) => r.res === 'W' || r.res === 'L';
+    const all = pairItems().filter(wl), mine = charGroups(all, (r) => r.me);
+    const who = mine.some(([id]) => id === ui.anal.who) ? ui.anal.who : null;
+    const items = who ? all.filter((r) => r.me === who) : all, tot = recCount(items);
+    const face = (id, on) => `<button class="aface${on ? ' on' : ''}" data-a="analwho" data-v="${id || ''}" ${id ? `style="--cc:${CHAR_BY_ID[id].color}"` : ''} aria-label="${id ? esc(recName(id)) : '전체'} 분석">
+        ${id ? recFace(id) : '<span class="aall">ALL</span>'}<b>${id ? esc(recName(id)) : '전체'}</b></button>`;
+    const faces = face(null, !who) + mine.filter(([id]) => CHAR_BY_ID[id]).map(([id]) => face(id, id === who)).join('');
+    // 두상 줄도 리포트와 함께 스크롤 (캐릭터 고르기는 이 줄에서만)
+    const head = `<header><b>ANALYSIS<small>전적 분석${who ? ` · ${esc(recName(who))}` : ''}</small></b><button class="lclose" data-a="analclose" aria-label="닫기">✕</button></header>
+      <div class="abody" id="abody"><nav class="afaces">${faces}</nav>`;
+    if (!tot.n) return `${head}<div class="rempty">아직 분석할 승 · 패 전적이 없어요.</div></div>`;
+    // 순서가 필요한 것: 남은 기록 줄(오래된 것부터)
+    const seq = sortedRecs().filter((r) => wl(r) && (!who || r.me === who)).reverse();
+    let best = 0, run = 0;
+    seq.forEach((r) => { run = r.res === 'W' ? run + 1 : 0; best = Math.max(best, run); });
+    let cur = 0;
+    for (let k = seq.length - 1; k >= 0 && seq[k].res === seq[seq.length - 1].res; k--) cur++;
+    const last10 = recCount(seq.slice(-10));
+    const kpi = (label, val, sub = '', cls = '') => `<div class="akpi"><span>${label}</span><b>${val}</b>${sub ? `<small class="${cls}">${sub}</small>` : ''}</div>`;
+    const kpis = `<section class="akpis">
+        ${kpi('판수', `${tot.n}<i>판</i>`, who ? `전체의 ${pctOf(tot.n, recCount(all).n)}%` : `캐릭터 ${mine.length}명 사용`)}
+        ${kpi('승 · 패', `<em class="W">${tot.W}</em><i>/</i><em class="L">${tot.L}</em>`)}
+        ${kpi('승률', `${tot.rate}<i>%</i>`, resBar(tot), 'kbar')}
+        ${kpi('최근 10판', seq.length ? `${last10.rate}<i>%</i>` : '—', seq.length ? `${last10.W}승 ${last10.L}패` : '')}
+        ${kpi('최고 연승', seq.length ? `${best}<i>연승</i>` : '—', seq.length ? `지금 ${cur}${seq[seq.length - 1].res === 'W' ? '연승' : '연패'}` : '')}
+      </section>`;
+    const row = ([id, , c], val) => `<div class="arow">${recFace(id)}${recNameB(id)}<span class="swl">${wlText(c)}</span><span class="aval">${val}</span></div>`;
+    const card = (title, rows, empty = '없어요') => `<section class="acard"><h5>${title}</h5>${rows.length ? rows.join('') : `<p class="anone">${empty}</p>`}</section>`;
+    // 전체에서만: 최고 픽률 · 최고 승률 (1위는 크게, 2~5위는 그 아래 작게 순서대로)
+    let top = '';
+    if (!who) {
+      const pool = mine.filter(([, , c]) => c.n >= ANAL_MIN);
+      const rateRank = (pool.length ? pool : mine).slice().sort(byRate).slice(0, ANAL_TOP);
+      const pickRank = mine.slice(0, ANAL_TOP);
+      const color = (id) => (CHAR_BY_ID[id] ? CHAR_BY_ID[id].color : 'var(--lumen)');
+      const hero = (title, [id], big, sub) => `<div class="ahero" style="--cc:${color(id)}">${recFace(id)}<span class="ht">${title}</span><b>${esc(recName(id))}</b><small>${sub}</small><span class="hv">${big}</span></div>`;
+      const minor = (list, val) => list.slice(1).map((g, k) => `<div class="aminor" style="--cc:${color(g[0])}"><span class="rk num">${k + 2}</span>${recFace(g[0])}<b>${esc(recName(g[0]))}</b><span class="swl">${val(g[2], true)}</span><span class="aval">${val(g[2])}</span></div>`).join('');
+      const pickVal = (c, sub) => (sub ? `${c.n}판 · 승률 ${c.rate}%` : `${pctOf(c.n, tot.n)}%`);
+      const rateVal = (c, sub) => (sub ? wlText(c) : `${c.rate}%`);
+      top = `<section class="aheroes">
+          <div class="acol">${hero('최고 픽률', pickRank[0], `${pctOf(pickRank[0][2].n, tot.n)}<i>%</i>`, pickVal(pickRank[0][2], true))}${minor(pickRank, pickVal)}</div>
+          <div class="acol">${hero('최고 승률', rateRank[0], `${rateRank[0][2].rate}<i>%</i>`, `${wlText(rateRank[0][2])}${pool.length ? '' : ' · 판수 적음'}`)}${minor(rateRank, rateVal)}</div>
+        </section>`;
+    }
+    // 날짜별 승률: 최근 ANAL_DAYS일, 오래된 날짜부터 (막대 = 그날 승률, 파랑 50% 이상 · 빨강 미만)
+    const dItems = dayItems().filter((r) => wl(r) && (!who || r.me === who));
+    const days = groupBy(dItems, (r) => r.date).sort(([a], [b]) => (a < b ? -1 : 1)).slice(-ANAL_DAYS).map(([d, rs]) => [d, recCount(rs)]).filter(([, c]) => c.n);
+    const chart = `<section class="acard wide"><h5>날짜별 승률</h5><div class="achart">${dayChart(days)}</div></section>`;
+    // 상대 캐릭터: 많이 만난 상대 · 상성 좋은 / 나쁜 상대 (각 ANAL_TOP명). 판수가 ANAL_NEED판 미만이면 '데이터가 부족해요'
+    //   상성 = ANAL_MIN판 이상 만난 상대만. 같으면 판수 많은 쪽 → 먼저 만난 쪽(날짜순, 같은 날이면 먼저 넣은 기록. 정리된 기록에만 있는 상대가 가장 먼저, 그 안에서는 캐릭터 순서)
+    const opps = charGroups(items, (r) => r.opp);
+    const first = new Map(), baseOpp = new Set(Object.keys(rec.base.pairs).map((k) => k.split('|')).filter(([m]) => !who || m === who).map(([, o]) => o));
+    seq.forEach((r, k) => { if (!first.has(r.opp)) first.set(r.opp, k); });
+    const met = (id) => (baseOpp.has(id) || !first.has(id) ? CHARACTERS.findIndex((c) => c.id === id) - 1000 : first.get(id));
+    const earlier = (a, b) => met(a[0]) - met(b[0]);
+    const pool = opps.filter(([, , c]) => c.n >= ANAL_MIN);
+    const lack = tot.n < ANAL_NEED ? `데이터가 부족해요 (${tot.n}/${ANAL_NEED})` : '';
+    const vsCard = (title, list, val, empty) => card(title, lack ? [] : list.slice(0, ANAL_TOP).map((g) => row(g, val(g[2]))), lack || empty);
+    const noPool = `같은 캐릭터와 ${ANAL_MIN}번 이상 만나보세요`;
+    const oppCards = `<section class="agrid">
+        ${vsCard('많이 만난 상대', opps.slice().sort((a, b) => b[2].n - a[2].n || earlier(a, b)), (c) => `${c.n}판`)}
+        ${vsCard('상성 좋은 상대', pool.filter(([, , c]) => c.rate > 50).sort((a, b) => b[2].rate - a[2].rate || b[2].n - a[2].n || earlier(a, b)), (c) => `${c.rate}%`, pool.length ? '승률 50%를 넘는 상대가 없어요' : noPool)}
+        ${vsCard('상성 나쁜 상대', pool.filter(([, , c]) => c.rate < 50).sort((a, b) => a[2].rate - b[2].rate || b[2].n - a[2].n || earlier(a, b)), (c) => `${c.rate}%`, pool.length ? '승률 50% 미만인 상대가 없어요' : noPool)}
+      </section>`;
+    const flow = seq.length ? `<section class="acard wide"><h5>최근 흐름<small>최근 ${Math.min(20, seq.length)}판 · 왼쪽이 오래된 판</small></h5><div class="aflow">${seq.slice(-20).map((r) => `<span class="rres ${r.res}" title="${esc(r.date)} VS ${esc(recName(r.opp))}">${REC_RES[r.res]}</span>`).join('')}</div></section>` : '';
+    const kept = baseGames();
+    // 맨 아래 안내: 무엇을 어떻게 셌는지 (지금 분석 기준 그대로)
+    const note = `<ul class="anote">
+        <li>승 · 패만 세요. 무효 · 부전승 · 부전패는 빠져요.</li>
+        <li>최고 승률은 ${ANAL_MIN}판 이상인 캐릭터 중에서 고르고, 없으면 전체에서 골라요.</li>
+        <li>상성은 ${ANAL_MIN}판 이상 만난 상대만, 많이 만난 상대 · 상성은 ${ANAL_NEED}판 이상부터 보여요.</li>
+        <li>날짜별 승률은 최근 ${ANAL_DAYS}일이에요.</li>
+        ${kept ? `<li>CLEAR LOG · 기록 수 제한으로 정리한 ${kept}판은 판수 · 승률 · 날짜별 · 상대 정보에 들어가고, 최근 10판 · 최고 연승 · 최근 흐름에는 빠져요.</li>` : ''}
+      </ul>`;
+    return `${head}${kpis}${top}${chart}${oppCards}${flow}${note}</div>`;
+  }
+  // 날짜별 승률 막대 그래프 (SVG). 칸은 늘 ANAL_DAYS개 → 영역 너비에 맞춰 줄어듦 (스크롤 없음)
+  function dayChart(days) {
+    const colW = 48, pad = 30, H = 150, top = 24, bottom = 34, ph = H - top - bottom, n = days.length; // pad = 왼쪽 '50%' 글자 자리
+    const W = pad + ANAL_DAYS * colW, x0 = pad + (W - pad - n * colW) / 2, y50 = top + ph / 2;
+    const bars = days.map(([date, c], k) => {
+      const x = x0 + k * colW + colW / 2, h = Math.max(2, (ph * c.rate) / 100), y = top + ph - h;
+      return `<g class="${c.rate >= 50 ? 'up' : 'dn'}"><rect x="${x - 13}" y="${y}" width="26" height="${h}" rx="3"/><text class="v" x="${x}" y="${y - 6}">${c.rate}%</text>`
+        + `<text class="d" x="${x}" y="${H - bottom + 15}">${date.slice(5).replace('-', '.')}</text><text class="g" x="${x}" y="${H - bottom + 29}">${c.n}판</text></g>`;
+    }).join('');
+    return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="날짜별 승률"><line class="g50" x1="0" x2="${W}" y1="${y50}" y2="${y50}"/><text class="l50" x="4" y="${y50 - 4}">50%</text><line class="g0" x1="0" x2="${W}" y1="${top + ph}" y2="${top + ph}"/>${bars}</svg>`;
+  }
+  // 전적 TXT: 맨 위 = 전체 · 내 캐릭터별(상대별) 전적 · 승률, 다음 날짜별, 마지막에 남은 기록 줄 (최신이 위)
+  //   전적 · 승률에는 정리된 기록(base)도 들어가므로 아래 기록 줄 수와 전체 판수가 다를 수 있음
   function recordsToText() {
-    const now = new Date(), list = sortedRecs();
-    const tot = recCount(list);
-    const out = [`${APP.name} ${APP.version} · 전적 내보내기 ${fmtDay(now)} ${fmtTime(now)}`, `전체 ${wlText(tot)} · 승률 ${pct(tot)}`, '', '[내 캐릭터별]'];
-    charGroups(list, (r) => r.me).forEach(([me, , c]) => out.push(`  ${recName(me)}: ${wlText(c)} · ${pct(c)}`));
+    const now = new Date(), list = sortedRecs(), items = pairItems(), tot = recCount(items), kept = baseGames();
+    const out = [`${APP.name} ${APP.version} · 전적 내보내기 ${fmtDay(now)} ${fmtTime(now)}`, '', `[전체] ${wlText(tot)} · 승률 ${pct(tot)}`, '', '[내 캐릭터별]'];
+    charGroups(items, (r) => r.me).forEach(([me, rs, c]) => {
+      out.push(`  ${recName(me)}: ${wlText(c)} · ${pct(c)}`);
+      charGroups(rs, (r) => r.opp).sort(byRate).forEach(([opp, , d]) => out.push(`      VS ${recName(opp)}: ${wlText(d)} · ${pct(d)}`));
+    });
     out.push('', '[날짜별]');
-    groupBy(dayRecs(list), (r) => r.date).forEach(([date, rs]) => { const c = recCount(rs); out.push(`  ${date}: ${wlText(c)}${byeText(rs)} · ${pct(c)}`); });
-    out.push('', '='.repeat(40));
+    dateGroups().forEach(({ date, c, rs }) => out.push(`  ${date}: ${wlText(c)}${byeText(rs)} · ${pct(c)}`));
+    out.push('', '='.repeat(40), `[기록] 저장된 기록 ${list.length}개${kept ? ` · 정리된 ${kept}판은 위 전적 · 승률에만 들어 있어 전체 판수와 달라요` : ''}`, '-'.repeat(40));
     list.forEach((r) => out.push(`${r.date}  ${REC_RES[r.res]}${isBye(r.res) ? '' : `  ${recName(r.me)}  VS  ${recName(r.opp)}`}`));
-    return out.join('\n');
+    return out.join('\n') + dataBlock({ type: 'record', rows: rec.list.map((r) => [r.id, r.date, r.me, r.opp, r.res]), base: rec.base });
   }
   // ALL DELETE(1초 누르기, 길게 누르기 처리기에서 부름)
   function deleteAllRecords() {
-    if (rec.list.length) {
-      rec.list = [];
+    if (rec.list.length || baseGames()) {
+      Object.assign(rec, { list: [], base: emptyBase() });
       Object.assign(ui.rec, { armDel: null, openGrp: new Set() });
       saveRec();
       flashToast('모든 전적을 지웠어요', 1600);
       buzz(15);
     } else flashToast('지울 전적이 없어요');
+    refresh();
+  }
+  // CLEAR LOG(1초 누르기): 기록 줄은 지우고 승 · 패 수는 base에 남김 → 전적 · 승률 · 분석은 그대로
+  function clearRecordLog() {
+    const n = rec.list.length;
+    if (n) {
+      foldRecs(rec.list);
+      rec.list = [];
+      Object.assign(ui.rec, { armDel: null, openGrp: new Set() });
+      saveRec();
+      flashToast(`기록 ${n}개를 정리했어요 · 승패 · 승률은 남아요`, 2000);
+      buzz(15);
+    } else flashToast('정리할 기록이 없어요');
     refresh();
   }
   let recArmTimer = null;
@@ -3009,7 +3434,12 @@
     recnew() {
       if (twoStep('recnew', '한 번 더 누르면 캐릭터 선택으로', () => { openPanel(null); goSelect(); })) return 'shown';
     },
-    recview(_, v) { Object.assign(ui.rec, { view: v, openGrp: new Set(), armDel: null }); const l = $('rlist'); if (l) l.scrollTop = 0; },
+    recview(_, v) {
+      const R = ui.rec;
+      if (v === 'char' && R.view === 'char') { R.charSort = R.charSort === 'rate' ? 'n' : 'rate'; return; } // 캐릭터별 탭 다시 누르기 = 판수순 ↔ 승률순
+      Object.assign(R, { view: v, openGrp: new Set(), armDel: null, more: REC_PAGE });
+      const l = $('rlist'); if (l) l.scrollTop = 0;
+    },
     recgrp(_, v) { const s = ui.rec.openGrp; if (!s.delete(v)) s.add(v); },
     recpick(_, v) { ui.rec.pick = v; },
     recpickclose() { ui.rec.pick = null; },
@@ -3024,6 +3454,7 @@
       const date = (dateEl && dateEl.value) || fmtDay(new Date());
       const id = rec.list.reduce((m, r) => Math.max(m, r.id + 1), Date.now());
       rec.list.push({ id, date, me: bye ? null : f.me, opp: bye ? null : f.opp, res: v });
+      applyRecLimit();
       saveRec();
       flashToast(bye ? REC_RES[v] : `${REC_RES[v]} · ${recName(f.me)} VS ${recName(f.opp)}`);
       if (!bye) f.opp = null;
@@ -3045,6 +3476,20 @@
       if (!rec.list.length) { flashToast('내보낼 전적이 없어요'); return; }
       saveTextFile('record', recordsToText(), '전적 파일');
     },
+    recimport() { importText(); },
+    recmore() { ui.rec.more += REC_PAGE; }, // 기록 탭 맨 아래 '더 보기'
+    // 설정 탭 '전적 기록 수 제한': 줄여서 기록이 정리되면 확인 창
+    reclimit(_, __, d) {
+      const n = Number(d.set) || 0, over = n ? rec.list.length - n : 0;
+      const apply = () => { rec.limit = n; const cut = applyRecLimit(); saveRec(); flashToast(cut ? `오래된 기록 ${cut}개를 정리했어요 · 승패 · 승률은 남아요` : `전적 기록 수 제한: ${n ? `${n}개` : '무제한'}`, 2000); };
+      if (over > 0) askConfirm('기록 수 제한을 바꿀까요?', `${n}개로 줄이면 오래된 기록 ${over}개가 정리돼요. 승패 · 승률은 그대로 남아요.`, '바꾸기', apply);
+      else apply();
+    },
+    analopen() { Object.assign(ui.anal, { open: true, who: null }); },
+    analclose() { ui.anal.open = false; },
+    analwho(_, v) { ui.anal.who = v || null; const b = $('abody'); if (b) b.scrollTop = 0; },
+    cfok(_, v) { const c = ui.confirm, b = c && c.btns[Number(v) || 0]; ui.confirm = null; if (b) b[3](); },
+    cfno() { ui.confirm = null; },
   };
 
   // ================= 화면 전환 =================
@@ -3182,6 +3627,7 @@
     fppop() { if (state.screen === 'game') ui.fpPop = true; },
     fpclose() { ui.fpPop = false; },
     logexport() { exportLogs(); },
+    logimport() { importText(); },
     // + / − 와 같은 묶음: 3초 안에 이어서 누르면(1P·2P 모두) 기록·되돌리기가 한 번
     fpset(i, v) {
       const p = state.players[i], next = Number(v), d = next - p.fp;
@@ -3471,7 +3917,7 @@
   // 가로 고정(APK)·가로 뷰포트에서는 회전 없이 그대로 같은 방식(관성 포함)으로 스크롤 → 어느 쪽이든 똑같이 동작.
   let dragScrolled = false;
   (() => {
-    const SEL = '.llist, .ltabs, .setbody, .rlist, .lfaces, .lcards';
+    const SEL = '.llist, .ltabs, .setbody, .rlist, .lfaces, .lcards, .abody, .afaces'; // 가장 안쪽 영역만 (분석 창: 두상 줄 = 좌우, 나머지 = 위아래)
     const PORTRAIT_MQ = matchMedia('(orientation: portrait)'); // 끄는 동안 매번 새로 만들지 않음
     // 화면(손가락) 이동 → 앱 기준 이동. 90°: 앱 x = 화면 y, 앱 y = −화면 x / −90°(세로+뒤집기): 반대 / 180°(가로+뒤집기): 둘 다 반대
     const toApp = (dx, dy) => (PORTRAIT_MQ.matches ? (state.flip ? [-dy, dx] : [dy, -dx]) : (state.flip ? [-dx, -dy] : [dx, dy]));
@@ -3522,7 +3968,7 @@
     if (longFired && btn.dataset.long) { longFired = false; return; }
     const fn = actions[btn.dataset.a];
     if (!fn) return;
-    if ((btn.dataset.a === 'logbg' || btn.id === 'artpop' || btn.id === 'recpick') && e.target !== btn) return; // 패널 안쪽(빈 곳)은 닫지 않음
+    if ((btn.dataset.a === 'logbg' || btn.id === 'artpop' || btn.id === 'recpick' || btn.id === 'confirm') && e.target !== btn) return; // 패널 안쪽(빈 곳)은 닫지 않음
     const i = btn.dataset.p != null ? Number(btn.dataset.p) : null;
     actionHid = null;
     const r = fn(i, btn.dataset.v, btn.dataset);
