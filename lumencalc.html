@@ -150,7 +150,7 @@
     (날짜별 묶음은 '○전 ○승 ○패 · 부전승 n · 부전패 n'), 판수 · 승률 · 캐릭터별에는 넣지 않음.
   - 캐릭터 고르기 창 오른쪽 아래 뒤로가기 = 창 닫기.
   - 나 · 상대 칸을 누르면 캐릭터 선택 화면과 같은 마름모 로스터(나 파랑 · 상대 빨강 테두리). 승 · 패 · 무효 아래 = 전체 승률.
-  - 기록 탭은 최근 30줄만 그리고 맨 아래 '더 보기'로 30줄씩 더(REC_PAGE) → 기록이 수천 줄이어도 가벼움.
+  - 기록 탭은 최근 30줄(REC_PAGE) · 날짜별 탭은 최근 10일(DATE_PAGE)만 그리고 맨 아래 '더 보기'로 그만큼씩 더 → 기록이 수천 줄이어도 가벼움.
   - 목록 탭: 기록(✕ 두 번 = 삭제) · 날짜별(펼치면 그날 1R, 2R …) · 캐릭터별(내 캐릭터 → 상대별 승률 높은 순. 판수순 기본, 탭을 다시 누르면 승률순 ↔ 판수순).
   - 정리된 기록: CLEAR LOG(1초) · 설정의 '전적 기록 수 제한'(기본 무제한, 줄이면 확인 창)으로 지운 줄은 승 · 패 수만 rec.base에 남음
     → 전체 승률 · 날짜별 · 캐릭터별 · 분석 · TXT에 계속 들어감(그래서 기록 줄 수 ≠ 전체 판수일 수 있음).
@@ -203,6 +203,7 @@
     --p1: #4DA3FF;
     --p2: #FF5C7A;
     --dmg: #FF6B61;
+    --dmg-fill: #CC362E; /* 흰 글자를 올리는 빨간 바탕(토스트 · 두 번 누르기 대기 버튼): 흰 글자 대비 5:1 */
     --heal: #3DCB8A;
     --lumen: #FFC247;
     --u: min(1cqh, .45cqw);
@@ -434,7 +435,7 @@
     word-break: keep-all;
     text-wrap: balance;
   }
-  .fighter:not(.empty) .name { color: var(--cc); text-shadow: 0 0 calc(2 * var(--u)) rgba(6, 8, 16, .9); } /* 캐릭터 상징색 */
+  .fighter:not(.empty) .name { color: var(--ct, var(--cc)); text-shadow: 0 0 calc(2 * var(--u)) rgba(6, 8, 16, .9); } /* 캐릭터 상징색 */
   .fighter.empty .name { color: var(--muted); font-size: max(14px, calc(4.4 * var(--u))); }
   .fighter .ptag { font-size: max(15px, calc(4.6 * var(--u))); }
   /* 지금 고르는 쪽 화면 바깥 모서리 빛 (1P 왼쪽 파랑, 2P 오른쪽 빨강). 터치는 통과.
@@ -477,20 +478,20 @@
   }
   .seltools button {
     width: var(--tbtn-w);
-    height: var(--tbtn-h);
+    height: max(44px, var(--tbtn-h)); /* 선택 화면은 자리가 있어 누르는 영역 최소 44px (배틀 화면 툴바는 그대로) */
     display: grid;
     place-items: center;
     background: var(--surface);
     color: var(--text);
     font-family: var(--font-num);
     font-weight: 700;
-    font-size: max(10px, calc(2.9 * var(--u)));
+    font-size: max(11px, calc(2.9 * var(--u)));
     letter-spacing: .05em;
     white-space: nowrap;
   }
   .seltools button:active { background: var(--surface-2); color: var(--text); }
   /* 제목(SELECT YOUR CHARACTER)을 누르면 캐릭터 칸에 이름 표시 켜기 / 끄기 (state.names, 저장됨) — 제목 모양은 그대로 */
-  .titlebtn { font: inherit; letter-spacing: inherit; color: inherit; line-height: inherit; }
+  .titlebtn { font: inherit; letter-spacing: inherit; color: inherit; line-height: inherit; padding: 12px 16px; margin: -12px -16px; } /* 패딩 = 음수 여백 → 누르는 영역만 넓어짐 */
   /* 캐릭터 칸 아래쪽에 어두운 띠 + 이름(캐릭터 상징색). 마름모 모양으로 잘림, 터치는 칸으로 통과.
      늘 그려 두고 .app[data-names="1"]일 때만 보임 (선택 화면 · 전적 캐릭터 고르기 창 공용) */
   .slot .sname { display: none; }
@@ -499,7 +500,7 @@
     position: absolute; left: 0; right: 0; top: 62%; z-index: 1;
     padding: calc(3.4 * var(--u)) 0 calc(4 * var(--u));
     background: linear-gradient(rgba(6, 8, 16, 0), rgba(6, 8, 16, .85) calc(2.6 * var(--u)));
-    color: var(--cc, #fff); text-align: center; font-weight: 700; font-size: max(10px, calc(2.6 * var(--u))); line-height: 1.2;
+    color: var(--cc, #fff); text-align: center; font-weight: 700; font-size: max(11px, calc(2.6 * var(--u))); line-height: 1.2;
     text-shadow: 0 0 calc(.8 * var(--u)) #000; white-space: nowrap; pointer-events: none;
   }
   .pickhead h1 {
@@ -535,7 +536,7 @@
   }
   .slot .art { width: 100%; height: 100%; }
   .slot .face-fb { font-size: calc(5.4 * var(--u)); line-height: 1; }
-  .slot .face-fb small { font-family: var(--font-body); font-weight: 700; font-size: max(10px, calc(2.6 * var(--u))); line-height: 1.15; max-width: 60%; word-break: keep-all; color: rgba(8, 10, 20, .75); }
+  .slot .face-fb small { font-family: var(--font-body); font-weight: 700; font-size: max(11px, calc(2.6 * var(--u))); line-height: 1.15; max-width: 60%; word-break: keep-all; color: rgba(8, 10, 20, .75); }
   .slot:not(.empty) { --ring: #FFDD7A; } /* 캐릭터 칸 얇은 테두리: 밝은 노랑 */
   .slot.empty { --ring: rgba(42, 52, 82, .55); }
   .slot.empty .art { background: rgba(19, 26, 43, .7); }
@@ -557,11 +558,11 @@
   }
   .pickclear {
     position: absolute;
-    left: calc(100% + 2.4 * var(--u));
+    left: calc(100% + max(10px, 2.4 * var(--u)));
     top: 50%;
     translate: 0 -50%;
     display: grid; place-items: center;
-    width: calc(9 * var(--u)); height: calc(9 * var(--u)); min-width: 34px; min-height: 34px;
+    width: calc(9 * var(--u)); height: calc(9 * var(--u)); min-width: 44px; min-height: 44px;
     --cut: calc(1.4 * var(--u));
     background: var(--surface); border: 1px solid var(--line);
     color: var(--muted);
@@ -598,6 +599,7 @@
     line-height: 1.3; /* 고정 */
     letter-spacing: .14em;
     padding: calc(1.8 * var(--u)) 6cqw;
+    min-height: 44px; /* 누르는 영역 최소 44px (글자는 버튼 안 가운데) */
     background: linear-gradient(180deg, #FFD778, var(--lumen));
     color: #1A1300;
     clip-path: polygon(calc(3.2 * var(--u)) 0, calc(100% - calc(3.2 * var(--u))) 0, 100% 50%, calc(100% - calc(3.2 * var(--u))) 100%, calc(3.2 * var(--u)) 100%, 0 50%);
@@ -740,10 +742,10 @@
     min-height: 0;
     margin-top: calc(.6 * var(--u));
     display: grid;
-    grid-template-columns: minmax(0, 1fr) calc(12 * var(--u));
+    grid-template-columns: minmax(0, 1fr) max(46px, calc(12 * var(--u))); /* FP 칸: 작은 폰에서도 누르는 폭 최소 46px */
     gap: calc(1.4 * var(--u));
   }
-  .side.p2 .ctrl { grid-template-columns: calc(12 * var(--u)) minmax(0, 1fr); }
+  .side.p2 .ctrl { grid-template-columns: max(46px, calc(12 * var(--u))) minmax(0, 1fr); }
   .quick {
     min-height: 0;
     min-width: 0;
@@ -820,8 +822,8 @@
     column-gap: calc(1.4 * var(--u));
     animation: fpfade .12s ease-out;
   }
-  .fppanel.p1 { grid-column: 1; grid-template-columns: minmax(0, 1fr) calc(12 * var(--u)); }
-  .fppanel.p2 { grid-column: 3; grid-template-columns: calc(12 * var(--u)) minmax(0, 1fr); }
+  .fppanel.p1 { grid-column: 1; grid-template-columns: minmax(0, 1fr) max(46px, calc(12 * var(--u))); }
+  .fppanel.p2 { grid-column: 3; grid-template-columns: max(46px, calc(12 * var(--u))) minmax(0, 1fr); }
   /* 숫자 버튼 = 데미지 버튼과 같은 크기·위치:
      ±1~4 두 줄은 데미지 버튼 두 줄(.quick) 자리 그대로, ±5~9는 그 바로 위·아래에 같은 높이·같은 간격으로 다섯 칸
      (데미지 버튼 넷 + FP 칸 위·아래 비어 있던 자리, 다섯 칸 모두 같은 크기. 1P: +9 … +5(FP 칸 위), 2P: +5(FP 칸 위) … +9)
@@ -872,8 +874,8 @@
   }
   .side.p2 .extras { grid-template-columns: minmax(0, 1fr) calc(27 * var(--u)); }
   /* 특성만 있는 캐릭터: 데미지 칸 가운데 줄에 맞춤 */
-  .extras.solo { grid-template-columns: minmax(0, 1fr) calc(12 * var(--u)); }
-  .side.p2 .extras.solo { grid-template-columns: calc(12 * var(--u)) minmax(0, 1fr); }
+  .extras.solo { grid-template-columns: minmax(0, 1fr) max(46px, calc(12 * var(--u))); }
+  .side.p2 .extras.solo { grid-template-columns: max(46px, calc(12 * var(--u))) minmax(0, 1fr); }
   .extras.solo .trait { width: calc(27 * var(--u)); justify-self: center; }
   .side.p2 .extras.solo .trait { grid-column: 2; }
   .trait {
@@ -926,7 +928,7 @@
   .pips i.on { background: var(--cc, var(--pc)); }
   /* 강조 (캐릭터 색) */
   .counter.hi, .counter .grp.hi { background: color-mix(in srgb, var(--cc) 18%, var(--surface)); }
-  .counter.hi .val, .counter .grp.hi .val { color: var(--cc); }
+  .counter.hi .val, .counter .grp.hi .val { color: var(--ct, var(--cc)); }
   .counter.hi .pips i.on { box-shadow: 0 0 calc(1.4 * var(--u)) var(--cc); }
 
   /* 두 종류 토큰 (타오) */
@@ -1019,7 +1021,7 @@
   .side.trait-on .trait { filter: drop-shadow(0 0 calc(.9 * var(--u)) color-mix(in srgb, var(--cc) 70%, transparent)); }
   /* 타오: 조화 중에 고른 쪽 = 토큰 강조와 같은 스타일 */
   .counter .grp.sel { background: color-mix(in srgb, var(--cc) 18%, var(--surface)); }
-  .counter .grp.sel .val { color: var(--cc); }
+  .counter .grp.sel .val { color: var(--ct, var(--cc)); }
   .counter.dual:not(.armed) .tap { cursor: default; }
   /* 타오 양/음 줄: 조화 중에만 누르는 순간 토큰 초기화와 같은 반응 (조화 OFF면 반응 없음) */
   .counter.dual:not(.armed) .tap:active { background: none; }
@@ -1061,6 +1063,7 @@
   }
   /* 10초/30초: 카운트다운 아래 (아랫선 = FP − 버튼 아랫선), 버튼 전체를 누르면 바뀜 */
   .center .rsel { grid-row: 4; align-self: end; position: relative; z-index: 3; }
+  .center .rsel::after { content: ''; position: absolute; inset: 0 0 -10px; } /* 누르는 영역만 아래 빈 곳으로 넓힘 */
   .center .dtimer { grid-row: 4; }
   /* FP 버튼: 카운트다운 위 (윗선 = FP + 버튼 윗선), 크기 = LOG 버튼. 누르면 FP 팝업 */
   .center .fpopen { grid-row: 4; align-self: start; margin-top: calc(.6 * var(--u)); position: relative; z-index: 3; }
@@ -1072,7 +1075,7 @@
   .center .cbottom { grid-row: 5; align-self: end; display: grid; justify-items: center; gap: calc(1.2 * var(--u)); }
   /* 카운트다운 길이 고르기: 10초 / 30초 */
   .rsel { display: flex; gap: 1px; background: var(--line); --cut: calc(1 * var(--u)); }
-  .rsel span { width: calc(11 * var(--u)); padding: calc(1.2 * var(--u)) 0; background: var(--surface); color: var(--muted); font-family: var(--font-num); font-weight: 700; font-size: max(10px, calc(2.6 * var(--u))); letter-spacing: .06em; text-align: center; }
+  .rsel span { width: calc(11 * var(--u)); padding: calc(1.2 * var(--u)) 0; background: var(--surface); color: var(--muted); font-family: var(--font-num); font-weight: 700; font-size: max(11px, calc(2.6 * var(--u))); letter-spacing: .06em; text-align: center; }
   .rsel span.on { background: var(--surface-3); color: var(--lumen); }
   .rsel:active span { filter: brightness(1.3); }
   /* 글자 버튼 (NEW GAME / LOG / SETTING): 세 개 같은 폭 */
@@ -1086,13 +1089,17 @@
     background: var(--surface);
     color: var(--muted);
   }
-  .toolbar button.tbtext { font-family: var(--font-num); font-weight: 700; font-size: max(10px, calc(2.9 * var(--u))); letter-spacing: .05em; white-space: nowrap; color: var(--text); }
+  .toolbar button.tbtext { font-family: var(--font-num); font-weight: 700; font-size: max(11px, calc(2.9 * var(--u))); letter-spacing: .05em; white-space: nowrap; color: var(--text); }
 
   .toolbar button:active { background: var(--surface-2); color: var(--text); }
-  .toolbar button.armed { background: var(--dmg); color: #fff; }
+  .toolbar button.armed { background: var(--dmg-fill); color: #fff; }
+  /* NEW GAME 1초 누르기(같은 캐릭터로 다시) 진행 막대 */
+  .toolbar button.tbtext { position: relative; overflow: hidden; }
+  .toolbar .fill { position: absolute; inset: 0; background: var(--lumen); opacity: .35; transform: scaleX(0); transform-origin: left center; }
+  .toolbar .tbtext span { position: relative; }
 
   /* 폭 고정: 시간 글자 폭과 상관없이 터치 영역이 같음 */
-  .clock { width: calc(16 * var(--u)); display: grid; justify-items: center; gap: calc(.4 * var(--u)); margin-bottom: calc(.8 * var(--u)); } /* 턴 버튼에서 살짝 위로 */
+  .clock { width: calc(24 * var(--u)); padding-top: 20px; display: grid; justify-items: center; gap: calc(.4 * var(--u)); margin-bottom: calc(.8 * var(--u)); } /* 위 패딩 = 누르는 영역만 위쪽 빈 곳으로 */ /* 턴 버튼에서 살짝 위로 */
   .clock .num { font-size: max(15px, calc(5 * var(--u))); line-height: 1; letter-spacing: .04em; }
   .clock.paused .num { color: var(--muted); }
   .clock.over .num { color: var(--dmg); }
@@ -1117,14 +1124,14 @@
     padding-block: var(--dt-top) var(--rsel-h);
   }
   /* 마름모는 칸보다 작게(88%) — 칸 전체는 그대로 터치 영역 */
-  .dtimer svg.track, .fpx .dshape, .fpx .x { position: absolute; top: var(--dt-top); left: 10%; width: 80%; height: calc(100% - var(--dt-top) - var(--rsel-h)); }
+  .dtimer svg.track, .fpx .dshape, .fpx .x, .sdbtn { position: absolute; top: var(--dt-top); left: 10%; width: 80%; height: calc(100% - var(--dt-top) - var(--rsel-h)); }
   .dtimer .bg { stroke: var(--surface-3); fill: rgba(19, 26, 43, .7); }
   .dtimer .inner { stroke: var(--line); fill: none; }
   .dtimer .fg { stroke: var(--lumen); fill: none; transition: stroke .2s; }
   .dtimer.warn .fg { stroke: var(--dmg); }
   .dtimer.idle .fg { stroke: var(--faint); }
-  .dtimer .face { position: relative; display: grid; place-items: center; pointer-events: none; }
-  .dtimer .face > * { grid-area: 1 / 1; }
+  .dtimer > .face { position: relative; display: grid; place-items: center; pointer-events: none; } /* 카운트다운 숫자판만 (서든데스 버튼 안 .face는 제외) */
+  .dtimer > .face > * { grid-area: 1 / 1; }
   /* 멈춰 있을 때는 숫자 대신 초시계 그림 (누르면 시작한다는 표시) */
   .dtimer .swatch { width: calc(7 * var(--u)); height: calc(7 * var(--u)); color: var(--muted); opacity: 0; transition: opacity .3s; }
   .dtimer.idle .swatch { opacity: 1; }
@@ -1146,12 +1153,11 @@
   .fpx .x { display: grid; place-items: center; }
   .fpx .x svg { width: calc(8 * var(--u)); height: calc(8 * var(--u)); }
   /* 서든데스 버튼: 양쪽 체력이 모두 0일 때만 10초 타이머 자리 전체(네모 영역)를 덮음 */
-  .sdbtn { position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; }
+  /* 자리 · 크기는 타이머 마름모(svg.track)와 같음. 글자는 마름모 크기(cqmin)에 맞춤, 못 쓰는 WebView는 --u 기준 */
+  .sdbtn { z-index: 2; display: grid; place-items: center; container-type: size; }
   .sdbtn .sdshape { position: absolute; inset: 0; width: 100%; height: 100%; }
   .sdbtn:active .sdshape { filter: brightness(.88); }
-  .sdbtn .face { position: relative; display: grid; justify-items: center; gap: calc(.6 * var(--u)); color: var(--bg); }
-  .sdbtn .t { font-family: var(--font-display); font-size: calc(5 * var(--u)); line-height: 1; }
-  .sdbtn .s { font-family: var(--font-num); font-weight: 700; font-size: max(8px, calc(2 * var(--u))); letter-spacing: .06em; }
+  .sdbtn .t { position: relative; font-family: var(--font-display); font-size: calc(3.6 * var(--u)); font-size: 18cqmin; line-height: 1; color: var(--bg); }
 
   .turnbtn {
     /* 폭 고정: 턴 숫자가 두 자리가 되거나 SUDDEN으로 바뀌어도 버튼 크기가 같음 */
@@ -1161,12 +1167,12 @@
     justify-content: center;
     align-items: baseline;
     gap: calc(1.2 * var(--u));
-    padding: calc(2 * var(--u)) 0;
+    padding: max(10px, calc(2 * var(--u))) 0;
     background: var(--surface);
     --cut: calc(1.4 * var(--u));
   }
   .turnbtn:active { background: var(--surface-2); }
-  .turnbtn .lbl { font-family: var(--font-num); font-weight: 700; font-size: max(9px, calc(2.2 * var(--u))); letter-spacing: .14em; color: var(--muted); }
+  .turnbtn .lbl { font-family: var(--font-num); font-weight: 700; font-size: max(11px, calc(2.2 * var(--u))); letter-spacing: .14em; color: var(--muted); }
   .turnbtn .num { font-size: max(14px, calc(4.6 * var(--u))); line-height: 1; color: var(--lumen); }
   .turnbtn.sd .lbl { color: var(--lumen); }
 
@@ -1177,9 +1183,9 @@
     transform: translateX(-50%);
     z-index: 9; /* 로그 · 설정 · 전적 창 위에도 보이게 */
     padding: calc(.9 * var(--u)) 2cqw;
-    background: var(--dmg);
+    background: var(--dmg-fill);
     color: #fff;
-    font-size: max(11px, calc(2.8 * var(--u)));
+    font-size: max(12px, calc(2.8 * var(--u)));
     font-weight: 600;
     white-space: nowrap;
     pointer-events: none;
@@ -1193,6 +1199,7 @@
     z-index: 5;
     background: var(--surface);
     box-shadow: 0 0 0 1px var(--line), 0 calc(2 * var(--u)) calc(8 * var(--u)) rgba(0,0,0,.6);
+    border-radius: calc(2 * var(--u)); /* 모든 창 같은 둥근 모서리 */
     display: grid;
     grid-template-rows: auto 1fr;
     overflow: hidden;
@@ -1201,12 +1208,12 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: calc(2 * var(--u)) 2.4cqw;
+    min-height: 46px; box-sizing: border-box; /* 모든 창 머리줄 같은 높이 */
+    padding: calc(1.6 * var(--u)) calc(2.4 * var(--u));
     border-bottom: 1px solid var(--line);
     font-family: var(--font-display);
     font-size: max(14px, calc(4.2 * var(--u)));
   }
-  .settings header > button { font-family: var(--font-body); font-size: max(11px, calc(2.8 * var(--u))); color: var(--muted); padding: .4em .9em; background: var(--surface-2); }
 
   /* GAME LOG */
   .logov {
@@ -1262,6 +1269,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    min-height: 46px; box-sizing: border-box; /* 모든 창 머리줄 같은 높이 */
     padding: calc(1.6 * var(--u)) calc(2.4 * var(--u));
     border-bottom: 1px solid var(--line);
   }
@@ -1273,12 +1281,13 @@
   .lmeta .lvs i { font-style: normal; font-family: var(--font-num); color: var(--muted); margin: 0 .6em; font-size: .85em; }
   .lmeta .p1c { color: var(--p1); }
   .lmeta .p2c { color: var(--p2); }
-  .lclose { width: calc(8 * var(--u)); height: calc(8 * var(--u)); min-width: 30px; min-height: 30px; border-radius: calc(1.2 * var(--u)); color: var(--muted); font-size: max(15px, calc(4 * var(--u))); }
+  .lclose { width: calc(8 * var(--u)); height: calc(8 * var(--u)); min-width: 30px; min-height: 30px; border-radius: calc(1.2 * var(--u)); color: var(--muted); font-size: max(15px, calc(4 * var(--u))); position: relative; }
+  .lclose::after { content: ''; position: absolute; inset: -7px; } /* 누르는 영역만 사방 7px 넓힘 (30px → 44px) */
   .lclose:active { background: var(--surface-2); }
   /* 창 머리줄의 ✕ 옆 글자 버튼 (LOG 창 RECORD · 전적 창 NEW GAME): 같은 모양 */
-  .hbtn { flex: none; margin-right: calc(1.2 * var(--u)); padding: .5em 1.2em; border-radius: calc(1 * var(--u)); background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); font-family: var(--font-num); font-weight: 700; font-size: max(11px, calc(2.6 * var(--u))); letter-spacing: .06em; color: var(--text); white-space: nowrap; }
+  .hbtn { flex: none; min-height: 32px; margin-right: calc(1.2 * var(--u)); padding: .5em 1.2em; border-radius: calc(1 * var(--u)); background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); font-family: var(--font-num); font-weight: 700; font-size: max(11px, calc(2.6 * var(--u))); letter-spacing: .06em; color: var(--text); white-space: nowrap; }
   .hbtn:active { background: var(--surface-3); }
-  .hbtn.armed { background: var(--dmg); color: #fff; box-shadow: none; }
+  .hbtn.armed { background: var(--dmg-fill); color: #fff; box-shadow: none; }
   .ltabs {
     display: flex;
     flex: none;
@@ -1291,6 +1300,7 @@
   }
   .ltab {
     flex: none;
+    min-height: 32px;
     padding: .35em .8em;
     border-radius: calc(1 * var(--u));
     background: var(--surface-2);
@@ -1336,7 +1346,7 @@
   .lrow.p1 { background: linear-gradient(to right, color-mix(in srgb, var(--p1) 12%, transparent), var(--surface-2) 60%); border-left-color: color-mix(in srgb, var(--p1) 55%, transparent); }
   .lrow.p2 { background: linear-gradient(to right, color-mix(in srgb, var(--p2) 12%, transparent), var(--surface-2) 60%); border-left-color: color-mix(in srgb, var(--p2) 55%, transparent); }
   .ltime { display: grid; color: var(--muted); font-size: max(12px, calc(3 * var(--u))); line-height: 1.25; }
-  .ltime small { font-size: .85em; color: var(--faint); letter-spacing: .06em; }
+  .ltime small { font-size: max(11px, .85em); color: var(--muted); letter-spacing: .06em; }
   .laction { display: flex; align-items: center; flex-wrap: wrap; gap: calc(1.2 * var(--u)); min-width: 0; }
   .laction .who { font-family: var(--font-num); font-weight: 700; font-size: .85em; white-space: nowrap; }
   .laction .who b { margin-left: .4em; font-family: var(--font-body); font-weight: 700; }
@@ -1373,11 +1383,12 @@
   .lvalue .v1 { color: var(--p1); }
   .lvalue .v2 { color: var(--p2); }
   .lvalue i { font-style: normal; color: var(--faint); margin: 0 .35em; }
-  .lhint { flex: 1; min-width: 0; font-size: max(10px, calc(2.4 * var(--u))); color: var(--muted); word-break: keep-all; }
+  .lhint { flex: 1; min-width: 0; font-size: max(11px, calc(2.4 * var(--u))); color: var(--muted); word-break: keep-all; }
   .logpanel footer { display: flex; align-items: center; gap: calc(2 * var(--u)); justify-content: flex-end; padding: calc(1.2 * var(--u)) calc(2 * var(--u)); border-top: 1px solid var(--line); }
   .ldel {
     position: relative;
     overflow: hidden;
+    min-height: 32px;
     padding: .5em 1.2em;
     border-radius: calc(1 * var(--u));
     background: var(--surface-2);
@@ -1390,7 +1401,7 @@
     touch-action: none;
   }
   .ldel span { position: relative; }
-  .lexp { padding: .5em 1.2em; border-radius: calc(1 * var(--u)); background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); font-family: var(--font-num); font-weight: 700; font-size: max(11px, calc(2.6 * var(--u))); letter-spacing: .06em; color: var(--lumen); }
+  .lexp { min-height: 32px; padding: .5em 1.2em; border-radius: calc(1 * var(--u)); background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); font-family: var(--font-num); font-weight: 700; font-size: max(11px, calc(2.6 * var(--u))); letter-spacing: .06em; color: var(--lumen); }
   .lexp:active { background: var(--surface-3); }
   .ldel .fill { position: absolute; inset: 0; background: var(--dmg); opacity: .45; transform: scaleX(0); transform-origin: left center; }
 
@@ -1398,23 +1409,25 @@
   .toolbar button.on { background: var(--surface-3); color: var(--lumen); }
   .settings .tabs { display: flex; gap: calc(.6 * var(--u)); }
   .settings .tabs button {
-    font-family: var(--font-display);
-    font-size: max(13px, calc(3.8 * var(--u)));
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: max(13px, calc(3.4 * var(--u)));
+    min-height: 34px;
     padding: .3em .8em;
     background: none;
     color: var(--muted);
     box-shadow: inset 0 -2px 0 transparent;
   }
-  .settings .tabs button.on { color: var(--text); box-shadow: inset 0 -2px 0 var(--lumen); }
+  .settings .tabs button.on { color: var(--lumen); box-shadow: inset 0 -2px 0 var(--lumen); }
   .setbody { touch-action: none; overflow-y: auto; padding: calc(2.4 * var(--u)) 2.4cqw; display: grid; gap: calc(2.4 * var(--u)); align-content: start; }
   .setrow { display: flex; align-items: center; justify-content: space-between; gap: 2cqw; }
   .setrow b, .mtime b { display: block; font-size: max(13px, calc(3.6 * var(--u))); }
-  .setrow small, .mtime small { display: block; margin-top: .3em; font-size: max(10px, calc(2.5 * var(--u))); color: var(--muted); line-height: 1.4; max-width: 36ch; }
+  .setrow small, .mtime small { display: block; margin-top: .3em; font-size: max(11px, calc(2.5 * var(--u))); color: var(--muted); line-height: 1.4; max-width: 36ch; }
   .stepper { display: flex; align-items: center; gap: calc(1.4 * var(--u)); flex: none; }
-  .stepper .dbtn { width: calc(11 * var(--u)); height: calc(11 * var(--u)); }
+  .stepper .dbtn { width: max(44px, calc(11 * var(--u))); height: max(44px, calc(11 * var(--u))); }
   .stepper .num { font-size: max(16px, calc(5.4 * var(--u))); min-width: 3.4em; text-align: center; }
   .presets { display: flex; flex-wrap: wrap; gap: calc(1 * var(--u)); --cut: calc(.8 * var(--u)); }
-  .presets button { padding: .5em 1em; background: var(--surface-2); font-size: max(11px, calc(2.8 * var(--u))); font-weight: 600; }
+  .presets button { min-height: 34px; padding: .5em 1em; background: var(--surface-2); font-size: max(11px, calc(2.8 * var(--u))); font-weight: 600; }
   .presets button.on { background: var(--lumen); color: #1A1300; }
   /* 설정 > 캐릭터: [두상] 이름 | 반신 1 2 | 두상 1 2 */
   .chars { gap: calc(1.2 * var(--u)); }
@@ -1422,16 +1435,17 @@
   .charrow .facering { width: calc(8 * var(--u)); height: calc(8 * var(--u)); display: grid; }
   .charrow b { font-size: max(12px, calc(3.2 * var(--u))); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   /* 반신 / 두상 버튼: [반신 | 1번] 누르면 일러스트 고르기 창 */
-  .seg { display: flex; align-items: stretch; gap: 1px; background: var(--line); --cut: calc(.8 * var(--u)); }
-  .seg span { padding: 0 1em; display: grid; place-items: center; background: var(--surface); color: var(--muted); font-size: max(10px, calc(2.5 * var(--u))); }
+  .seg { display: flex; align-items: stretch; min-height: 32px; gap: 1px; background: var(--line); --cut: calc(.8 * var(--u)); }
+  .seg span { padding: 0 1em; display: grid; place-items: center; background: var(--surface); color: var(--muted); font-size: max(11px, calc(2.5 * var(--u))); }
   .seg b { min-width: calc(10 * var(--u)); padding: calc(1 * var(--u)) .8em; display: grid; place-items: center; background: var(--surface-2); color: var(--lumen); font-size: max(11px, calc(2.8 * var(--u))); }
   .seg:active b { background: var(--surface-3); }
   /* 일러스트 고르기 창 */
   .artpop { position: absolute; inset: 0; z-index: 8; display: grid; place-items: center; padding: calc(4 * var(--u)); background: rgba(8, 11, 20, .78); }
-  .artpanel { max-width: 100%; max-height: 100%; overflow: auto; background: var(--surface); box-shadow: 0 0 0 1px var(--line); --cut: calc(1.6 * var(--u)); }
+  .artpanel { max-width: 100%; max-height: 100%; overflow: auto; background: var(--surface); box-shadow: 0 0 0 1px var(--line); border-radius: calc(2 * var(--u)); }
   .artpanel header { display: flex; align-items: center; justify-content: space-between; gap: 3cqw; padding: calc(1.6 * var(--u)) calc(2.4 * var(--u)); border-bottom: 1px solid var(--line); }
   .artpanel header b { font-size: max(13px, calc(3.6 * var(--u))); }
-  .artpanel header button { width: calc(8 * var(--u)); height: calc(8 * var(--u)); min-width: 30px; min-height: 30px; color: var(--muted); font-size: max(15px, calc(4 * var(--u))); }
+  .artpanel header button { position: relative; width: calc(8 * var(--u)); height: calc(8 * var(--u)); min-width: 30px; min-height: 30px; color: var(--muted); font-size: max(15px, calc(4 * var(--u))); }
+  .artpanel header button::after { content: ''; position: absolute; inset: -7px; } /* 누르는 영역만 44px */
   .vtiles { display: flex; flex-wrap: wrap; justify-content: center; gap: calc(2 * var(--u)); padding: calc(2.4 * var(--u)); }
   .vtile { display: grid; justify-items: center; gap: calc(1 * var(--u)); padding: calc(1 * var(--u)); border-radius: calc(1 * var(--u)); box-shadow: inset 0 0 0 1px var(--line); }
   .vtile .art { width: calc(26 * var(--u)); height: calc(26 * var(--u)); background: var(--surface-2); }
@@ -1440,10 +1454,10 @@
   .vtile b { font-size: max(12px, calc(3.2 * var(--u))); color: var(--muted); }
   .vtile.on { box-shadow: inset 0 0 0 calc(.5 * var(--u)) var(--lumen); }
   .vtile.on b { color: var(--lumen); }
-  .vtile .vnone { color: var(--faint); font-size: max(11px, calc(2.8 * var(--u))); }
+  .vtile .vnone { color: var(--muted); font-size: max(11px, calc(2.8 * var(--u))); }
   .vtile.missing { opacity: .5; }
   /* ON/OFF 버튼 (설정의 화면 뒤집기 · 로그 비율 고정) */
-  .switch { flex: none; min-width: calc(14 * var(--u)); padding: .5em 1.2em; background: var(--surface-2); color: var(--muted); font-family: var(--font-num); font-weight: 700; font-size: max(11px, calc(2.8 * var(--u))); letter-spacing: .08em; --cut: calc(.8 * var(--u)); }
+  .switch { flex: none; min-width: calc(14 * var(--u)); min-height: 34px; padding: .5em 1.2em; background: var(--surface-2); color: var(--muted); font-family: var(--font-num); font-weight: 700; font-size: max(11px, calc(2.8 * var(--u))); letter-spacing: .08em; --cut: calc(.8 * var(--u)); }
   .switch.on { background: var(--lumen); color: #1A1300; }
   /* 설정 항목 묶음: 항목 사이에 줄 */
   .setsec { display: grid; gap: calc(1.6 * var(--u)); }
@@ -1452,19 +1466,19 @@
   .setsec .follow { margin-top: calc(1.2 * var(--u)); } /* 줄 없이 이어지는 항목(로그 비율 고정)은 조금 띄움 */ /* 한 줄 항목(설명 | ON/OFF)은 좌우 배치 그대로 */
   /* 경기 시간: [설명 | − 30분 +] / [20·25·30분 | 남은 경기 시간] — 남은 시간은 '30분' 바로 아래 가운데 */
   .mtime { grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: 2cqw; }
-  .mtime .remain { justify-self: center; display: grid; justify-items: center; gap: .2em; color: var(--muted); font-size: max(10px, calc(2.5 * var(--u))); }
+  .mtime .remain { justify-self: center; display: grid; justify-items: center; gap: .2em; color: var(--muted); font-size: max(11px, calc(2.5 * var(--u))); }
   .mtime .remain b { color: var(--text); font-size: max(14px, calc(4.2 * var(--u))); line-height: 1; }
   .help { gap: calc(2 * var(--u)); }
   .help h4 { margin: 0 0 .4em; font-family: var(--font-display); font-weight: 400; font-size: max(13px, calc(3.4 * var(--u))); color: var(--lumen); }
   .help ul { margin: 0; padding-left: 1.2em; display: grid; gap: .35em; }
-  .help li { font-size: max(11px, calc(2.8 * var(--u))); line-height: 1.55; color: var(--muted); text-wrap: pretty; }
+  .help li { font-size: max(12px, calc(2.8 * var(--u))); line-height: 1.55; color: var(--muted); text-wrap: pretty; }
   .help li b { font-weight: 700; color: var(--text); }
   .help li, .help h4, .setrow small, .mtime small { word-break: keep-all; overflow-wrap: break-word; }
   .about { gap: calc(2.4 * var(--u)); }
   .about .brand { display: flex; align-items: center; gap: calc(2 * var(--u)); }
   .about .mk { flex: none; width: calc(9 * var(--u)); height: calc(9 * var(--u)); background: linear-gradient(135deg, #FFE08A, var(--lumen)); }
   .about .brand b { display: block; font-family: var(--font-display); font-weight: 400; font-size: max(15px, calc(4.4 * var(--u))); }
-  .about .brand small { display: block; margin-top: .2em; font-size: max(10px, calc(2.6 * var(--u))); color: var(--muted); }
+  .about .brand small { display: block; margin-top: .2em; font-size: max(11px, calc(2.6 * var(--u))); color: var(--muted); }
   .about dl { margin: 0; display: grid; gap: 1px; background: var(--line); }
   .about dl > div { display: flex; justify-content: space-between; align-items: baseline; gap: 2cqw; padding: calc(1.4 * var(--u)) calc(1.6 * var(--u)); background: var(--surface-2); }
   .about dt { font-size: max(11px, calc(2.8 * var(--u))); color: var(--muted); }
@@ -1477,7 +1491,7 @@
     text-decoration: none; --cut: calc(1.2 * var(--u));
   }
   .about .feedback:active { background: var(--surface-2); }
-  .about .note, .chars .note { margin: 0; font-size: max(10px, calc(2.5 * var(--u))); color: var(--muted); line-height: 1.55; word-break: keep-all; }
+  .about .note, .chars .note { margin: 0; font-size: max(11px, calc(2.5 * var(--u))); color: var(--muted); line-height: 1.55; word-break: keep-all; }
 
   /* =================== 전적 메모 (RECORD) =================== */
   /* 디지메모리체커 RECORD와 같은 흐름(승 / 패 / 무효를 누르면 바로 저장, 기록 · 날짜별 · 캐릭터별, ✕ 두 번 삭제, ALL DELETE).
@@ -1489,38 +1503,38 @@
   /* 두상 줄: 넘치면 좌우로 끌어서 스크롤 (끌기 스크롤은 JS, 화면 회전 대응) */
   .lfaces { flex: none; display: flex; gap: calc(1.6 * var(--u)); overflow-x: auto; scrollbar-width: thin; touch-action: none; padding-bottom: calc(.4 * var(--u)); }
   .lfaces::before, .lfaces::after { content: ""; flex: 1 0 0; } /* 넘치지 않을 때는 가운데 정렬 */
-  .lface { flex: none; display: grid; justify-items: center; gap: calc(.6 * var(--u)); padding: calc(.6 * var(--u)) calc(.4 * var(--u)); border-radius: calc(1 * var(--u)); opacity: .6; transition: opacity .15s; }
+  .lface { flex: none; display: grid; justify-items: center; gap: calc(.6 * var(--u)); padding: calc(.6 * var(--u)) calc(.4 * var(--u)); border-radius: calc(1 * var(--u)); }
   .lface .facering { width: calc(19 * var(--u)); height: calc(19 * var(--u)); display: grid; padding: calc(.5 * var(--u)); box-sizing: border-box; background: var(--line); }
   /* 제한 목록: 넘치면 위아래로 끌어서 스크롤 */
   .lcards { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: thin; touch-action: none; }
   .lpick { margin: 0; padding: calc(4 * var(--u)) 0; text-align: center; color: var(--muted); font-size: max(13px, calc(3.3 * var(--u))); }
-  .lface b { font-size: max(13px, calc(3.4 * var(--u))); color: var(--cc); white-space: nowrap; }
-  .lface.on { opacity: 1; }
+  .lface b { font-size: max(13px, calc(3.4 * var(--u))); color: var(--ct, var(--cc)); white-space: nowrap; }
+  .lface:not(.on) .facering { opacity: .6; } /* 고르지 않은 두상만 흐리게, 이름 글자는 또렷하게(대비) */
   .lface.on .facering { background: #FFDD7A; } /* 고른 캐릭터: 선택 화면 칸과 같은 노란 테두리 */
-  .lface:active { opacity: .85; }
+  .lface:active .facering { opacity: .85; }
   .llegend { margin: 0; display: flex; flex-wrap: wrap; gap: calc(.8 * var(--u)) calc(3 * var(--u)); color: var(--muted); font-size: max(12px, calc(3.2 * var(--u))); }
   .lcard { display: grid; align-content: start; gap: calc(1 * var(--u)); padding: calc(1.4 * var(--u)) calc(1.8 * var(--u)) calc(1.8 * var(--u)); border-radius: calc(1.2 * var(--u)); background: var(--surface-2); border-left: 3px solid var(--cc); }
-  .lcard h4 { margin: 0 0 calc(.4 * var(--u)); color: var(--cc); font-size: max(16px, calc(4.3 * var(--u))); }
+  .lcard h4 { margin: 0 0 calc(.4 * var(--u)); color: var(--ct, var(--cc)); font-size: max(16px, calc(4.3 * var(--u))); }
   .lgroup { display: flex; flex-wrap: wrap; align-items: center; gap: calc(.7 * var(--u)); font-size: max(13px, calc(3.2 * var(--u))); line-height: 1.5; }
   .llegend .lgroup { font-size: inherit; }
-  .lk { flex: none; padding: .05em .55em; border-radius: calc(.8 * var(--u)); font-size: .8em; font-weight: 700; background: color-mix(in srgb, var(--lumen) 22%, transparent); color: #FFD98A; }
+  .lk { flex: none; padding: .05em .55em; border-radius: calc(.8 * var(--u)); font-size: max(11px, .8em); font-weight: 700; background: color-mix(in srgb, var(--lumen) 22%, transparent); color: #FFD98A; }
   .ban .lk { background: color-mix(in srgb, var(--dmg) 26%, transparent); color: #FFB3AD; }
   .err .lk { background: color-mix(in srgb, var(--p1) 24%, transparent); color: #A9D2FF; }
   .lchip { padding: .1em .6em; border-radius: calc(.8 * var(--u)); background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); white-space: nowrap; }
   .ban .lchip { color: #FFA69F; text-decoration: line-through; }
-  .lor { font-style: normal; font-family: var(--font-num); font-weight: 700; font-size: .7em; color: var(--muted); }
+  .lor { font-style: normal; font-family: var(--font-num); font-weight: 700; font-size: max(11px, .7em); color: var(--muted); }
   #setbg { z-index: 5; }
   /* LOG 창과 같은 틀: 둥근 모서리 · 머리줄(제목 왼쪽, [글자 버튼] ✕ 오른쪽) */
   /* 넓은 창(.wide: 전적 · LIMITATION): 설정 창 틀에 LOG 창과 같은 둥근 모서리 · 머리줄 */
   .settings.wide { inset: calc(4 * var(--u)) max(16px, 7cqw); z-index: 7; border-radius: calc(2 * var(--u)); }
   .settings.wide header { padding: calc(1.6 * var(--u)) calc(2.4 * var(--u)); font-family: var(--font-body); font-size: inherit; }
   .settings.wide header b { font-family: var(--font-num); font-weight: 700; letter-spacing: .08em; font-size: max(13px, calc(3.6 * var(--u))); }
-  .settings.wide header b small { margin-left: .6em; font-family: var(--font-body); font-weight: 600; letter-spacing: 0; font-size: .8em; color: var(--muted); }
+  .settings.wide header b small { margin-left: .6em; font-family: var(--font-body); font-weight: 600; letter-spacing: 0; font-size: max(11px, .8em); color: var(--muted); }
   /* 머리줄 오른쪽: NEW GAME(두 번 눌러 캐릭터 선택으로) · ✕ 닫기 */
   .rhtools { display: flex; align-items: center; }
   .rmain { display: grid; grid-template-columns: minmax(0, 40%) minmax(0, 1fr); min-height: 0; }
   .rform { display: grid; align-content: start; gap: calc(1.6 * var(--u)); padding: calc(2 * var(--u)) 2cqw; border-right: 1px solid var(--line); overflow: hidden; }
-  .rdate { display: flex; align-items: center; justify-content: space-between; gap: 2cqw; font-size: max(10px, calc(2.6 * var(--u))); color: var(--muted); }
+  .rdate { display: flex; align-items: center; justify-content: space-between; gap: 2cqw; font-size: max(11px, calc(2.6 * var(--u))); color: var(--muted); }
   .rdate input {
     min-width: 0; height: max(28px, calc(7 * var(--u))); padding: 0 calc(1.4 * var(--u));
     border: 0; border-radius: 0; outline: 0; background: var(--surface-2); color: var(--text); box-shadow: inset 0 0 0 1px var(--line);
@@ -1533,14 +1547,14 @@
   .rchar { display: grid; justify-items: center; gap: calc(.6 * var(--u)); padding: calc(1.2 * var(--u)) calc(.6 * var(--u)); background: var(--surface-2); --cut: calc(1.2 * var(--u)); }
   .rchar:active { background: var(--surface-3); }
   .rchar .facering { width: calc(12 * var(--u)); height: calc(12 * var(--u)); display: grid; background: var(--surface-3); }
-  .rchar small { font-family: var(--font-num); font-weight: 700; font-size: max(9px, calc(2.2 * var(--u))); letter-spacing: .1em; }
+  .rchar small { font-family: var(--font-num); font-weight: 700; font-size: max(11px, calc(2.2 * var(--u))); letter-spacing: .1em; }
   .rchar.me small { color: var(--p1); }
   .rchar.opp small { color: var(--p2); }
   .rchar b { max-width: 100%; font-size: max(12px, calc(3.2 * var(--u))); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .rchar.empty b { color: var(--faint); }
   /* 나 ⇄ 상대 자리 바꾸기 */
-  .rswap { display: grid; place-items: center; align-content: center; gap: calc(.3 * var(--u)); width: calc(10 * var(--u)); min-width: 36px; padding: calc(1.6 * var(--u)) 0; background: var(--surface-2); color: var(--text); font-size: max(14px, calc(4 * var(--u))); line-height: 1; --cut: calc(1 * var(--u)); }
-  .rswap small { font-size: max(9px, calc(2.2 * var(--u))); font-weight: 700; color: var(--muted); }
+  .rswap { display: grid; place-items: center; align-content: center; gap: calc(.3 * var(--u)); width: calc(10 * var(--u)); min-width: 44px; padding: calc(1.6 * var(--u)) 0; background: var(--surface-2); color: var(--text); font-size: max(14px, calc(4 * var(--u))); line-height: 1; --cut: calc(1 * var(--u)); }
+  .rswap small { font-size: max(11px, calc(2.2 * var(--u))); font-weight: 700; color: var(--muted); }
   .rswap:active { background: var(--surface-3); }
   /* 승 / 패 / 무효: 누르면 바로 저장 (무효는 순수 기록용, 전적 · 승률에서 빠짐) */
   .rresbtns { display: grid; grid-template-columns: 1fr 1fr; gap: calc(1 * var(--u)); --cut: calc(1 * var(--u)); }
@@ -1549,20 +1563,20 @@
   .rresbtns button:active { filter: brightness(1.35); }
   .rresbtns .W { background: color-mix(in srgb, var(--p1) 24%, var(--surface-2)); color: #A9D2FF; }
   .rresbtns .L { background: color-mix(in srgb, var(--dmg) 26%, var(--surface-2)); color: #FFB3AD; }
-  .rresbtns.sub button { height: max(26px, calc(8 * var(--u))); font-size: max(12px, calc(3 * var(--u))); }
-  .rresbtns .N { background: var(--surface-2); color: var(--muted); }
+  .rresbtns.sub button { height: max(32px, calc(8 * var(--u))); font-size: max(12px, calc(3 * var(--u))); }
+  .rresbtns .N { background: var(--surface-2); color: #A9B1CC; } /* 회색이지만 글자 대비 4.5:1 이상 */
   .rresbtns .B { background: color-mix(in srgb, var(--p1) 12%, var(--surface-2)); color: #A9D2FF; }
   .rresbtns .F { background: color-mix(in srgb, var(--dmg) 13%, var(--surface-2)); color: #FFB3AD; }
   /* 오른쪽: 기록 · 날짜별 · 캐릭터별 탭 + 목록 + TXT IMPORT · EXPORT · CLEAR LOG · ALL DELETE */
   .rside { display: flex; flex-direction: column; min-height: 0; }
   .rtabs { display: grid; grid-template-columns: repeat(3, 1fr); flex: none; border-bottom: 1px solid var(--line); }
-  .rtabs button { padding: calc(1.5 * var(--u)) 0; color: var(--muted); font-weight: 700; font-size: max(13px, calc(3.4 * var(--u))); box-shadow: inset 0 -2px 0 transparent; }
+  .rtabs button { min-height: 34px; padding: calc(1.5 * var(--u)) 0; color: var(--muted); font-weight: 700; font-size: max(13px, calc(3.4 * var(--u))); box-shadow: inset 0 -2px 0 transparent; }
   .rtabs button.on { color: var(--lumen); box-shadow: inset 0 -2px 0 var(--lumen); }
   .rlist { flex: 1; min-height: 0; overflow-y: auto; padding: calc(1.4 * var(--u)); display: flex; flex-direction: column; gap: calc(.8 * var(--u)); scrollbar-width: thin; touch-action: none; }
   .rempty { text-align: center; color: var(--muted); padding: calc(6 * var(--u)) 0; font-size: max(14px, calc(3.6 * var(--u))); line-height: 1.6; word-break: keep-all; }
   /* 왼쪽 승 · 패 · 무효 아래: 전체 승률 */
   .rtotal { flex: none; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: calc(.4 * var(--u)) calc(3 * var(--u)); padding: calc(1.4 * var(--u)) calc(2 * var(--u)) calc(.6 * var(--u)); background: var(--surface-2); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--lumen) 40%, transparent); border-radius: calc(1.2 * var(--u)); }
-  .rtotal .tl { font-size: max(10px, calc(2.6 * var(--u))); font-weight: 700; color: var(--lumen); }
+  .rtotal .tl { font-size: max(11px, calc(2.6 * var(--u))); font-weight: 700; color: var(--lumen); }
   .rtotal .tw { font-size: max(12px, calc(3.1 * var(--u))); }
   .rtotal .tr { grid-row: 1 / 3; grid-column: 2; font-family: var(--font-num); font-weight: 700; font-size: max(22px, calc(7 * var(--u))); line-height: 1; }
   .rtotal .tr small { font-size: .5em; color: var(--muted); }
@@ -1581,16 +1595,17 @@
   .rres { padding: .15em .6em; border-radius: calc(.8 * var(--u)); font-weight: 700; font-size: .9em; white-space: nowrap; }
   .rres.W { background: color-mix(in srgb, var(--p1) 24%, transparent); color: #A9D2FF; }
   .rres.L { background: color-mix(in srgb, var(--dmg) 24%, transparent); color: #FFA69F; }
-  .rres.N { background: rgba(138, 147, 180, .2); color: var(--muted); }
+  .rres.N { background: rgba(138, 147, 180, .2); color: #A9B1CC; }
   .rres.B, .rres.F { background: none; box-shadow: inset 0 0 0 1px currentColor; }
   .rres.B { color: #A9D2FF; }
   .rres.F { color: #FFA69F; }
   .rvsname .nochar { color: var(--faint); font-style: normal; font-size: .85em; } /* 부전승 · 부전패 줄: 캐릭터 없음 */
-  .rdel { min-width: calc(7 * var(--u)); height: calc(6.4 * var(--u)); min-height: 26px; padding: 0 .5em; border-radius: calc(.8 * var(--u)); color: var(--muted); font-size: .85em; white-space: nowrap; }
+  .rdel { position: relative; min-width: calc(7 * var(--u)); height: calc(6.4 * var(--u)); min-height: 26px; padding: 0 .5em; border-radius: calc(.8 * var(--u)); color: var(--muted); font-size: .85em; white-space: nowrap; }
+  .rdel::after { content: ''; position: absolute; inset: -4px -6px; } /* 누르는 영역만 넓힘 (줄 높이는 그대로) */
   .rdel.armed { background: color-mix(in srgb, var(--dmg) 26%, transparent); color: #FFA69F; font-weight: 700; }
   /* 날짜별 · 캐릭터별 묶음: 줄을 누르면 펼침 (날짜 → 그날 경기 1R, 2R… / 내 캐릭터 → 상대 캐릭터별, 승률 높은 순) */
   .rgrp { flex: none; border-radius: calc(1.2 * var(--u)); background: var(--surface-2); }
-  .rsum { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto calc(12 * var(--u)) calc(3 * var(--u)); align-items: center; gap: calc(1.4 * var(--u)); padding: calc(1.2 * var(--u)) calc(1.6 * var(--u)) calc(.6 * var(--u)) calc(1.8 * var(--u)); text-align: left; font-size: max(14px, calc(3.7 * var(--u))); }
+  .rsum { width: 100%; min-height: 36px; display: grid; grid-template-columns: minmax(0, 1fr) auto calc(12 * var(--u)) calc(3 * var(--u)); align-items: center; gap: calc(1.4 * var(--u)); padding: calc(1.2 * var(--u)) calc(1.6 * var(--u)) calc(.6 * var(--u)) calc(1.8 * var(--u)); text-align: left; font-size: max(14px, calc(3.7 * var(--u))); }
   .rsum .sn { display: flex; align-items: center; gap: .5em; min-width: 0; font-weight: 700; white-space: nowrap; overflow: hidden; }
   .rsum .sn .facering { flex: none; width: calc(7 * var(--u)); height: calc(7 * var(--u)); display: grid; }
   .rsum .arr { color: var(--muted); font-size: .8em; transition: transform .15s; }
@@ -1603,7 +1618,8 @@
   .rsubrow.round { grid-template-columns: calc(6 * var(--u)) minmax(0, 1fr) auto; }
   .rsubrow > .rbar { grid-column: 1 / -1; margin-top: calc(.2 * var(--u)); } /* 캐릭터별: 상대마다 승 · 패 비율 막대 */
   .rsubrow .rnd { font-family: var(--font-num); font-weight: 700; font-size: .85em; color: var(--lumen); }
-  .rfoot { flex: none; display: flex; align-items: center; gap: calc(2 * var(--u)); justify-content: flex-end; padding: calc(1.2 * var(--u)) calc(2 * var(--u)); border-top: 1px solid var(--line); }
+  .rfoot .lexp, .rfoot .ldel { white-space: nowrap; padding-inline: .8em; } /* LOG 창처럼 한 줄 */
+  .rfoot { flex: none; display: flex; align-items: center; gap: calc(1.2 * var(--u)); justify-content: flex-end; padding: calc(1.2 * var(--u)) calc(2 * var(--u)); border-top: 1px solid var(--line); }
   /* 캐릭터 고르기 창 (나 / 상대): 일러스트 고르기 창 틀 + 캐릭터 선택 화면과 같은 로스터(칸 크기만 고정) */
   .rproster { --d: calc(21 * var(--u)); padding: calc(2.4 * var(--u)) calc(3 * var(--u)) calc(3 * var(--u)); }
   /* 로스터(역삼각형) 오른쪽 아래 빈 자리: 뒤로가기 */
@@ -1625,7 +1641,7 @@
   .cfbox b { font-size: max(15px, calc(4.2 * var(--u))); }
   .cfbox p { margin: 0; color: var(--muted); font-size: max(13px, calc(3.4 * var(--u))); line-height: 1.55; word-break: keep-all; }
   .cfbtns { display: flex; justify-content: flex-end; gap: calc(1.4 * var(--u)); margin-top: calc(.6 * var(--u)); --cut: calc(.8 * var(--u)); }
-  .cfbtns button { min-width: calc(20 * var(--u)); padding: .6em 1.2em; background: var(--surface-2); font-weight: 700; font-size: max(13px, calc(3.3 * var(--u))); }
+  .cfbtns button { min-width: max(80px, calc(20 * var(--u))); min-height: 44px; padding: .6em 1.2em; background: var(--surface-2); font-weight: 700; font-size: max(13px, calc(3.3 * var(--u))); }
   .cfbtns .ok { background: var(--lumen); color: #1A1300; }
   .cfbtns .warn { color: #FFA69F; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--dmg) 55%, transparent); }
   .cfnotes { margin: 0; padding: 0; list-style: none; display: grid; gap: calc(.8 * var(--u)); font-size: max(12px, calc(3.1 * var(--u))); line-height: 1.5; color: var(--muted); word-break: keep-all; }
@@ -1636,20 +1652,20 @@
   .hbtn.anbtn { color: var(--lumen); } /* RECORD 창 머리줄의 ANALYSIS: 노란 글자 */
   .settings.anal { grid-template-rows: auto 1fr; }
   .afaces { display: flex; gap: calc(2.4 * var(--u)); overflow-x: auto; scrollbar-width: none; touch-action: none; padding-bottom: calc(1.2 * var(--u)); border-bottom: 1px solid var(--line); }
-  .aface { flex: none; display: grid; justify-items: center; gap: calc(.5 * var(--u)); min-width: max(48px, calc(13 * var(--u))); padding: calc(.6 * var(--u)) calc(.4 * var(--u)); opacity: .55; transition: opacity .15s; }
+  .aface { flex: none; display: grid; justify-items: center; gap: calc(.5 * var(--u)); min-width: max(48px, calc(13 * var(--u))); padding: calc(.6 * var(--u)) calc(.4 * var(--u)); }
   .aface .facering, .aface .aall { width: max(38px, calc(10 * var(--u))); height: max(38px, calc(10 * var(--u))); display: grid; padding: calc(.4 * var(--u)); box-sizing: border-box; background: var(--line); }
-  .aface .aall { place-items: center; clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); background: var(--surface-2); font-family: var(--font-num); font-weight: 700; font-size: max(10px, calc(2.4 * var(--u))); color: var(--lumen); }
-  .aface b { font-size: max(11px, calc(2.8 * var(--u))); color: var(--cc, var(--text)); white-space: nowrap; }
-  .aface.on { opacity: 1; }
+  .aface .aall { place-items: center; clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); background: var(--surface-2); font-family: var(--font-num); font-weight: 700; font-size: max(11px, calc(2.4 * var(--u))); color: var(--lumen); }
+  .aface b { font-size: max(11px, calc(2.8 * var(--u))); color: var(--ct, var(--cc, var(--text))); white-space: nowrap; }
+  .aface:not(.on) .facering, .aface:not(.on) .aall { opacity: .55; } /* 고르지 않은 두상만 흐리게, 이름 글자는 또렷하게(대비) */
   .aface.on .facering, .aface.on .aall { background: #FFDD7A; color: #1A1300; }
   .abody { min-height: 0; overflow-y: auto; scrollbar-width: thin; touch-action: none; display: grid; align-content: start; grid-auto-rows: max-content; gap: calc(1.4 * var(--u)); padding: calc(1.6 * var(--u)) calc(2.4 * var(--u)) calc(2.4 * var(--u)); }
   .akpis { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: calc(1 * var(--u)); }
   .akpi { display: grid; align-content: start; gap: calc(.4 * var(--u)); padding: calc(1.2 * var(--u)) calc(1.6 * var(--u)); border-radius: calc(1.2 * var(--u)); background: var(--surface-2); min-width: 0; }
-  .akpi > span { font-size: max(10px, calc(2.5 * var(--u))); font-weight: 700; color: var(--lumen); }
+  .akpi > span { font-size: max(11px, calc(2.5 * var(--u))); font-weight: 700; color: var(--lumen); }
   .akpi > b { font-family: var(--font-num); font-weight: 700; font-size: max(17px, calc(5.4 * var(--u))); line-height: 1.1; white-space: nowrap; }
   .akpi > b i { font-style: normal; font-family: var(--font-body); font-size: .5em; color: var(--muted); margin: 0 .15em; }
   .akpi > b em { font-style: normal; } .akpi > b em.W { color: #A9D2FF; } .akpi > b em.L { color: #FFA69F; }
-  .akpi > small { font-size: max(10px, calc(2.4 * var(--u))); line-height: 1.4; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .akpi > small { font-size: max(11px, calc(2.4 * var(--u))); line-height: 1.4; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .akpi > small.kbar { display: flex; align-items: center; height: 1.4em; } /* 승률 막대 = 옆 칸 아래 글자 줄과 같은 자리 · 글자 높이 */
   .akpi > small .rbar { flex: 1; height: .9em; }
   .aheroes { display: grid; grid-template-columns: 1fr 1fr; gap: calc(1 * var(--u)); align-items: start; }
@@ -1658,37 +1674,37 @@
   .aminor { display: grid; grid-template-columns: calc(3 * var(--u)) auto minmax(0, 1fr) auto auto; align-items: center; gap: calc(1 * var(--u)); padding: calc(.4 * var(--u)) calc(1.2 * var(--u)); border-radius: calc(.8 * var(--u)); background: var(--surface-2); text-align: left; font-size: max(12px, calc(3 * var(--u))); }
   .aminor .rk { color: var(--muted); font-weight: 700; text-align: center; }
   .aminor .facering { width: calc(5.6 * var(--u)); height: calc(5.6 * var(--u)); display: grid; }
-  .aminor b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--cc); }
-  .aminor .swl { font-size: .85em; color: var(--muted); }
+  .aminor b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ct, var(--cc)); }
+  .aminor .swl { font-size: max(11px, .85em); color: var(--muted); }
   .aminor .aval { font-family: var(--font-num); font-weight: 700; min-width: 3em; text-align: right; }
   .ahero { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; grid-template-rows: auto auto auto; align-items: center; column-gap: calc(1.4 * var(--u)); padding: calc(1.2 * var(--u)) calc(1.8 * var(--u)); border-radius: calc(1.2 * var(--u)); text-align: left;
     background: linear-gradient(90deg, color-mix(in srgb, var(--cc) 22%, var(--surface-2)), var(--surface-2) 70%); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cc) 45%, transparent); }
   .ahero .facering { grid-row: 1 / 4; width: calc(12 * var(--u)); height: calc(12 * var(--u)); display: grid; }
-  .ahero .ht { font-size: max(10px, calc(2.5 * var(--u))); font-weight: 700; color: var(--lumen); }
-  .ahero b { font-size: max(15px, calc(4.2 * var(--u))); line-height: 1.2; color: var(--cc); }
+  .ahero .ht { font-size: max(11px, calc(2.5 * var(--u))); font-weight: 700; color: var(--lumen); }
+  .ahero b { font-size: max(15px, calc(4.2 * var(--u))); line-height: 1.2; color: var(--ct, var(--cc)); }
   .ahero small { font-size: max(11px, calc(2.8 * var(--u))); color: var(--muted); }
   .ahero > :is(.ht, b, small) { grid-column: 2; }
   .ahero .hv { grid-column: 3; grid-row: 1 / 4; font-family: var(--font-num); font-weight: 700; font-size: max(22px, calc(7 * var(--u))); }
   .ahero .hv i { font-style: normal; font-size: .5em; color: var(--muted); }
   .acard { display: grid; align-content: start; gap: calc(.6 * var(--u)); padding: calc(1.2 * var(--u)) calc(1.4 * var(--u)); border-radius: calc(1.2 * var(--u)); background: var(--surface-2); min-width: 0; }
   .acard h5 { margin: 0 0 calc(.2 * var(--u)); font-size: max(12px, calc(3 * var(--u))); color: var(--lumen); }
-  .acard h5 small { margin-left: .6em; font-weight: 400; color: var(--muted); font-size: .85em; }
+  .acard h5 small { margin-left: .6em; font-weight: 400; color: var(--muted); font-size: max(11px, .85em); }
   .agrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: calc(1 * var(--u)); }
   .agrid.two { grid-template-columns: 1fr 1fr; }
   .arow { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: calc(1 * var(--u)); padding: calc(.5 * var(--u)) calc(.6 * var(--u)); border-radius: calc(.8 * var(--u)); background: var(--surface); font-size: max(12px, calc(3.1 * var(--u))); }
   .arow .facering { width: calc(6.4 * var(--u)); height: calc(6.4 * var(--u)); display: grid; }
   .arow b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .arow .swl { font-size: .85em; }
+  .arow .swl { font-size: max(11px, .85em); }
   .arow .aval { font-family: var(--font-num); font-weight: 700; min-width: 3.2em; text-align: right; }
-  .anone { margin: 0; padding: calc(1 * var(--u)) 0; color: var(--faint); font-size: max(11px, calc(2.8 * var(--u))); text-align: center; }
+  .anone { margin: 0; padding: calc(1 * var(--u)) 0; color: var(--muted); font-size: max(11px, calc(2.8 * var(--u))); text-align: center; }
   .achart svg { display: block; width: 100%; height: calc(34 * var(--u)); min-height: 120px; }
   .achart text { font-family: var(--font-num); font-size: 11px; text-anchor: middle; fill: var(--muted); }
   .achart text.v { fill: var(--text); font-weight: 700; font-size: 12px; }
-  .achart text.l50 { text-anchor: start; font-size: 9px; fill: var(--faint); }
+  .achart text.l50 { text-anchor: start; font-size: 11px; fill: var(--muted); }
   .achart .up rect { fill: var(--p1); } .achart .dn rect { fill: var(--dmg); }
   .achart .g50 { stroke: var(--faint); stroke-dasharray: 4 4; } .achart .g0 { stroke: var(--line); }
   .aflow { display: flex; flex-wrap: wrap; gap: calc(.6 * var(--u)); font-size: max(12px, calc(3 * var(--u))); }
-  .anote { margin: 0; padding-left: 1.2em; display: grid; gap: calc(.3 * var(--u)); color: var(--faint); font-size: max(10px, calc(2.5 * var(--u))); line-height: 1.5; word-break: keep-all; }
+  .anote { margin: 0; padding-left: 1.2em; display: grid; gap: calc(.3 * var(--u)); color: var(--muted); font-size: max(11px, calc(2.5 * var(--u))); line-height: 1.5; word-break: keep-all; }
 
   @media (prefers-reduced-motion: reduce) {
     .bar .ghost, .bar .fill, .q, .burst, .trait .mark { transition: none; }
@@ -1703,7 +1719,7 @@
   <div class="toast chamfer" id="toast" hidden></div>
   <div class="logov" id="log" data-a="logbg" hidden></div>
   <div class="dimbg" id="setbg" data-a="settings" hidden></div>
-  <div class="settings chamfer" id="settings" hidden></div>
+  <div class="settings" id="settings" hidden></div>
   <div class="artpop" id="artpop" data-a="artpopclose" hidden></div>
   <div class="dimbg" id="limitbg" data-a="limit" hidden></div>
   <div class="settings wide" id="limit" hidden></div>
@@ -1754,6 +1770,18 @@
   const MERGE_MS = 1000;
   const FP_MERGE_MS = 3000;
 
+  // 글자용 캐릭터 색: 어두운 칸(--surface-2) 위에서 대비 4.6:1이 안 되는 고유색만 흰색을 조금씩 섞어 밝게 (빛 · 테두리는 고유색 그대로)
+  function textColor(hex) {
+    if (!/^#[0-9a-f]{6}$/i.test(hex)) return hex;
+    const rgb = (h) => [1, 3, 5].map((k) => parseInt(h.slice(k, k + 2), 16));
+    const lum = (c) => c.map((v) => (v /= 255, v <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4)).reduce((a, v, k) => a + v * [.2126, .7152, .0722][k], 0);
+    const bg = lum(rgb('#1A2238')), c0 = rgb(hex);
+    for (let w = 0; w <= 1; w += .05) {
+      const c = c0.map((v) => Math.round(v + (255 - v) * w));
+      if ((lum(c) + .05) / (bg + .05) >= 4.6) return w ? '#' + c.map((v) => v.toString(16).padStart(2, '0')).join('') : hex;
+    }
+    return '#FFFFFF';
+  }
   const CHARACTERS = [
     { id: 'nia', name: '니아', color: '#5BE37D', trait: '오버리밋' },
     { id: 'root', name: '루트', color: '#6CCBFF', trait: '차지' },
@@ -1781,7 +1809,7 @@
     counter: null,
     ...c,
     color: c.color || `hsl(${Math.round(i * 360 / all.length + 200) % 360} 68% 62%)`,
-  }));
+  })).map((c) => ({ ...c, tcolor: textColor(c.color) }));
 
   const CHAR_BY_ID = Object.fromEntries(CHARACTERS.map((c) => [c.id, c]));
 
@@ -2096,7 +2124,7 @@
         </div>`;
     }
     return `
-      <button class="fighter p${i + 1}" style="--cc:${c.color}" data-a="unpick" data-p="${i}" aria-label="${i + 1}P ${esc(c.name)}, 눌러서 해제">
+      <button class="fighter p${i + 1}" style="--cc:${c.color};--ct:${c.tcolor}" data-a="unpick" data-p="${i}" aria-label="${i + 1}P ${esc(c.name)}, 눌러서 해제">
         <div class="glow"></div><div class="bigdia"></div><span class="unzone" aria-hidden="true"></span>
         <div class="body art contain">${silhouette('c' + i, c.color)}${artImg(c, 'body')}</div>
         <div class="plate">
@@ -2132,7 +2160,7 @@
       if (!c) return `<div class="slot dia empty" style="${pos}" aria-hidden="true"><div class="art dia"></div></div>`;
       const [s1, s2] = sel(c.id);
       return `<button class="slot dia${s1 ? ' s1' : ''}${s2 ? ' s2' : ''}" style="${pos}" data-a="${act}" data-v="${c.id}" aria-label="${esc(c.name)}">
-                <div class="art dia">${faceArt(c, true)}<span class="sname" style="--cc:${c.color}">${esc(c.name)}</span></div>
+                <div class="art dia">${faceArt(c, true)}<span class="sname" style="--cc:${c.tcolor}">${esc(c.name)}</span></div>
               </button>`;
     }).join('');
     return `<div class="roster${cls}" style="--cols:${W * 2};--w:${W}">${tiles}</div>`;
@@ -2185,7 +2213,7 @@
         <div class="plate">
           <div class="facering dia">${faceArt(c, false, 'art dia')}</div>
           <div class="who">
-            <div class="line"><span class="ptag">${i + 1}P</span><span class="cname" style="color:${c.color}">${esc(c.name)}</span><span id="badges${i}"></span></div>
+            <div class="line"><span class="ptag">${i + 1}P</span><span class="cname" style="color:${c.tcolor}">${esc(c.name)}</span><span id="badges${i}"></span></div>
           </div>
         </div>
         <div class="hpline">
@@ -2253,7 +2281,7 @@
     if (ct.kind === 'count') {
       const [minus, plus] = stepBtns(i, 0, ct.label || '토큰');
       return `
-        <div class="counter chamfer${ct.max && ct.max <= 10 ? '' : ' nopips'}" id="ctr${i}" style="--cc:${c.color}">
+        <div class="counter chamfer${ct.max && ct.max <= 10 ? '' : ' nopips'}" id="ctr${i}" style="--cc:${c.color};--ct:${c.tcolor}">
           ${minus}
           <div class="mid${ct.tapReset ? ' tap' : ''}"${resetAttr(i, 0, ct)}><span class="val num" id="cv${i}_0">0</span>${pipsHtml(ct.max, `pips${i}_0`)}</div>
           ${plus}
@@ -2270,11 +2298,11 @@
             ${plus}
           </div>`;
       };
-      return `<div class="counter dual chamfer" id="ctr${i}" style="--cc:${c.color}">${grp(0)}${grp(1)}</div>`;
+      return `<div class="counter dual chamfer" id="ctr${i}" style="--cc:${c.color};--ct:${c.tcolor}">${grp(0)}${grp(1)}</div>`;
     }
     if (ct.kind === 'stance') {
       return `
-        <div class="counter stance chamfer" id="ctr${i}" style="--cc:${c.color}">
+        <div class="counter stance chamfer" id="ctr${i}" style="--cc:${c.color};--ct:${c.tcolor}">
           ${ct.states.map((st) => `
             <button class="st" id="st${i}_${st.id}" data-a="stance" data-p="${i}" data-v="${st.id}" aria-pressed="false" aria-label="${i + 1}P ${esc(st.label)}">
               <span class="stimg"><span class="art"><span class="face-fb" style="--cc:${c.color}">${esc(st.label[0])}</span>${artImg(c, st.id)}</span></span>
@@ -2358,7 +2386,7 @@
       ${sideHtml(0)}
       <div class="center">
         <div class="toolbar chamfer">
-          <button class="tbtext" data-a="reselect" id="tb-reselect" aria-label="새 게임 (캐릭터 선택으로)">NEW GAME</button>
+          <button class="tbtext" data-a="reselect" data-hold="rematch" id="tb-reselect" aria-label="새 게임: 두 번 눌러 캐릭터 선택으로, 1초 누르면 같은 캐릭터로 다시"><i class="fill"></i><span>NEW GAME</span></button>
           <button class="tbtext" data-a="log" aria-label="기록 보기">LOG</button>
           <button class="tbtext" data-a="settings" id="tb-settings" aria-label="설정">SETTING</button>
         </div>
@@ -2382,9 +2410,9 @@
           <button class="sdbtn" id="sdBtn" data-a="sudden" hidden aria-label="서든데스 시작">
             <svg class="sdshape" viewBox="0 0 100 100" aria-hidden="true">
               <defs><linearGradient id="sdGrad" x1="0" y1="0" x2=".35" y2="1"><stop offset="0" stop-color="#FFD978"/><stop offset=".55" stop-color="#FFC247"/><stop offset="1" stop-color="#E29A1E"/></linearGradient></defs>
-              <polygon points="50,0 100,50 50,100 0,50" fill="url(#sdGrad)"/>
+              <polygon points="50,3 97,50 50,97 3,50" fill="url(#sdGrad)"/>
             </svg>
-            <span class="face"><span class="t">서든데스</span><span class="s num">HP ${SUDDEN_DEATH_HP} · FP 0</span></span>
+            <span class="t">서든데스</span>
           </button>
         </div>
         <button class="rsel chamfer" data-a="rsec" aria-label="카운트다운 10초/30초 바꾸기"><span id="rsec10">10</span><span id="rsec30">30</span></button>
@@ -2489,7 +2517,7 @@
       ? `<div class="lgroup"><span class="lk">택1</span>${x.map(chip).join('<i class="lor">OR</i>')}</div>`
       : x.ban ? `<div class="lgroup ban"><span class="lk">금지</span>${chip(x.ban)}</div>`
         : `<div class="lgroup err"><span class="lk">에라타</span>${chip(x.errata)}</div>`);
-    const faces = chars.map((c) => `<button class="lface${c === sel ? ' on' : ''}" style="--cc:${c.color}" data-a="limitsel" data-v="${c.id}" aria-label="${esc(c.name)} 제한 보기">
+    const faces = chars.map((c) => `<button class="lface${c === sel ? ' on' : ''}" style="--cc:${c.color};--ct:${c.tcolor}" data-a="limitsel" data-v="${c.id}" aria-label="${esc(c.name)} 제한 보기">
         <span class="facering dia">${faceArt(c, false, 'art dia')}</span><b>${esc(c.name)}</b></button>`).join('');
     setHtml(el, `
       <header><b>LIMITATION<small>${LIMIT_SEASON} 시즌 카드 제한</small></b><button class="lclose" data-a="limit" aria-label="닫기">✕</button></header>
@@ -2499,7 +2527,7 @@
           <span class="lgroup err"><span class="lk">에라타</span>효과 변경</span></p>
         <nav class="lfaces">${faces}</nav>
         <div class="lcards">${sel ? `
-          <section class="lcard" style="--cc:${sel.color}">
+          <section class="lcard" style="--cc:${sel.color};--ct:${sel.tcolor}">
             <h4>${esc(sel.name)}</h4>
             ${LIMITS[sel.id].map(line).join('')}
           </section>` : '<p class="lpick">캐릭터 두상을 누르면 그 캐릭터의 제한 목록이 나와요</p>'}</div>
@@ -2518,7 +2546,7 @@
           <b class="num">${n}번</b></button>`;
     }).join('');
     setHtml(el, `
-      <div class="artpanel chamfer">
+      <div class="artpanel">
         <header><b>${esc(c.name)} · ${KIND_LABEL[p.kind]}</b><button data-a="artpopclose" aria-label="닫기">✕</button></header>
         <div class="vtiles">${tiles}</div>
       </div>`);
@@ -2942,6 +2970,7 @@
     };
     const tick = () => { paint(Math.min(1, (Date.now() - start) / DELETE_HOLD_MS)); raf = requestAnimationFrame(tick); };
     document.addEventListener('pointerdown', (e) => {
+      holdFired = false; // 누르기가 끝나며 버튼이 다시 그려지면(같은 캐릭터로 다시) 뒤따르는 클릭이 안 와서 남은 표시를 새 터치에서 지움
       const b = e.target.closest('[data-hold]');
       if (!b) return;
       if (b.dataset.hold !== 'logload') e.preventDefault();
@@ -2954,7 +2983,7 @@
         const kind = b.dataset.hold, v = b.dataset.v;
         end();
         holdFired = true; // 손을 뗄 때 생기는 클릭(탭 보기)은 무시
-        if (kind === 'logdel') deleteAllLogs(); else if (kind === 'logload') loadLog(v); else if (kind === 'recdelall') deleteAllRecords(); else if (kind === 'recclear') clearRecordLog();
+        if (kind === 'logdel') deleteAllLogs(); else if (kind === 'logload') loadLog(v); else if (kind === 'recdelall') deleteAllRecords(); else if (kind === 'recclear') clearRecordLog(); else if (kind === 'rematch') rematch();
       }, DELETE_HOLD_MS);
     });
     ['pointerup', 'pointercancel'].forEach((t) => document.addEventListener(t, () => { if (btn) end(); }));
@@ -2971,7 +3000,7 @@
 
   // 사용법: "항목: 설명" 한 줄씩 (앞부분은 굵게 표시). 캐릭터별 특성·토큰 규칙은 넣지 않음
   const HELP = [
-    ['상단 메뉴', ['NEW GAME: 두 번 눌러 캐릭터 선택으로', 'UNDO: 마지막 행동 취소', 'LOG: 게임 기록 보기', 'SETTING: 설정 · 일러스트 · 사용법 · 버전']],
+    ['상단 메뉴', ['NEW GAME: 두 번 누르면 캐릭터 선택으로, 1초 누르면 같은 캐릭터로 다시 시작', 'UNDO: 마지막 행동 취소', 'LOG: 게임 기록 보기', 'SETTING: 설정 · 일러스트 · 사용법 · 버전']],
     ['캐릭터 선택', ['캐릭터 칸: 처음 누른 캐릭터가 1P, 다음이 2P', '고른 캐릭터 · 아래 캐릭터: 누르면 선택 취소', '↻: 1P · 2P 선택 모두 취소',
       'GAME START: 둘 다 고르면 시작', 'SELECT YOUR CHARACTER: 누르면 캐릭터 이름 표시 켜기 · 끄기',
       'LIMITATION: 이번 시즌 종제한 · 금지 · 에라타. 두상을 누르면 그 캐릭터의 제한 목록', 'RECORD: 전적 메모']],
@@ -3048,7 +3077,7 @@
           <button class="${tab === 'help' ? 'on' : ''}" data-a="stab" data-v="help">사용법</button>
           <button class="${tab === 'about' ? 'on' : ''}" data-a="stab" data-v="about">버전</button>
         </nav>
-        <button data-a="settings">닫기</button>
+        <button class="lclose" data-a="settings" aria-label="닫기">✕</button>
       </header>
       ${body}`);
   }
@@ -3090,10 +3119,12 @@
   const saveRec = () => { recRev++; try { localStorage.setItem(REC_KEY, JSON.stringify(rec)); } catch (e) { flashToast('저장 공간이 부족해요', 2000); } };
   const fmtDay = (d) => `${d.getFullYear()}-${two(d.getMonth() + 1)}-${two(d.getDate())}`;
   const REC_PAGE = 30; // 기록 탭에 처음 그리는 줄 수 · '더 보기' 한 번에 더하는 줄 수
+  const DATE_PAGE = 10; // 날짜별 탭: 처음 그리는 날 수 · '더 보기' 한 번에 더하는 날 수
+  const recPage = () => (ui.rec.view === 'date' ? DATE_PAGE : REC_PAGE); // 지금 탭의 '더 보기' 단위 (R.more = 그린 줄 / 날 수)
   ui.rec = { open: false, view: 'list', charSort: 'n', more: REC_PAGE, form: { me: null, opp: null, date: null }, pick: null, openGrp: new Set(), armDel: null };
   ui.anal = { open: false, who: null }; // 전적 분석 창 (who = 내 캐릭터 id, null = 전체)
   const recName = (id) => (CHAR_BY_ID[id] ? CHAR_BY_ID[id].name : '?');
-  const recNameB = (id) => `<b style="color:${CHAR_BY_ID[id] ? CHAR_BY_ID[id].color : 'inherit'}">${esc(recName(id))}</b>`; // 전적 · 분석 창의 캐릭터 이름 = 고유색
+  const recNameB = (id) => `<b style="color:${CHAR_BY_ID[id] ? CHAR_BY_ID[id].tcolor : 'inherit'}">${esc(recName(id))}</b>`; // 전적 · 분석 창의 캐릭터 이름 = 고유색
   const recFace = (id) => `<span class="facering dia">${CHAR_BY_ID[id] ? faceArt(CHAR_BY_ID[id], false, 'art dia') : '<span class="art dia"></span>'}</span>`;
   // 최신이 위: 날짜, 같은 날이면 넣은 순서의 반대
   const sortedRecs = () => rec.list.slice().sort((a, b) => (a.date === b.date ? b.id - a.id : a.date < b.date ? 1 : -1));
@@ -3166,7 +3197,7 @@
   function openRecord() {
     openPanel('rec');
     ui.rec.form.date = null; // 날짜 칸은 열 때마다 오늘로 (바꾸면 닫을 때까지 그 날짜)
-    ui.rec.more = REC_PAGE;
+    ui.rec.more = recPage();
   }
 
   // 창 골격은 열 때 한 번(날짜 입력 칸이 그리는 도중 다시 만들어지지 않게), 입력 버튼 · 목록만 바꿔 그림
@@ -3242,8 +3273,11 @@
       // 최근 날짜부터, 펼치면 그날 경기를 넣은 순서대로 1R, 2R … (부전승 · 부전패도 한 라운드, 무효는 넣지 않음). 정리된 기록만 있는 날은 승패만
       const days = dateGroups();
       if (!days.length) return '<div class="rempty">아직 날짜별로 볼 전적이 없어요.</div>';
-      return days.map(({ date, c, rs }) => sumGroup(`d:${date}`, `<span class="num">${esc(date)}</span>`, c,
-        rs.length ? rs.slice().reverse().map((r, k) => `<div class="rsubrow round"><span class="rnd">${k + 1}R</span>${vsHtml(r.me, r.opp)}${resTag(r)}</div>`).join('') : null, byeText(rs))).join('');
+      // 날이 수백 개여도 가볍게: 최근 R.more일만 그리고, 맨 아래 '더 보기'로 DATE_PAGE일씩 더
+      const more = days.length - R.more;
+      return days.slice(0, R.more).map(({ date, c, rs }) => sumGroup(`d:${date}`, `<span class="num">${esc(date)}</span>`, c,
+        rs.length ? rs.slice().reverse().map((r, k) => `<div class="rsubrow round"><span class="rnd">${k + 1}R</span>${vsHtml(r.me, r.opp)}${resTag(r)}</div>`).join('') : null, byeText(rs))).join('')
+        + (more > 0 ? `<button class="rmore" data-a="recmore">더 보기<small>${more}일 남음</small></button>` : '');
     }
     // 캐릭터별: 판수순(기본) ↔ 승률순(탭을 다시 누르면), 펼치면 상대 캐릭터별 (승률 높은 순)
     const groups = charGroups(pairItems(), (r) => r.me);
@@ -3261,7 +3295,7 @@
     if (!k) { htmlCache.delete(el); return; }
     const f = ui.rec.form;
     setHtml(el, `
-      <div class="artpanel chamfer">
+      <div class="artpanel">
         <header><b class="${k === 'me' ? 'p1' : 'p2'}"><span class="ptag">${k === 'me' ? 'ME' : 'VS'}</span>${k === 'me' ? '내 캐릭터' : '상대 캐릭터'}</b><button data-a="recpickclose" aria-label="닫기">✕</button></header>
         <div class="rpwrap">
           ${rosterHtml((id) => [f.me === id, f.opp === id], 'recset', ' rproster')}
@@ -3293,7 +3327,7 @@
     const all = pairItems().filter(wl), mine = charGroups(all, (r) => r.me);
     const who = mine.some(([id]) => id === ui.anal.who) ? ui.anal.who : null;
     const items = who ? all.filter((r) => r.me === who) : all, tot = recCount(items);
-    const face = (id, on) => `<button class="aface${on ? ' on' : ''}" data-a="analwho" data-v="${id || ''}" ${id ? `style="--cc:${CHAR_BY_ID[id].color}"` : ''} aria-label="${id ? esc(recName(id)) : '전체'} 분석">
+    const face = (id, on) => `<button class="aface${on ? ' on' : ''}" data-a="analwho" data-v="${id || ''}" ${id ? `style="--cc:${CHAR_BY_ID[id].color};--ct:${CHAR_BY_ID[id].tcolor}"` : ''} aria-label="${id ? esc(recName(id)) : '전체'} 분석">
         ${id ? recFace(id) : '<span class="aall">ALL</span>'}<b>${id ? esc(recName(id)) : '전체'}</b></button>`;
     const faces = face(null, !who) + mine.filter(([id]) => CHAR_BY_ID[id]).map(([id]) => face(id, id === who)).join('');
     // 두상 줄도 리포트와 함께 스크롤 (캐릭터 고르기는 이 줄에서만)
@@ -3323,7 +3357,7 @@
       const pool = mine.filter(([, , c]) => c.n >= ANAL_MIN);
       const rateRank = (pool.length ? pool : mine).slice().sort(byRate).slice(0, ANAL_TOP);
       const pickRank = mine.slice(0, ANAL_TOP);
-      const color = (id) => (CHAR_BY_ID[id] ? CHAR_BY_ID[id].color : 'var(--lumen)');
+      const color = (id) => (CHAR_BY_ID[id] ? `${CHAR_BY_ID[id].color};--ct:${CHAR_BY_ID[id].tcolor}` : 'var(--lumen)');
       const hero = (title, [id], big, sub) => `<div class="ahero" style="--cc:${color(id)}">${recFace(id)}<span class="ht">${title}</span><b>${esc(recName(id))}</b><small>${sub}</small><span class="hv">${big}</span></div>`;
       const minor = (list, val) => list.slice(1).map((g, k) => `<div class="aminor" style="--cc:${color(g[0])}"><span class="rk num">${k + 2}</span>${recFace(g[0])}<b>${esc(recName(g[0]))}</b><span class="swl">${val(g[2], true)}</span><span class="aval">${val(g[2])}</span></div>`).join('');
       const pickVal = (c, sub) => (sub ? `${c.n}판 · 승률 ${c.rate}%` : `${pctOf(c.n, tot.n)}%`);
@@ -3437,7 +3471,8 @@
     recview(_, v) {
       const R = ui.rec;
       if (v === 'char' && R.view === 'char') { R.charSort = R.charSort === 'rate' ? 'n' : 'rate'; return; } // 캐릭터별 탭 다시 누르기 = 판수순 ↔ 승률순
-      Object.assign(R, { view: v, openGrp: new Set(), armDel: null, more: REC_PAGE });
+      Object.assign(R, { view: v, openGrp: new Set(), armDel: null });
+      R.more = recPage();
       const l = $('rlist'); if (l) l.scrollTop = 0;
     },
     recgrp(_, v) { const s = ui.rec.openGrp; if (!s.delete(v)) s.add(v); },
@@ -3477,7 +3512,7 @@
       saveTextFile('record', recordsToText(), '전적 파일');
     },
     recimport() { importText(); },
-    recmore() { ui.rec.more += REC_PAGE; }, // 기록 탭 맨 아래 '더 보기'
+    recmore() { ui.rec.more += recPage(); }, // 기록 · 날짜별 탭 맨 아래 '더 보기'
     // 설정 탭 '전적 기록 수 제한': 줄여서 기록이 정리되면 확인 창
     reclimit(_, __, d) {
       const n = Number(d.set) || 0, over = n ? rec.list.length - n : 0;
@@ -3543,6 +3578,15 @@
     addLog(null, '턴 1 시작', null, 'turn');
     show();
     requestWakeLock();
+  }
+
+  // NEW GAME 1초 누르기: 같은 캐릭터로 다시 (체력 · FP · 토큰 · 턴 · 타이머 처음부터, 지금 로그는 보관)
+  function rematch() {
+    if (state.screen !== 'game' || state.players.some((p) => !CHAR_BY_ID[p.char])) return;
+    clearTimeout(armTimer);
+    startGame();
+    flashToast('같은 캐릭터로 다시 시작');
+    refresh();
   }
 
   // NEW GAME (툴바 · 전적 창): 캐릭터 선택으로, 1P·2P 모두 비움
