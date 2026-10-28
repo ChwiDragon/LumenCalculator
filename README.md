@@ -14,6 +14,7 @@
 
 | 어디서 | 상태 | 링크 |
 |---|---|---|
+| Google Play | 출시 | https://play.google.com/store/apps/details?id=com.chwidragon.lumencalc |
 | 원스토어 | 출시 (판매 중) | https://m.onestore.co.kr/v2/ko-kr/app/0001010466 |
 | 웹 (GitHub Pages) | 바로 사용 · 홈 화면에 설치(PWA) | https://chwidragon.github.io/LumenCounter/lumencalc.html |
 | GitHub APK | [`lumencalc.apk`](lumencalc.apk) | 캐릭터 그림을 뺀 버전 |

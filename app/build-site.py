@@ -33,6 +33,7 @@ SITE_README = """# 루멘 카운터 (웹)
 
 - 폰을 테이블 가운데에 가로로 눕혀 두면 왼쪽은 1P, 오른쪽은 2P 화면이 됩니다.
 - 홈 화면에 앱처럼 설치할 수 있습니다. 안드로이드 크롬은 메뉴(⋮) → **앱 설치**, 아이폰 사파리는 공유 → **홈 화면에 추가**.
+- Google Play: https://play.google.com/store/apps/details?id=com.chwidragon.lumencalc
 - 원스토어: https://m.onestore.co.kr/v2/ko-kr/app/0001010466
 - 개인정보처리방침: [PRIVACY.md](PRIVACY.md)
 
