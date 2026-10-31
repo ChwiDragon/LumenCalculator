@@ -7,7 +7,7 @@
           - pwa/ 아이콘: assets/icon/app-icon.(webp|png)(캐릭터 그림 아이콘)이 있으면 그것으로, 없으면 이 저장소의 pwa/ 그대로
           - sw.js 캐시 이름 = 넣은 파일 내용의 해시 → 그림·화면이 바뀌면 설치한 앱도 새 파일을 받음
           - site/ 안에서 위 목록에 없는 파일은 지움(.git 제외)
-  실행  : python app/build-site.py   (한글 글꼴은 먼저 app/make-fonts.py로 다시 만듦)
+  실행  : python app/build-site.py   (먼저 app/make-fonts.py로 한글 글꼴을, app/optimize-art.py로 캐릭터 그림을 다시 만듦)
   올리기: site/ 안에서 git add -A / commit / push (LumenCounter 저장소)
 """
 import hashlib
@@ -73,6 +73,7 @@ def wanted():
 
 def main():
     subprocess.run([sys.executable, str(ROOT / 'app' / 'make-fonts.py')], check=True)
+    subprocess.run([sys.executable, str(ROOT / 'app' / 'optimize-art.py')], check=True)
     files = wanted()
     SITE.mkdir(exist_ok=True)
     data = {}

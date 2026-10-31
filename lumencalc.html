@@ -164,7 +164,7 @@
 
  ■ 캐릭터 데이터 · 이미지
   - 반신(body) · 두상(face)은 캐릭터마다 일러스트 선택(설정 > 일러스트 탭, state.artPick, 저장됨). 기본 1·2번, CMYK 두상은 4번까지(artCount).
-    n번 = {id}_body{n} / {id}_face{n} 파일(1번은 번호 없음). 없으면 1번 → 그것도 없으면 대체 그림. 특성·리타 상태·타오 토큰 그림은 하나뿐.
+    n번 = {id}_body{n} / {id}_face{n} 파일(1번은 번호 없음). 없으면 1번 → 그것도 없으면 대체 그림(고르기 창에서는 없는 2번부터 칸을 숨김). 특성·리타 상태·타오 토큰 그림은 하나뿐.
   - 스크립트의 CHARACTERS 목록에 한 줄 추가하면 캐릭터가 늘어남(필드 설명은 목록 위 주석).
   - 이미지는 assets/characters/{id}_{body|face|trait}.png(.webp) — 없으면 대체 그림. 자세한 건 그 폴더 README.txt.
 
@@ -1848,7 +1848,7 @@
   // 버전·빌드 날짜는 APK를 빌드할 때만 올림 (빌드마다 끝자리 +1, 캐릭터 정식 추가 때 가운데 자리 +1)
   // 버전 탭의 '버그 제보 · 건의 사항' 링크 (APK에서는 Capacitor가 바깥 주소를 시스템 브라우저로 엶)
   const FEEDBACK_URL = 'https://forms.gle/ThJPMxAxXwBPvzcq5';
-  const APP = { name: '루멘 카운터', version: '1.1.0', build: '2026-10-31' };
+  const APP = { name: '루멘 카운터', version: '1.1.1', build: '2026-10-31' };
 
   // ================= 아이콘 =================
   const I = {
@@ -1895,7 +1895,7 @@
     return src ? `<img src="${src}" data-id="${c.id}" data-kind="${kind}" alt="" draggable="false">` : '';
   };
   // 그림을 못 불러오면: 앱 그림(data-kind)은 다음 후보(png · 1번)로, 일러스트 고르기 창 미리보기(data-vkind)는
-  // 그 번호 파일만 보여 주므로 png까지 없으면 칸에 '없음'. 실패한 주소는 기억해서 다시 요청하지 않음
+  // 그 번호 파일만 보여 주므로 png까지 없으면 1번 칸은 '없음', 2번부터는 칸을 숨김. 실패한 주소는 기억해서 다시 요청하지 않음
   document.addEventListener('error', (e) => {
     const img = e.target;
     if (!(img instanceof HTMLImageElement) || !(img.dataset.kind || img.dataset.vkind)) return;
@@ -1908,8 +1908,14 @@
     }
     if (/\.webp$/.test(src) && !failed.has(src.replace(/\.webp$/, '.png'))) { img.src = src.replace(/\.webp$/, '.png'); return; }
     const t = img.closest('.vtile');
-    if (t) t.classList.add('missing');
     img.remove();
+    if (!t) return;
+    t.classList.add('missing');
+    // 2번부터는 파일이 없으면 칸을 숨김(1번과 같은 그림이라 지운 파일 등). 고른 번호가 숨겨지면 1번 그림이 보이므로 1번에 표시
+    if (t.dataset.set !== '1') {
+      t.hidden = true;
+      if (t.classList.contains('on')) t.parentElement.firstElementChild.classList.add('on');
+    }
   }, true);
   const faceArt = (c, withName, cls = 'art') => `
     <div class="${cls}">

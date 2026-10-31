@@ -2,8 +2,9 @@
 
   원본  : assets/icon/app-icon.webp (또는 .png) — 정사각형 그림. assets/ 라 GitHub에 올라가지 않음
   결과  : app/android/app/src/art/res/  (git에 올리지 않음)
-          - mipmap-*/ic_launcher.png, ic_launcher_round.png  : 예전 안드로이드용 (둥근 네모 / 원)
-          - mipmap-*/ic_launcher_foreground.png               : 적응형 아이콘 앞 레이어 (108dp 칸 가운데 84dp 크기)
+          - mipmap-*/ic_launcher.webp, ic_launcher_round.webp : 예전 안드로이드용 (둥근 네모 / 원)
+          - mipmap-*/ic_launcher_foreground.webp              : 적응형 아이콘 앞 레이어 (108dp 칸 가운데 84dp 크기)
+            (무손실 WebP: PNG와 화질은 같고 용량은 절반쯤)
           - values/ic_launcher_background.xml                 : 적응형 아이콘 뒤 색 = 그림 위쪽 가장자리 색
   빌드 때 -PwithArt 로 이 폴더가 release 리소스에 겹쳐져 기본(금색 마름모) 아이콘을 덮음.
   GitHub용 APK는 -PwithArt 없이 빌드되므로 그림 아이콘이 들어가지 않음.
@@ -19,6 +20,8 @@ ROOT = Path(__file__).resolve().parent.parent
 SRC = next((p for p in (ROOT / 'assets' / 'icon' / f'app-icon.{e}' for e in ('webp', 'png')) if p.exists()), None)
 OUT = ROOT / 'app' / 'android' / 'app' / 'src' / 'art' / 'res'
 DENSITIES = {'mdpi': 1, 'hdpi': 1.5, 'xhdpi': 2, 'xxhdpi': 3, 'xxxhdpi': 4}
+# 무손실 WebP (exact: 투명한 곳의 색도 그대로). main/res 의 기본 아이콘도 .webp 라 같은 이름으로 덮어씀
+WEBP = {'lossless': True, 'quality': 100, 'method': 6, 'exact': True}
 
 
 def rounded(img, radius_ratio):
@@ -46,12 +49,12 @@ def main():
         d = OUT / f'mipmap-{name}'
         d.mkdir(parents=True)
         legacy = round(48 * k)
-        rounded(art.resize((legacy, legacy), Image.LANCZOS), .18).save(d / 'ic_launcher.png')
-        rounded(art.resize((legacy, legacy), Image.LANCZOS), .5).save(d / 'ic_launcher_round.png')
+        rounded(art.resize((legacy, legacy), Image.LANCZOS), .18).save(d / 'ic_launcher.webp', **WEBP)
+        rounded(art.resize((legacy, legacy), Image.LANCZOS), .5).save(d / 'ic_launcher_round.webp', **WEBP)
         canvas, inner = round(108 * k), round(84 * k)
         fg = Image.new('RGBA', (canvas, canvas), (0, 0, 0, 0))
         fg.paste(art.resize((inner, inner), Image.LANCZOS), ((canvas - inner) // 2,) * 2)
-        fg.save(d / 'ic_launcher_foreground.png')
+        fg.save(d / 'ic_launcher_foreground.webp', **WEBP)
     (OUT / 'values').mkdir(parents=True)
     (OUT / 'values' / 'ic_launcher_background.xml').write_text(
         '<?xml version="1.0" encoding="utf-8"?>\n<resources>\n'

@@ -20,6 +20,7 @@
   추가 일러스트 (선택 사항): body2 / face2 (CMYK 두상은 face3 / face4 까지)
   - 앱 설정 > 일러스트 탭에서 캐릭터마다 반신·두상 버튼을 눌러 일러스트 고르기 창에서 고름.
   - 고른 번호의 파일이 없으면 1번(body / face)으로 보임. 크기·규칙은 1번과 같음.
+  - 1번과 똑같은 파일은 빌드 때 지워짐(app/optimize-art.py). 고르기 창에는 실제로 있는 그림만 나옴.
   예)  wolf_body2.webp   wolf_face2.webp   cmyk_face3.webp   cmyk_face4.webp
 
   리타 상태 일러(정사각형): rita_guardian.png / rita_assassin.png / rita_paladin.png
@@ -46,6 +47,10 @@
   CMYK          cmyk
   미녕이        minyeong
   부쿠키        bukuki
+
+용량
+  빌드 때 app/optimize-art.py 가 그림을 손실 WebP(품질 80)로 다시 저장함(10% 이상 줄 때만).
+  바꾸기 전 원본은 release/asset-backup/characters-orig/ 에 남음.
 
 새 캐릭터 추가
   1) lumencalc.html 의 CHARACTERS 목록에 한 줄 추가

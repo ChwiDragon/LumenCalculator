@@ -14,6 +14,9 @@ $root = Split-Path $app -Parent
 # Korean fonts: keep only the characters used in lumencalc.html (assets/fonts/src/*.ttf -> assets/fonts/*.woff2)
 python "$app\make-fonts.py"
 if ($LASTEXITCODE -ne 0) { throw 'make-fonts.py failed (pip install fonttools brotli)' }
+# Character art: drop extra illustrations identical to #1, re-encode as lossy WebP q80 when it saves 10%+ (app/optimize-art.py)
+python "$app\optimize-art.py"
+if ($LASTEXITCODE -ne 0) { throw 'optimize-art.py failed (pip install pillow)' }
 $release = "$root\release"
 New-Item -ItemType Directory -Force $release | Out-Null
 
