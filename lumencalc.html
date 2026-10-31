@@ -163,7 +163,7 @@
   - LumenCalculator 저장소의 Pages = 그림 없는 버전. 그림·글꼴을 넣은 공개 사이트는 app/build-site.py → site/ (LumenCounter 저장소).
 
  ■ 캐릭터 데이터 · 이미지
-  - 반신(body) · 두상(face)은 캐릭터마다 일러스트 선택(설정 > 일러스트 탭, state.artPick, 저장됨). 기본 1·2번, CMYK 두상은 4번까지(artCount).
+  - 반신(body) · 두상(face)은 캐릭터마다 일러스트 선택(설정 > 일러스트 탭, state.artPick, 저장됨). 기본 1·2번, 이오몽 두상은 3번 · CMYK 두상은 4번까지(artCount).
     n번 = {id}_body{n} / {id}_face{n} 파일(1번은 번호 없음). 없으면 1번 → 그것도 없으면 대체 그림(고르기 창에서는 없는 2번부터 칸을 숨김). 특성·리타 상태·타오 토큰 그림은 하나뿐.
   - 스크립트의 CHARACTERS 목록에 한 줄 추가하면 캐릭터가 늘어남(필드 설명은 목록 위 주석).
   - 이미지는 assets/characters/{id}_{body|face|trait}.png(.webp) — 없으면 대체 그림. 자세한 건 그 폴더 README.txt.
@@ -1756,7 +1756,7 @@
   //     { kind: 'dual', labels: [a, b], start, max }  두 종류 토큰 (타오: 둘 다 최대면 조화 ON, 한쪽이라도 2 이하면 OFF)
   //     { kind: 'stance', states: [{ id, label }] }   하나만 켤 수 있는 상태 (리타). 특성 마크 = 전부 켜기(빛의 루멘)
   //   이미지: {id}_body / {id}_face / {id}_trait, stance 상태는 {id}_{상태id} (예: rita_guardian.png)
-  //   artCount: { body, face } 고를 수 있는 일러스트 수 (없으면 2). 2번부터는 {id}_body2, {id}_face3 … (CMYK 두상 4)
+  //   artCount: { body, face } 고를 수 있는 일러스트 수 (없으면 2). 2번부터는 {id}_body2, {id}_face3 … (이오몽 두상 3, CMYK 두상 4)
   const ASSET_DIR = 'assets/characters';
   const ASSET_EXTS = ['webp', 'png']; // 실제 그림이 모두 webp → webp부터 찾아 없는 png 요청(404)을 건너뜀
   const DEFAULT_HP = 5000;
@@ -1796,7 +1796,7 @@
     { id: 'lin', noTraitLog: true, name: '린', color: '#FF9838', traitFixed: true, counter: { kind: 'count', label: '불씨', start: 0, max: null, tapReset: true } },
     { id: 'johan', name: '요한', color: '#F4F5FA', trait: '디제스터 원', hpToken: { at: 2000, add: 1 }, counter: { kind: 'count', label: '예지', start: 2, max: 5 } },
     { id: 'jezebel', noTraitLog: true, name: '이제벨', color: '#E5484D', traitFixed: true, counter: { kind: 'count', label: '거미', start: 0, max: null, tapReset: true } },
-    { id: 'iomong', noTraitLog: true, name: '이오몽', color: '#FFFFFF', traitFixed: true },
+    { id: 'iomong', noTraitLog: true, name: '이오몽', artCount: { face: 3 }, color: '#FFFFFF', traitFixed: true },
     { id: 'chimera', name: '키메라', color: '#A2714C', hands: [5, 5, 5, 6, 6], trait: '섭리의 궤', traitHand: 1, traitOn: true, counter: { kind: 'count', label: '편린', start: 0, max: 9, hi: 'full' } },
     { id: 'muyoung', name: '무영', color: '#3D6EF2', hp: 4500, trait: '청염', autoTrait: 2500, counter: { kind: 'count', label: '귀섬', start: 3, max: 5, tapReset: true } },
     { id: 'finf', name: '핀프', color: '#9AA3B5', hp: 5500, trait: 'X-05 솔다트', traitByCount: true, counter: { kind: 'count', label: '파츠', start: 4, max: 4, hi: 'zero' } },
@@ -1848,7 +1848,7 @@
   // 버전·빌드 날짜는 APK를 빌드할 때만 올림 (빌드마다 끝자리 +1, 캐릭터 정식 추가 때 가운데 자리 +1)
   // 버전 탭의 '버그 제보 · 건의 사항' 링크 (APK에서는 Capacitor가 바깥 주소를 시스템 브라우저로 엶)
   const FEEDBACK_URL = 'https://forms.gle/ThJPMxAxXwBPvzcq5';
-  const APP = { name: '루멘 카운터', version: '1.1.1', build: '2026-10-31' };
+  const APP = { name: '루멘 카운터', version: '1.1.2', build: '2026-10-31' };
 
   // ================= 아이콘 =================
   const I = {

@@ -17,11 +17,11 @@
 
   예)  wolf_body.png   wolf_face.png   wolf_trait.png
 
-  추가 일러스트 (선택 사항): body2 / face2 (CMYK 두상은 face3 / face4 까지)
+  추가 일러스트 (선택 사항): body2 / face2 (이오몽 두상은 face3, CMYK 두상은 face3 / face4 까지)
   - 앱 설정 > 일러스트 탭에서 캐릭터마다 반신·두상 버튼을 눌러 일러스트 고르기 창에서 고름.
   - 고른 번호의 파일이 없으면 1번(body / face)으로 보임. 크기·규칙은 1번과 같음.
   - 1번과 똑같은 파일은 빌드 때 지워짐(app/optimize-art.py). 고르기 창에는 실제로 있는 그림만 나옴.
-  예)  wolf_body2.webp   wolf_face2.webp   cmyk_face3.webp   cmyk_face4.webp
+  예)  wolf_body2.webp   wolf_face2.webp   iomong_face3.webp   cmyk_face3.webp   cmyk_face4.webp
 
   리타 상태 일러(정사각형): rita_guardian.png / rita_assassin.png / rita_paladin.png
   타오 토큰 일러(정사각형): tao_yang.png (양) / tao_yin.png (음)
