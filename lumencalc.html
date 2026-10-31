@@ -178,10 +178,10 @@
   /* 글꼴은 모두 앱에 포함(assets/fonts/) → 인터넷 없이 바로 그려지고, 늦게 받은 글꼴로 바뀌며 화면이 출렁이지 않음.
      한글 글꼴은 이 파일에 쓰인 글자만 남긴 것 (app/make-fonts.py가 빌드 때마다 다시 만듦). 라이선스: SIL OFL 1.1
      font-display: block → 기본 글꼴로 먼저 그렸다가 바꾸지 않음 (파일이 없으면 바로 기본 글꼴) */
-  @font-face { font-family: "Black Han Sans"; font-weight: 400; font-display: block; src: url(assets/fonts/BlackHanSans-400.woff2) format("woff2"); }
-  @font-face { font-family: "IBM Plex Sans KR"; font-weight: 400; font-display: block; src: url(assets/fonts/IBMPlexSansKR-400.woff2) format("woff2"); }
-  @font-face { font-family: "IBM Plex Sans KR"; font-weight: 600; font-display: block; src: url(assets/fonts/IBMPlexSansKR-600.woff2) format("woff2"); }
-  @font-face { font-family: "IBM Plex Sans KR"; font-weight: 700; font-display: block; src: url(assets/fonts/IBMPlexSansKR-700.woff2) format("woff2"); }
+  @font-face { font-family: "Black Han Sans"; font-weight: 400; font-display: block; src: url(assets/fonts/BlackHanSans-400.woff2?v=32c09a93) format("woff2"); }
+  @font-face { font-family: "IBM Plex Sans KR"; font-weight: 400; font-display: block; src: url(assets/fonts/IBMPlexSansKR-400.woff2?v=cbf47369) format("woff2"); }
+  @font-face { font-family: "IBM Plex Sans KR"; font-weight: 600; font-display: block; src: url(assets/fonts/IBMPlexSansKR-600.woff2?v=75ad65ea) format("woff2"); }
+  @font-face { font-family: "IBM Plex Sans KR"; font-weight: 700; font-display: block; src: url(assets/fonts/IBMPlexSansKR-700.woff2?v=f945b9bb) format("woff2"); }
   @font-face { font-family: "Chakra Petch"; font-weight: 500; font-display: block;
     src: url(assets/fonts/ChakraPetch-500.woff2) format("woff2"), url(https://fonts.gstatic.com/s/chakrapetch/v13/cIflMapbsEk7TDLdtEz1BwkebIl1R5_F.woff2) format("woff2"); }
   @font-face { font-family: "Chakra Petch"; font-weight: 600; font-display: block;
@@ -1802,6 +1802,7 @@
     { id: 'finf', name: '핀프', color: '#9AA3B5', hp: 5500, trait: 'X-05 솔다트', traitByCount: true, counter: { kind: 'count', label: '파츠', start: 4, max: 4, hi: 'zero' } },
     { id: 'cmyk', noTraitLog: true, name: 'CMYK', artCount: { face: 4 }, color: '#FF5AA0', hands: [10, 10, 10, 10, 10], traitFixed: true, counter: { kind: 'count', label: '뉴 싱글', start: 10, max: 10 } },
     { id: 'minyeong', name: '미녕이', color: '#F3E3BE', trait: '하이텐션' },
+    { id: 'bukuki', name: '부쿠키', color: '#8E9BFF', counter: { kind: 'count', label: '토큰', start: 0, max: null, tapReset: true } },
   ].map((c, i, all) => ({
     hp: DEFAULT_HP,
     hands: DEFAULT_HANDS,
@@ -1811,7 +1812,8 @@
     color: c.color || `hsl(${Math.round(i * 360 / all.length + 200) % 360} 68% 62%)`,
   })).map((c) => ({ ...c, tcolor: textColor(c.color) }));
 
-  const CHAR_BY_ID = Object.fromEntries(CHARACTERS.map((c) => [c.id, c]));
+  // 프로토타입 없는 객체: 불러온 파일의 'constructor' · '__proto__' 같은 값이 캐릭터로 잡히지 않게
+  const CHAR_BY_ID = Object.assign(Object.create(null), Object.fromEntries(CHARACTERS.map((c) => [c.id, c])));
 
   // 시즌 카드 제한 (캐릭터 선택 화면 왼쪽 위 LIMITATION 창). 시즌이 바뀌면 LIMIT_SEASON과 이 목록만 고침.
   //   ['카드', '카드', …] = 종제한: 이 묶음 중 1장만 덱에 넣을 수 있음
@@ -1846,7 +1848,7 @@
   // 버전·빌드 날짜는 APK를 빌드할 때만 올림 (빌드마다 끝자리 +1, 캐릭터 정식 추가 때 가운데 자리 +1)
   // 버전 탭의 '버그 제보 · 건의 사항' 링크 (APK에서는 Capacitor가 바깥 주소를 시스템 브라우저로 엶)
   const FEEDBACK_URL = 'https://forms.gle/ThJPMxAxXwBPvzcq5';
-  const APP = { name: '루멘 카운터', version: '1.0.8', build: '2026-10-28' };
+  const APP = { name: '루멘 카운터', version: '1.1.0', build: '2026-10-31' };
 
   // ================= 아이콘 =================
   const I = {
@@ -1991,7 +1993,7 @@
   function loadLog(v) {
     if (v === 'current') {
       if (state.screen === 'game') { flashToast('지금 진행 중인 게임이에요'); refresh(); return; }
-      if (!state.log.length || !state.lastGame) { flashToast('불러올 상황이 없어요'); refresh(); return; }
+      if (!state.log.length || !state.lastGame || state.lastGame.players.some((x) => !CHAR_BY_ID[x.char])) { flashToast('불러올 상황이 없어요'); refresh(); return; }
       restoreSnap(state.lastGame);
     } else {
       const k = Number(v);
@@ -2666,10 +2668,10 @@
     // FP 묶음 줄: 'FP'는 노랑(태그 색), 1P 값은 파랑, 2P 값은 빨강
     const tagHtml = x.fpSides
       ? `FP ${x.fpSides.map(([k, v]) => `<span class="f${k + 1}">${k + 1}P ${esc(v)}</span>`).join(' · ')}` : esc(tag);
-    const presses = x.presses ? `<span class="presses">${x.presses}</span>` : '';
+    const presses = x.presses ? `<span class="presses">${esc(x.presses)}</span>` : '';
     return `
       <div class="lrow${side}${r.undone ? ' undone' : ''}">
-        <div class="ltime num">${x.time}<small>${x.turn}</small></div>
+        <div class="ltime num">${x.time}<small>${esc(x.turn)}</small></div>
         <div class="laction">${who}<span class="tag ${tagCls}">${tagHtml}</span>${presses}${r.undone ? '<span class="undid">되돌림</span>' : ''}</div>
         <div class="lvalue num">${Array.isArray(x.value) ? `<span class="v1">${esc(x.value[0])}</span><i>/</i><span class="v2">${esc(x.value[1])}</span>` : x.value != null ? esc(x.value) : '—'}</div>
       </div>`;
@@ -2857,8 +2859,12 @@
     return true;
   };
   // 불러온 게임의 마지막 상황: 캐릭터 값 정리(예전 번호 → id), 모양이 틀리면 없음으로 (불러와도 그 게임 이어하기만 안 됨)
+  //   체력 · FP · 토큰이 숫자가 아니면 이어하기 도중 멈출 수 있어서 함께 검사
+  const isNum = (n) => typeof n === 'number' && Number.isFinite(n);
+  const okPlayer = (x) => x && typeof x === 'object' && isNum(x.hp) && isNum(x.maxHp) && isNum(x.fp)
+    && (x.counts == null || (Array.isArray(x.counts) && x.counts.length === 2 && x.counts.every(isNum)));
   const okSnap = (sn) => {
-    if (!sn || !Array.isArray(sn.players) || sn.players.length !== 2 || sn.players.some((x) => !x || typeof x !== 'object')) return null;
+    if (!sn || !Array.isArray(sn.players) || sn.players.length !== 2 || !sn.players.every(okPlayer)) return null;
     sn.players.forEach((x) => { x.char = normChar(x.char); });
     return sn;
   };
@@ -3508,7 +3514,7 @@
       buzz(8);
     },
     recexport() {
-      if (!rec.list.length) { flashToast('내보낼 전적이 없어요'); return; }
+      if (!rec.list.length && !baseGames()) { flashToast('내보낼 전적이 없어요'); return; } // CLEAR LOG 뒤 승패만 남아 있어도 내보냄
       saveTextFile('record', recordsToText(), '전적 파일');
     },
     recimport() { importText(); },
@@ -4019,7 +4025,13 @@
     if (r !== 'shown') refresh();
   });
 
-  setInterval(() => { if (state.screen === 'game' && state.timer.since) updateClock(); }, 250);
+  setInterval(() => {
+    if (state.screen !== 'game' || !state.timer.since) return;
+    updateClock();
+    // 설정 창의 '남은 경기 시간'도 함께 (창 전체를 다시 그리면 누르던 버튼이 사라지므로 숫자만)
+    const remain = ui.settingsOpen && document.querySelector('#settings .remain b');
+    if (remain) setText(remain, fmtClock(timeLeft()));
+  }, 250);
 
   // ================= 화면 꺼짐 방지 =================
   let wakeLock = null;

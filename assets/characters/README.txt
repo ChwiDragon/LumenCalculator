@@ -45,6 +45,7 @@
   핀프          finf
   CMYK          cmyk
   미녕이        minyeong
+  부쿠키        bukuki
 
 새 캐릭터 추가
   1) lumencalc.html 의 CHARACTERS 목록에 한 줄 추가
