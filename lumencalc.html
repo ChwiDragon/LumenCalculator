@@ -207,14 +207,17 @@
     --heal: #3DCB8A;
     --lumen: #FFC247;
     --u: min(1cqh, .45cqw);
-    --tb-over: calc(20 * var(--u)); /* 계산기 툴바(글자 버튼 셋)가 가운데 열 밖(양옆 칸)으로 넘어가는 길이 */
-    /* 툴바 글자 버튼(LOG 등) 한 칸 크기 = UNDO·FP 버튼 크기 */
-    --tbtn-w: calc((24 * var(--u) + 2 * (3 * var(--u) + var(--tb-over)) - 2px) / 3);
-    --tbtn-h: max(34px, calc(10.5 * var(--u)));
     --cut: calc(1.6 * var(--u));
     --font-display: "Black Han Sans", "IBM Plex Sans KR", "Malgun Gothic", sans-serif;
     --font-body: "IBM Plex Sans KR", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
     --font-num: "Chakra Petch", "IBM Plex Sans KR", "Malgun Gothic", sans-serif; /* 고정폭 대체 글꼴은 숫자가 넓어져 겹침 */
+  }
+  /* 툴바 크기는 --u로 계산 → --u를 따로 정하는 선택 화면 위쪽 버튼(.selbar)에서도 그 --u로 다시 계산되게 함께 선언 */
+  :root, .selbar {
+    --tb-over: calc(20 * var(--u)); /* 계산기 툴바(글자 버튼 셋)가 가운데 열 밖(양옆 칸)으로 넘어가는 길이 */
+    /* 툴바 글자 버튼(LOG 등) 한 칸 크기 = UNDO·FP 버튼 크기 */
+    --tbtn-w: calc((24 * var(--u) + 2 * (3 * var(--u) + var(--tb-over)) - 2px) / 3);
+    --tbtn-h: max(34px, calc(10.5 * var(--u)));
   }
   html, body { height: 100%; }
   /* 모바일 브라우저가 글자만 따로 키우지 않게 (레이아웃은 화면 크기에 맞춰 스스로 조절됨) */
@@ -460,16 +463,22 @@
   /* 마름모 모양만 눌리고, 빈 곳은 뒤의 전신(다시 고르기)으로 통과 */
   .pickcol button { pointer-events: auto; }
   .pickhead { text-align: center; }
-  /* 오른쪽 위 [LOG | SETTING] · 왼쪽 위 [LIMITATION | RECORD]: 좌우 대칭, 모두 계산기 툴바 버튼과 같은 크기·글꼴 */
+  /* 오른쪽 위 [LOG | SETTING] · 왼쪽 위 [LIMITATION | RECORD]: 좌우 대칭, 모두 계산기 툴바 버튼과 같은 크기·글꼴·높이(위치).
+     계산기의 --u는 게임 화면 여백(위아래 3u · 좌우 max(16px, 4u), 이 u는 화면 전체 기준 = --u0)을 뺀 안쪽 기준이라
+     선택 화면(여백 없음)의 --u보다 조금 작음 → 여기서 같은 값으로 다시 계산 */
   .selbar {
+    --u0: min(1cqh, .45cqw);
+    --u: min(calc((var(--game-h, 100cqh) - 6 * var(--u0)) / 100), calc(.45 * (100cqw - 2 * max(16px, 4 * var(--u0))) / 100));
+    /* 계산기 툴바 버튼 폭: 가운데 열(24u)은 게임 화면 격자 칸이라 화면 전체 기준 u(--u0)로 계산됨 */
+    --tbtn-w: calc((24 * var(--u0) + 2 * (3 * var(--u) + var(--tb-over)) - 2px) / 3);
     position: absolute;
-    top: calc(2.6 * var(--u));
-    right: max(16px, calc(3 * var(--u)));
+    top: calc(3 * var(--u0));
+    right: max(16px, calc(3 * var(--u0)));
     z-index: 2;
     display: flex;
     gap: calc(1.2 * var(--u));
   }
-  .selbar.left { right: auto; left: max(16px, calc(3 * var(--u))); }
+  .selbar.left { right: auto; left: max(16px, calc(3 * var(--u0))); }
   .seltools {
     display: flex;
     gap: 1px;
@@ -478,7 +487,7 @@
   }
   .seltools button {
     width: var(--tbtn-w);
-    height: max(44px, var(--tbtn-h)); /* 선택 화면은 자리가 있어 누르는 영역 최소 44px (배틀 화면 툴바는 그대로) */
+    height: var(--tbtn-h);
     display: grid;
     place-items: center;
     background: var(--surface);
@@ -547,7 +556,8 @@
   .slot.s1 .art, .slot.s2 .art { filter: brightness(1.12); }
   button.slot:active .art { filter: brightness(1.25); }
 
-  .startbar { display: grid; place-items: center; min-height: calc(10 * var(--u)); position: relative; z-index: 1; }
+  /* 높이 고정 = 가장 큰 GAME START(10.1u, 최소 44px) 기준 → 1P SELECT ↔ GAME START로 바뀌어도 위 로스터가 움직이지 않음 */
+  .startbar { display: grid; place-items: center; height: max(44px, calc(10.2 * var(--u))); position: relative; z-index: 1; }
   /* 게임 시작(가운데 고정) 오른쪽 옆의 작은 초기화 버튼 */
   .startwrap { position: relative; display: grid; place-items: center; }
   /* GAME START 뒤의 노란 빛 */
@@ -1848,7 +1858,7 @@
   // 버전·빌드 날짜는 APK를 빌드할 때만 올림 (빌드마다 끝자리 +1, 캐릭터 정식 추가 때 가운데 자리 +1)
   // 버전 탭의 '버그 제보 · 건의 사항' 링크 (APK에서는 Capacitor가 바깥 주소를 시스템 브라우저로 엶)
   const FEEDBACK_URL = 'https://forms.gle/ThJPMxAxXwBPvzcq5';
-  const APP = { name: '루멘 카운터', version: '1.1.2', build: '2026-10-31' };
+  const APP = { name: '루멘 카운터', version: '1.1.3', build: '2026-11-02' };
 
   // ================= 아이콘 =================
   const I = {
