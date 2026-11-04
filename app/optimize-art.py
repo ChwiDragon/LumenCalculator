@@ -6,7 +6,8 @@
   2) 압축 : 손실 WebP(품질 80, method 6)로 다시 저장해서 10% 이상 작아질 때만 바꿈
             (이미 이렇게 줄인 파일은 그대로 → 여러 번 실행해도 화질이 계속 떨어지지 않음)
             png·jpg 는 같은 이름의 .webp 로 바뀜 (앱은 .webp 를 먼저 찾음)
-  원본  : 지우거나 바꾸기 전 파일은 release/asset-backup/characters-orig/ 에 남김 (이미 있으면 덮어쓰지 않음)
+  원본  : 지우거나 바꾸기 전 파일은 release/asset-backup/characters-orig/ 에 남김
+          (같은 이름의 예전 원본은 {이름}.{날짜}.webp 로 옮겨 둠 → 그림을 교체해도 원본이 모두 남음)
 
   필요  : pip install pillow
   실행  : python app/optimize-art.py
@@ -14,6 +15,7 @@
 import io
 import re
 import shutil
+from datetime import datetime
 from pathlib import Path
 
 from PIL import Image
@@ -27,9 +29,16 @@ MIN_GAIN = 0.10
 
 
 def backup(f):
+    """바꾸기 전 파일을 BACKUP/{이름}에 남김. 같은 이름의 다른 그림(예전 원본)이 이미 있으면
+    그건 {이름}.{그 파일 날짜}.{확장자}로 옮겨 두고 새 원본을 남김 (그림을 교체해도 원본이 사라지지 않게)"""
     BACKUP.mkdir(parents=True, exist_ok=True)
-    if not (BACKUP / f.name).exists():
-        shutil.copy2(f, BACKUP / f.name)
+    dst = BACKUP / f.name
+    if dst.exists():
+        if dst.read_bytes() == f.read_bytes():
+            return
+        stamp = datetime.fromtimestamp(dst.stat().st_mtime).strftime('%Y%m%d-%H%M%S')
+        dst.rename(dst.with_name(f'{dst.stem}.{stamp}{dst.suffix}'))
+    shutil.copy2(f, dst)
 
 
 def main():
