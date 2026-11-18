@@ -191,10 +191,10 @@
   /* 글꼴은 모두 앱에 포함(assets/fonts/) → 인터넷 없이 바로 그려지고, 늦게 받은 글꼴로 바뀌며 화면이 출렁이지 않음.
      한글 글꼴은 이 파일에서 화면에 나올 수 있는 글자만(주석 제외) 남긴 것 (app/make-fonts.py가 빌드 때마다 다시 만듦). 라이선스: SIL OFL 1.1
      font-display: block → 기본 글꼴로 먼저 그렸다가 바꾸지 않음 (파일이 없으면 바로 기본 글꼴) */
-  @font-face { font-family: "Black Han Sans"; font-weight: 400; font-display: block; src: url(assets/fonts/BlackHanSans-400.woff2?v=a32402c2) format("woff2"); }
-  @font-face { font-family: "IBM Plex Sans KR"; font-weight: 400; font-display: block; src: url(assets/fonts/IBMPlexSansKR-400.woff2?v=f4ca8bbe) format("woff2"); }
-  @font-face { font-family: "IBM Plex Sans KR"; font-weight: 600; font-display: block; src: url(assets/fonts/IBMPlexSansKR-600.woff2?v=1d058760) format("woff2"); }
-  @font-face { font-family: "IBM Plex Sans KR"; font-weight: 700; font-display: block; src: url(assets/fonts/IBMPlexSansKR-700.woff2?v=9fc7f5e6) format("woff2"); }
+  @font-face { font-family: "Black Han Sans"; font-weight: 400; font-display: block; src: url(assets/fonts/BlackHanSans-400.woff2?v=f64e3c7f) format("woff2"); }
+  @font-face { font-family: "IBM Plex Sans KR"; font-weight: 400; font-display: block; src: url(assets/fonts/IBMPlexSansKR-400.woff2?v=21fc0d3a) format("woff2"); }
+  @font-face { font-family: "IBM Plex Sans KR"; font-weight: 600; font-display: block; src: url(assets/fonts/IBMPlexSansKR-600.woff2?v=b78c16a7) format("woff2"); }
+  @font-face { font-family: "IBM Plex Sans KR"; font-weight: 700; font-display: block; src: url(assets/fonts/IBMPlexSansKR-700.woff2?v=517cd9a9) format("woff2"); }
   @font-face { font-family: "Chakra Petch"; font-weight: 500; font-display: block;
     src: url(assets/fonts/ChakraPetch-500.woff2) format("woff2"), url(https://fonts.gstatic.com/s/chakrapetch/v13/cIflMapbsEk7TDLdtEz1BwkebIl1R5_F.woff2) format("woff2"); }
   @font-face { font-family: "Chakra Petch"; font-weight: 600; font-display: block;
@@ -2771,7 +2771,7 @@
   const canInstall = () => !window.Capacitor && window.top === window && !navigator.standalone
     && !matchMedia('(display-mode: standalone)').matches && (!!pwa.evt || IOS);
   addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); pwa.evt = e; refresh(); }); // 브라우저 기본 설치 띠 대신 버튼으로
-  addEventListener('appinstalled', () => { pwa.evt = null; flashToast('설치했어요. 홈 화면의 아이콘으로 여세요', 2400); refresh(); });
+  addEventListener('appinstalled', () => { pwa.evt = null; flashToast('설치 중입니다. 잠시만 기다려주세요.', 2400); refresh(); });
   function renderLog() {
     const el = $('log'), dock = $('logdock');
     const docked = !!splitMode() && state.screen === 'game';
