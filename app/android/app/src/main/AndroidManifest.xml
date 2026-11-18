@@ -48,6 +48,10 @@
         </provider>
     </application>
 
+    <!-- 가로 고정(screenOrientation="landscape")이 자동으로 붙이는 '가로 화면 필수'를 선택으로:
+         세로 화면만 있는 기기에서도 설치 가능 (웹 화면이 세로면 알아서 90° 돌려 그림). Play Console 사전 검사 경고 해결 -->
+    <uses-feature android:name="android.hardware.screen.landscape" android:required="false" />
+
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />

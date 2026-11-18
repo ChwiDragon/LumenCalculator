@@ -1213,10 +1213,11 @@
     --cut: calc(1 * var(--u));
   }
 
-  /* 로그 · 전적 창과 같은 높이(위아래 4u), 뒤 화면은 같은 어둡기(.dimbg) */
+  /* 로그 · 전적 창과 같은 높이(위아래 4u), 뒤 화면은 같은 어둡기(.dimbg).
+     폭 = 화면의 52%, 단 최소 400px(작은 화면에서 머리줄 탭 · APP INSTALL · ✕가 한 줄에 들어가게, 화면보다 크면 양옆 16px만 남김) */
   .settings {
     position: absolute;
-    inset: calc(4 * var(--u)) 24cqw;
+    inset: calc(4 * var(--u)) max(16px, min(24cqw, calc(50cqw - 200px)));
     z-index: 5;
     background: var(--surface);
     box-shadow: 0 0 0 1px var(--line), 0 calc(2 * var(--u)) calc(8 * var(--u)) rgba(0,0,0,.6);
@@ -1429,13 +1430,14 @@
 
   /* 설정 팝업 */
   .toolbar button.on { background: var(--surface-3); color: var(--lumen); }
-  .settings .tabs { display: flex; gap: calc(.6 * var(--u)); }
+  .settings .tabs { display: flex; gap: calc(.6 * var(--u)); min-width: 0; }
   .settings .tabs button {
+    white-space: nowrap; /* 좁은 화면에서 '설/정'처럼 글자가 나뉘지 않게 */
     font-family: var(--font-body);
     font-weight: 700;
     font-size: max(13px, calc(3.4 * var(--u)));
     min-height: 34px;
-    padding: .3em .8em;
+    padding: .3em clamp(.45em, 1.1cqw, .8em); /* 좁은 앱(작은 폰 · 90° · 270°)에서는 양옆 여백을 줄여 한 줄에 */
     background: none;
     color: var(--muted);
     box-shadow: inset 0 -2px 0 transparent;
@@ -1886,7 +1888,7 @@
   // 버전·빌드 날짜는 APK를 빌드할 때만 올림 (빌드마다 끝자리 +1, 캐릭터 정식 추가 때 가운데 자리 +1)
   // 버전 탭의 '버그 제보 · 건의 사항' 링크 (APK에서는 Capacitor가 바깥 주소를 시스템 브라우저로 엶)
   const FEEDBACK_URL = 'https://forms.gle/ThJPMxAxXwBPvzcq5';
-  const APP = { name: '루멘 카운터', author: '취룡', version: '1.1.5', build: '2026-11-17' };
+  const APP = { name: '루멘 카운터', author: '취룡', version: '1.1.6', build: '2026-11-18' };
 
   // ================= 아이콘 =================
   const I = {
