@@ -36,8 +36,8 @@ if ($LASTEXITCODE -ne 0) { throw 'gradle bundleRelease failed' }
 
 # 3. versioned copy into release/
 $gradle = Get-Content "$app\android\app\build.gradle" -Raw
-$ver = [regex]::Match($gradle, 'versionName "([^"]+)"').Groups[1].Value
-$code = [regex]::Match($gradle, 'versionCode (\d+)').Groups[1].Value
+$ver = [regex]::Match($gradle, 'versionName\s*=?\s*"([^"]+)"').Groups[1].Value
+$code = [regex]::Match($gradle, 'versionCode\s*=?\s*(\d+)').Groups[1].Value
 $out = "$release\lumencalc-$ver-vc$code.aab"
 Copy-Item "$app\android\app\build\outputs\bundle\release\app-release.aab" $out -Force
 "built: $out"

@@ -27,8 +27,8 @@ python "$app\optimize-art.py"
 if ($LASTEXITCODE -ne 0) { throw 'optimize-art.py failed (pip install pillow)' }
 $release = "$root\release"
 $gradle = Get-Content "$app\android\app\build.gradle" -Raw
-$ver = [regex]::Match($gradle, 'versionName "([^"]+)"').Groups[1].Value
-$code = [regex]::Match($gradle, 'versionCode (\d+)').Groups[1].Value
+$ver = [regex]::Match($gradle, 'versionName\s*=?\s*"([^"]+)"').Groups[1].Value
+$code = [regex]::Match($gradle, 'versionCode\s*=?\s*(\d+)').Groups[1].Value
 
 function Build-Apk([bool]$withArt, [string]$dest) {
   # 1. web files -> www (lumencalc.html becomes index.html)

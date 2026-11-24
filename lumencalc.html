@@ -76,22 +76,29 @@
 
  ■ 계산기 규칙
   - 체력 버튼(1P, 왼쪽→오른쪽): −600 −500 −400 −300 / +200 +100 −100 −200. 2P는 줄마다 좌우를 뒤집은 대칭 배치. 체력은 0~최대 사이.
-  - 체력 옆 합계: 1초 안에 연달아 누르면(피해·회복 섞여도) 체력 숫자(/최대) 바로 옆에 합친 값을 잠깐(1.6초) 표시.
+  - 체력 옆 합계: 0.5초 안에 연달아 누르면(피해·회복 섞여도) 체력 숫자(/최대) 바로 옆에 합친 값을 잠깐(1.6초) 표시.
     체력 숫자 줄은 높이를 고정해 둠 → 합계가 나타나도 아래 칸들이 움직이지 않음.
+  - 체력 숫자 줄(체력 · 최대 체력 · 손패 마름모)을 누르면 그 캐릭터의 숫자 패드(#hppop, ui.hpPop): 숫자 = ×100(두 자리, 최대 9900).
+    데미지 ↔ 회복(누를 때마다 번갈아), ← 한 자리 지우기, C 모두 지우기, '추가 입력' = 넣고 다음 숫자, '입력 확인' = 넣고 닫기, ✕ = 그냥 닫기.
+    넣는 값은 데미지 버튼과 같은 체력 기록(로그 · 되돌리기 · 합계 표시).
   - 손패 한도: 체력 구간 5000~4001 / 4000~3001 / 3000~2001 / 2000~1001 / 1000 이하.
     기본 6/7/8/9/9, 리타 6/7/8/9/10, 키메라 5/5/5/6/6(특성 ON이면 +1), CMYK 10×5.
     시작 체력 기본 5000, 무영 4500, 핀프 5500.
   - FP: 데미지 버튼 옆 + / −. 가운데 현재 FP 숫자를 탭하면 0(+ / −와 같은 FP 묶음으로 로그 · 되돌리기),
-    두 번 탭하거나 1초 누르면 FP 팝업.
+    빠르게 두 번 탭하거나 1초 누르면 FP 팝업.
     카운트다운 위 FP 버튼 = FP 팝업: 양쪽 −9~+9. ±1~4는 데미지 버튼 자리, ±5~9는 그 위·아래 줄 다섯 칸(모두 같은 크기,
     다섯째 칸 ±5는 FP 칸 위·아래). 누르면 바로 그 값(+ / −와 같이 3초 안이면 기록 묶음). 0 = FP 칸 자리, 가운데 ✕ 마름모 = 닫기.
+  - 두 번 누르는 버튼(NEW GAME · RECORD 창의 NEW GAME · 기록 ✕ · FP 숫자): 첫 탭에 흰색 강조(.armed),
+    DBL_TAP_MS(0.4초) 안에 두 번째 탭이 없으면 강조가 빠르게 사라지고 취소. 알림은 띄우지 않음 — 빨간 토스트는 할 수 없을 때 · 오류 · 웹 앱 설치 안내에만.
+  - 1초 누르는 버튼(NEW GAME · ALL DELETE · CLEAR LOG): 오른쪽 위에 글자색 작은 점.
+  - 두 번 누르는 NEW GAME(툴바 · RECORD 창): 왼쪽 위에 글자색 작은 점 2개(.dbl).
   - 카운트다운(10초/30초, 아래 버튼으로 바꿈): 탭=시작, 도는 중(또는 끝난 뒤) 탭=처음으로 돌아가 멈춤, 0이 되고 5초 뒤 저절로 처음으로.
     멈춰 있을 때는 숫자 대신 초시계 그림. 길게 누르기 없음. 효과음 없음.
   - 경기 시간: 탭=시작/일시정지, 길게=초기화. 남은 1분부터 노란색, 10초부터 빨간색. 설정에서 분 단위로 바꾸면 즉시 적용.
   - TURN: 탭 +1, 길게 −1.
   - 서든데스: 양쪽 체력이 모두 0이면 가운데(카운트다운 자리)에 '서든데스' 버튼이 나타남.
     탭 → 양쪽 체력 1000 · FP 0, 버튼 사라짐. 되돌리기로 취소 가능(버튼 다시 나타남).
-  - 같은 종류를 이어 누르면 되돌리기·로그에서 한 번으로 묶는다: 체력·토큰 1초(MERGE_MS), FP 3초(FP_MERGE_MS).
+  - 같은 종류를 이어 누르면 되돌리기·로그에서 한 번으로 묶는다: 체력 0.5초(HP_MERGE_MS, 숫자 패드 입력은 묶지 않음), 토큰 3초(MERGE_MS), FP 3초(FP_MERGE_MS).
     같은 종류 = 같은 플레이어의 체력(피해·회복 합쳐서 한 줄: −500, +100 → 피해 −400) / FP(1P·2P 함께 한 줄, 결과값 표시) / 같은 토큰.
   - 특성 마크: 탭하면 밝게(ON)/어둡게(OFF). 강조 효과는 은은하게(움직이는 효과 금지).
     린·이제벨·이오몽·CMYK는 게임 시작부터 특성 ON 고정(탭해도 안 꺼짐).
@@ -191,10 +198,10 @@
   /* 글꼴은 모두 앱에 포함(assets/fonts/) → 인터넷 없이 바로 그려지고, 늦게 받은 글꼴로 바뀌며 화면이 출렁이지 않음.
      한글 글꼴은 이 파일에서 화면에 나올 수 있는 글자만(주석 제외) 남긴 것 (app/make-fonts.py가 빌드 때마다 다시 만듦). 라이선스: SIL OFL 1.1
      font-display: block → 기본 글꼴로 먼저 그렸다가 바꾸지 않음 (파일이 없으면 바로 기본 글꼴) */
-  @font-face { font-family: "Black Han Sans"; font-weight: 400; font-display: block; src: url(assets/fonts/BlackHanSans-400.woff2?v=f64e3c7f) format("woff2"); }
-  @font-face { font-family: "IBM Plex Sans KR"; font-weight: 400; font-display: block; src: url(assets/fonts/IBMPlexSansKR-400.woff2?v=21fc0d3a) format("woff2"); }
-  @font-face { font-family: "IBM Plex Sans KR"; font-weight: 600; font-display: block; src: url(assets/fonts/IBMPlexSansKR-600.woff2?v=b78c16a7) format("woff2"); }
-  @font-face { font-family: "IBM Plex Sans KR"; font-weight: 700; font-display: block; src: url(assets/fonts/IBMPlexSansKR-700.woff2?v=517cd9a9) format("woff2"); }
+  @font-face { font-family: "Black Han Sans"; font-weight: 400; font-display: block; src: url(assets/fonts/BlackHanSans-400.woff2?v=0e61010f) format("woff2"); }
+  @font-face { font-family: "IBM Plex Sans KR"; font-weight: 400; font-display: block; src: url(assets/fonts/IBMPlexSansKR-400.woff2?v=82d2488f) format("woff2"); }
+  @font-face { font-family: "IBM Plex Sans KR"; font-weight: 600; font-display: block; src: url(assets/fonts/IBMPlexSansKR-600.woff2?v=90355601) format("woff2"); }
+  @font-face { font-family: "IBM Plex Sans KR"; font-weight: 700; font-display: block; src: url(assets/fonts/IBMPlexSansKR-700.woff2?v=ac32e4d5) format("woff2"); }
   @font-face { font-family: "Chakra Petch"; font-weight: 500; font-display: block;
     src: url(assets/fonts/ChakraPetch-500.woff2) format("woff2"), url(https://fonts.gstatic.com/s/chakrapetch/v13/cIflMapbsEk7TDLdtEz1BwkebIl1R5_F.woff2) format("woff2"); }
   @font-face { font-family: "Chakra Petch"; font-weight: 600; font-display: block;
@@ -216,7 +223,8 @@
     --p1: #4DA3FF;
     --p2: #FF5C7A;
     --dmg: #FF6B61;
-    --dmg-fill: #CC362E; /* 흰 글자를 올리는 빨간 바탕(토스트 · 두 번 누르기 대기 버튼): 흰 글자 대비 5:1 */
+    --dmg-fill: #CC362E; /* 흰 글자를 올리는 빨간 바탕(토스트 · 숫자 패드 데미지): 흰 글자 대비 5:1 */
+    --heal-fill: #1E8A5A; /* 흰 글자를 올리는 초록 바탕(숫자 패드 회복) */
     --heal: #3DCB8A;
     --lumen: #FFC247;
     --u: min(1cqh, .45cqw);
@@ -671,14 +679,14 @@
   /* 1P/2P와 이름은 글자 아래선(baseline)을 맞춤 — 글꼴이 달라 가운데 정렬하면 이름이 떠 보임 */
   .plate .line { display: flex; align-items: baseline; gap: calc(1.6 * var(--u)); min-width: 0; }
   .plate .line #badges0, .plate .line #badges1 { align-self: center; }
-  .side .plate .ptag { font-size: max(16px, calc(5.2 * var(--u))); flex: none; }
+  .side .plate .ptag { font-size: max(18px, calc(6.2 * var(--u))); flex: none; }
   .side.p2 .plate .line { flex-direction: row-reverse; }
   /* 이름(캐릭터 상징색): 글자 높이를 1P / 2P와 같게. 아래선이 같고, 크기는 글꼴 차이만큼 줄임
-     (Chakra Petch 대문자 높이 ≈ 0.71em, Black Han Sans 글자 높이 ≈ 0.76em → 5.2u × 0.71 ÷ 0.76 ≈ 4.85u) */
+     (Chakra Petch 대문자 높이 ≈ 0.71em, Black Han Sans 글자 높이 ≈ 0.76em → 6.2u × 0.71 ÷ 0.76 ≈ 5.8u) */
   .plate .cname {
     min-width: 0;
     font-family: var(--font-display);
-    font-size: max(15px, calc(4.85 * var(--u)));
+    font-size: max(17px, calc(5.8 * var(--u)));
     line-height: 1.1;
     white-space: nowrap;
     overflow: hidden;
@@ -830,6 +838,66 @@
   .fp .val:active { background: var(--surface-2); }
   .fp .val.pos { color: var(--heal); } /* + 는 회복 버튼과 같은 초록 */
   .fp .val.neg { color: var(--dmg); }
+  /* 두 번 누르는 버튼 공통: 첫 탭 = 흰색 강조(바로), 풀릴 때 = 빠르게 사라짐 */
+  .toolbar button.tbtext, .hbtn, .rdel, .fp .val { transition: background-color .2s ease-out, color .2s ease-out, box-shadow .2s ease-out; }
+  .toolbar button.armed, .hbtn.armed, .rdel.armed, .fp .val.armed { background: rgba(255, 255, 255, .16); transition: none; }
+
+  /* 체력 숫자 패드(#hppop): 체력 숫자 줄을 누르면 그 캐릭터 칸 위에 뜸. 뒤는 FP 팝업과 같은 어두운 막 */
+  .hpline { cursor: pointer; }
+  #hppop { display: contents; }
+  #hppop[hidden] { display: none; }
+  .hpk {
+    grid-row: 1 / -1;
+    z-index: 31;
+    min-height: 0;
+    display: grid;
+    grid-template-rows: auto auto minmax(0, 1fr);
+    gap: calc(1.6 * var(--u));
+    padding: calc(2 * var(--u)) calc(2.4 * var(--u)) calc(2.4 * var(--u));
+    background: var(--surface);
+    box-shadow: 0 0 0 1px var(--line), 0 calc(2 * var(--u)) calc(8 * var(--u)) rgba(0,0,0,.6);
+    border-radius: calc(2 * var(--u));
+    animation: fpfade .12s ease-out;
+    --tone: var(--dmg);
+    --tone-fill: var(--dmg-fill);
+  }
+  .hpk.heal { --tone: var(--heal); --tone-fill: var(--heal-fill); }
+  .hpk.p1 { grid-column: 1; }
+  .hpk.p2 { grid-column: 3; }
+  .hpk header { display: flex; align-items: center; gap: calc(1.6 * var(--u)); min-width: 0; }
+  /* 1P/2P와 이름: 배틀 화면 이름판처럼 글자 아래선(baseline)을 맞춘 한 덩어리 → 그 덩어리를 토글 · ✕와 세로 가운데 맞춤 */
+  .hpkwho { flex: 1; min-width: 0; display: flex; align-items: baseline; gap: calc(1.6 * var(--u)); }
+  .hpk header .ptag { flex: none; font-family: var(--font-num); font-weight: 700; font-size: max(16px, calc(5.2 * var(--u))); }
+  .hpk.p1 header .ptag { color: var(--p1); }
+  .hpk.p2 header .ptag { color: var(--p2); }
+  .hpk header b { flex: 1; min-width: 0; font-family: var(--font-display); font-weight: 400; font-size: max(15px, calc(4.85 * var(--u))); line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* 데미지 ↔ 회복: 버튼 하나(어디를 눌러도 번갈아 바뀜), 지금 모드 쪽이 채워짐 */
+  .hpkmode { flex: none; display: flex; padding: 2px; border-radius: calc(1.2 * var(--u)); background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); }
+  .hpkmode span { display: grid; place-items: center; min-height: 30px; padding: 0 .9em; border-radius: calc(1 * var(--u)); font-weight: 700; font-size: max(12px, calc(3 * var(--u))); color: var(--muted); }
+  .hpkmode span.on { background: var(--tone-fill); color: #fff; }
+  .hpkmode:active { filter: brightness(1.3); }
+  .hpk .lclose { flex: none; }
+  .hpkval { display: flex; align-items: baseline; justify-content: space-between; gap: calc(2 * var(--u)); padding: 0 calc(1 * var(--u)); }
+  .hpkval .v { display: inline-flex; align-items: baseline; font-size: calc(11 * var(--u)); line-height: .9; color: var(--tone); }
+  .hpkval .v .qz { font-size: .55em; opacity: .55; }
+  .hpkval .v.empty { opacity: .35; }
+  .hpkval .to { display: inline-flex; align-items: baseline; gap: .3em; font-size: max(20px, calc(7.4 * var(--u))); line-height: 1; color: var(--muted); white-space: nowrap; }
+  .hpkval .to i { font-style: normal; font-size: .7em; color: var(--faint); }
+  .hpkval .to b { font-size: 1.15em; color: var(--text); font-weight: 700; }
+  .hpkpad {
+    min-height: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(0, 1.35fr);
+    grid-template-rows: repeat(4, minmax(0, 1fr));
+    gap: calc(1.2 * var(--u));
+  }
+  .hpkn, .hpkgo { --cut: calc(1.2 * var(--u)); min-height: 0; transition: filter .08s, transform .08s; }
+  .hpkn { font-size: max(20px, calc(8 * var(--u))); line-height: 1; background: var(--surface-2); color: var(--text); }
+  .hpkn.fn { font-family: var(--font-num); font-weight: 700; font-size: max(17px, calc(5.8 * var(--u))); color: var(--muted); }
+  .hpkgo { grid-column: 4; font-weight: 700; font-size: max(15px, calc(4.4 * var(--u))); line-height: 1.25; }
+  .hpkgo.next { grid-row: 1 / span 2; background: linear-gradient(180deg, color-mix(in srgb, var(--tone) 16%, var(--surface)), color-mix(in srgb, var(--tone) 8%, var(--surface))); color: var(--tone); }
+  .hpkgo.close { grid-row: 3 / span 2; background: var(--tone-fill); color: #fff; }
+  .hpkn:active, .hpkgo:active { transform: scale(.95); filter: brightness(1.4); }
 
   /* FP 팝업: 게임 칸(.game)의 줄·열을 그대로 써서 양쪽 칸 전체를 덮음 */
   #fppop { display: contents; }
@@ -1113,10 +1181,10 @@
   .toolbar button.tbtext { font-family: var(--font-num); font-weight: 700; font-size: max(11px, calc(2.9 * var(--u))); letter-spacing: .05em; white-space: nowrap; color: var(--text); }
 
   .toolbar button:active { background: var(--surface-2); color: var(--text); }
-  .toolbar button.armed { background: var(--dmg-fill); color: #fff; }
+  /* 두 번 누르는 버튼: 첫 탭에 흰색 강조(바로 켜짐), 두 번째 탭이 안 오면 빠르게 사라짐 (아래 .armed 공통 규칙) */
   /* NEW GAME 1초 누르기(같은 캐릭터로 다시) 진행 막대 */
   .toolbar button.tbtext { position: relative; overflow: hidden; }
-  .toolbar .fill { position: absolute; inset: 0; background: var(--lumen); opacity: .35; transform: scaleX(0); transform-origin: left center; }
+  .toolbar .fill { position: absolute; inset: 0; background: currentColor; opacity: .35; transform: scaleX(0); transform-origin: left center; }
   .toolbar .tbtext span { position: relative; }
 
   /* 폭 고정: 시간 글자 폭과 상관없이 터치 영역이 같음 */
@@ -1265,6 +1333,8 @@
   /* 세로로 긴 앱: 게임 화면 내용은 폭으로 크기가 정해져(u = 0.45 × 폭/100) 폭의 절반이면 충분 */
   .app[data-split="tall"] { --game-h: 50cqw; }
   .app[data-split] .screen.game { bottom: auto; height: calc(var(--game-h) - var(--safe-t)); }
+  /* 세로로 긴 앱: 캐릭터 선택 화면도 게임 화면과 같은 위쪽 2 : 1 띠 (아래는 비움) */
+  .app[data-split="tall"] .screen.select { bottom: auto; height: calc(var(--game-h) - var(--safe-t)); }
   .app[data-split] .logdock {
     position: absolute;
     top: var(--game-h);
@@ -1310,7 +1380,6 @@
   /* 창 머리줄의 ✕ 옆 글자 버튼 (LOG 창 RECORD · 전적 창 NEW GAME): 같은 모양 */
   .hbtn { flex: none; min-height: 32px; margin-right: calc(1.2 * var(--u)); padding: .5em 1.2em; border-radius: calc(1 * var(--u)); background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); font-family: var(--font-num); font-weight: 700; font-size: max(11px, calc(2.6 * var(--u))); letter-spacing: .06em; color: var(--text); white-space: nowrap; }
   .hbtn:active { background: var(--surface-3); }
-  .hbtn.armed { background: var(--dmg-fill); color: #fff; box-shadow: none; }
   .ltabs {
     display: flex;
     flex: none;
@@ -1339,7 +1408,8 @@
     touch-action: none;
   }
   .ltab span { position: relative; }
-  .ltab .fill { position: absolute; inset: 0; background: #fff; opacity: .35; transform: scaleX(0); transform-origin: left center; }
+  .ltab .fill { position: absolute; inset: 0; background: #fff; opacity: .35; transform: scaleX(0); transform-origin: left center; } /* 1초 누르기(이어하기) 진행 막대: 고르지 않은 탭 = 흰색, 고른 탭 = 검은색 */
+  .ltab.on .fill { background: #000; }
   .ltab.cur { color: var(--lumen); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--lumen) 45%, transparent); }
   .ltab.on { background: var(--lumen); color: #1A1300; box-shadow: none; }
   .llist {
@@ -1406,7 +1476,6 @@
   .lvalue .v1 { color: var(--p1); }
   .lvalue .v2 { color: var(--p2); }
   .lvalue i { font-style: normal; color: var(--faint); margin: 0 .35em; }
-  .lhint { flex: 1; min-width: 0; font-size: max(11px, calc(2.4 * var(--u))); color: var(--muted); word-break: keep-all; }
   .logpanel footer { display: flex; align-items: center; gap: calc(2 * var(--u)); justify-content: flex-end; padding: calc(1.2 * var(--u)) calc(2 * var(--u)); border-top: 1px solid var(--line); }
   .ldel {
     position: relative;
@@ -1424,9 +1493,36 @@
     touch-action: none;
   }
   .ldel span { position: relative; }
+  /* 1초 누르는 버튼(NEW GAME · ALL DELETE · CLEAR LOG) 표시: 오른쪽 위 작은 점(글자색, 반투명) */
+  #tb-reselect::after, .ldel::after {
+    content: '';
+    position: absolute;
+    top: max(3px, calc(.9 * var(--u)));
+    right: max(3px, calc(.9 * var(--u)));
+    width: max(3px, calc(.7 * var(--u)));
+    height: max(3px, calc(.7 * var(--u)));
+    border-radius: 50%;
+    background: currentColor;
+    opacity: .4;
+  }
+  /* 두 번 누르는 NEW GAME(툴바 · 전적 창) 표시: 왼쪽 위 작은 점 2개(글자색, 반투명, 둘째 점 = 그림자) */
+  .dbl { position: relative; }
+  .dbl::before {
+    --d: max(3px, calc(.7 * var(--u)));
+    content: '';
+    position: absolute;
+    top: max(3px, calc(.9 * var(--u)));
+    left: max(3px, calc(.9 * var(--u)));
+    width: var(--d);
+    height: var(--d);
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: calc(var(--d) * 1.8) 0 0 currentColor;
+    opacity: .4;
+  }
   .lexp { min-height: 32px; padding: .5em 1.2em; border-radius: calc(1 * var(--u)); background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); font-family: var(--font-num); font-weight: 700; font-size: max(11px, calc(2.6 * var(--u))); letter-spacing: .06em; color: var(--lumen); }
   .lexp:active { background: var(--surface-3); }
-  .ldel .fill { position: absolute; inset: 0; background: var(--dmg); opacity: .45; transform: scaleX(0); transform-origin: left center; }
+  .ldel .fill { position: absolute; inset: 0; background: currentColor; opacity: .4; /* 1초 누르기 진행 막대 = 글자색 */ transform: scaleX(0); transform-origin: left center; }
 
   /* 설정 팝업 */
   .toolbar button.on { background: var(--surface-3); color: var(--lumen); }
@@ -1577,7 +1673,6 @@
   .rchar.empty b { color: var(--faint); }
   /* 나 ⇄ 상대 자리 바꾸기 */
   .rswap { display: grid; place-items: center; align-content: center; gap: calc(.3 * var(--u)); width: calc(10 * var(--u)); min-width: 44px; padding: calc(1.6 * var(--u)) 0; background: var(--surface-2); color: var(--text); font-size: max(14px, calc(4 * var(--u))); line-height: 1; --cut: calc(1 * var(--u)); }
-  .rswap small { font-size: max(11px, calc(2.2 * var(--u))); font-weight: 700; color: var(--muted); }
   .rswap:active { background: var(--surface-3); }
   /* 승 / 패 / 무효: 누르면 바로 저장 (무효는 순수 기록용, 전적 · 승률에서 빠짐) */
   .rresbtns { display: grid; grid-template-columns: 1fr 1fr; gap: calc(1 * var(--u)); --cut: calc(1 * var(--u)); }
@@ -1625,7 +1720,6 @@
   .rvsname .nochar { color: var(--faint); font-style: normal; font-size: .85em; } /* 부전승 · 부전패 줄: 캐릭터 없음 */
   .rdel { position: relative; min-width: calc(7 * var(--u)); height: calc(6.4 * var(--u)); min-height: 26px; padding: 0 .5em; border-radius: calc(.8 * var(--u)); color: var(--muted); font-size: .85em; white-space: nowrap; }
   .rdel::after { content: ''; position: absolute; inset: -4px -6px; } /* 누르는 영역만 넓힘 (줄 높이는 그대로) */
-  .rdel.armed { background: color-mix(in srgb, var(--dmg) 26%, transparent); color: #FFA69F; font-weight: 700; }
   /* 날짜별 · 캐릭터별 묶음: 줄을 누르면 펼침 (날짜 → 그날 경기 1R, 2R… / 내 캐릭터 → 상대 캐릭터별, 승률 높은 순) */
   .rgrp { flex: none; border-radius: calc(1.2 * var(--u)); background: var(--surface-2); }
   .rsum { width: 100%; min-height: 36px; display: grid; grid-template-columns: minmax(0, 1fr) auto calc(12 * var(--u)) calc(3 * var(--u)); align-items: center; gap: calc(1.4 * var(--u)); padding: calc(1.2 * var(--u)) calc(1.6 * var(--u)) calc(.6 * var(--u)) calc(1.8 * var(--u)); text-align: left; font-size: max(14px, calc(3.7 * var(--u))); }
@@ -1665,7 +1759,8 @@
   .rmore { flex: none; display: flex; justify-content: center; align-items: baseline; gap: .6em; padding: calc(1.2 * var(--u)); border-radius: calc(1.2 * var(--u)); background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); color: var(--lumen); font-weight: 700; font-size: max(13px, calc(3.3 * var(--u))); }
   .rmore small { font-weight: 400; color: var(--muted); font-size: .8em; }
   .rmore:active { background: var(--surface-3); }
-  .rnote { flex: none; padding: calc(.6 * var(--u)) calc(1.4 * var(--u)); color: var(--muted); font-size: max(11px, calc(2.8 * var(--u))); text-align: center; }
+  .rnote { flex: none; padding: calc(.8 * var(--u)) calc(1.4 * var(--u)); color: var(--muted); font-size: max(13px, calc(3.4 * var(--u))); text-align: center; }
+  .rnote b { color: var(--text); font-weight: 700; }
   .rtabs button small { margin-left: .4em; font-size: .75em; color: var(--muted); }
   .rsum:is(div) { cursor: default; }
   /* 확인 창: 가장 위(알림 글자보다도 위), 뒤를 누르면 취소 */
@@ -1680,6 +1775,26 @@
   .cfnotes { margin: 0; padding: 0; list-style: none; display: grid; gap: calc(.8 * var(--u)); font-size: max(12px, calc(3.1 * var(--u))); line-height: 1.5; color: var(--muted); word-break: keep-all; }
   .cfnotes b { margin-right: .6em; color: var(--lumen); }
   .cfnotes .warn b { color: #FFA69F; }
+  /* 창 이름 옆 ? (LOG · RECORD · ANALYSIS): 누르면 간단한 사용법 창 (확인 창 모양, 확인 버튼 하나) */
+  .qhelp {
+    position: relative;
+    flex: none;
+    width: max(22px, calc(5.4 * var(--u)));
+    height: max(22px, calc(5.4 * var(--u)));
+    margin: 0 auto 0 calc(1.6 * var(--u)); /* 이름 바로 옆, 나머지 버튼은 오른쪽으로 */
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 1px var(--line);
+    background: var(--surface-2);
+    color: var(--muted);
+    font-family: var(--font-num);
+    font-weight: 700;
+    font-size: max(12px, calc(3 * var(--u)));
+    line-height: 1;
+  }
+  .qhelp::after { content: ''; position: absolute; inset: -8px; } /* 누르는 영역만 넓힘 */
+  .qhelp:active { background: var(--surface-3); color: var(--text); }
+  .cfhelp { margin: 0; padding-left: 1.1em; display: grid; gap: calc(.9 * var(--u)); font-size: max(12px, calc(3.1 * var(--u))); line-height: 1.5; color: var(--muted); word-break: keep-all; }
+  .cfhelp b { color: var(--text); font-size: inherit; }
   /* 전적 분석 창 (RECORD 위) */
   .anbg, .settings.anal { z-index: 8; }
   .hbtn.anbtn { color: var(--lumen); } /* RECORD 창 머리줄의 ANALYSIS · 설정 창의 APP INSTALL: 노란 글자 */
@@ -1739,7 +1854,6 @@
   .achart .up rect { fill: var(--p1); } .achart .dn rect { fill: var(--dmg); }
   .achart .g50 { stroke: var(--faint); stroke-dasharray: 4 4; } .achart .g0 { stroke: var(--line); }
   .aflow { display: flex; flex-wrap: wrap; gap: calc(.6 * var(--u)); font-size: max(12px, calc(3 * var(--u))); }
-  .anote { margin: 0; padding-left: 1.2em; display: grid; gap: calc(.3 * var(--u)); color: var(--muted); font-size: max(11px, calc(2.5 * var(--u))); line-height: 1.5; word-break: keep-all; }
 
   @media (prefers-reduced-motion: reduce) {
     .bar .ghost, .bar .fill, .q, .burst, .trait .mark { transition: none; }
@@ -1806,8 +1920,10 @@
   const HAND_COLORS = ['#4DA3FF', '#3DCB8A', '#FFD23F', '#FF9838', '#FF4D4D'];
   const MIN_EMPTY_SLOTS = 3; // 선택 화면에 항상 남겨 둘 빈 칸 수 (추가 캐릭터 자리)
   const ROSTER_ROWS = 4;     // 역삼각형 줄 수 (캐릭터가 늘면 윗줄이 길어짐)
-  // 이 시간 안에 같은 종류로 이어 누르면 기록/되돌리기에서 한 번으로 묶음: 체력·토큰 1초, FP(1P·2P 함께) 3초
-  const MERGE_MS = 1000;
+  // 이 시간 안에 같은 종류로 이어 누르면 기록/되돌리기에서 한 번으로 묶음: 체력 0.5초, 토큰 3초, FP(1P·2P 함께) 3초
+  // (체력 숫자 패드로 넣은 값은 묶지 않음)
+  const MERGE_MS = 3000;     // 토큰 (기본값)
+  const HP_MERGE_MS = 500;
   const FP_MERGE_MS = 3000;
 
   // 글자용 캐릭터 색: 어두운 칸(--surface-2) 위에서 대비 4.6:1이 안 되는 고유색만 흰색을 조금씩 섞어 밝게 (빛 · 테두리는 고유색 그대로)
@@ -1881,14 +1997,15 @@
   const ROUND_SECONDS = 10;            // 가운데 카운트다운 기본값 (10초 / 30초 중 고름: state.roundSeconds)
   const roundSec = () => (state.roundSeconds === 30 ? 30 : ROUND_SECONDS);
   const SUDDEN_DEATH_HP = 1000;
-  const BURST_MS = 1600;       // 체력 옆 합계를 보여 주는 시간 (합치는 기준은 체력 묶음과 같은 MERGE_MS)
+  const BURST_MS = 1600;       // 체력 옆 합계를 보여 주는 시간 (합치는 기준은 체력 묶음과 같은 HP_MERGE_MS)
   const STORE_KEY = 'lumencalc.v6';
   const LOG_ARCHIVE_MAX = 10;   // 새 게임 때 자동 보관하는 지난 로그 수
   const DELETE_HOLD_MS = 1000;  // ALL DELETE 길게 누르는 시간
+  const DBL_TAP_MS = 400;       // 두 번 누르기 판정 시간 (NEW GAME · 기록 ✕ · FP 숫자): 첫 탭의 흰색 강조도 이 시간 뒤에 사라짐
   // 버전·빌드 날짜는 APK를 빌드할 때만 올림 (빌드마다 끝자리 +1, 캐릭터 정식 추가 때 가운데 자리 +1)
   // 버전 탭의 '버그 제보 · 건의 사항' 링크 (APK에서는 Capacitor가 바깥 주소를 시스템 브라우저로 엶)
   const FEEDBACK_URL = 'https://forms.gle/ThJPMxAxXwBPvzcq5';
-  const APP = { name: '루멘 카운터', author: '취룡', version: '1.1.7', build: '2026-11-21' };
+  const APP = { name: '루멘 카운터', author: '취룡', version: '1.1.8', build: '2026-11-24' };
 
   // ================= 아이콘 =================
   const I = {
@@ -2061,16 +2178,15 @@
     }
     actionHid = null;
     addLog(null, '로그 불러오기', `T${state.turn}`, 'start');
-    flashToast(`${state.logName} 불러오기`);
     buzz(15);
     show();
     requestWakeLock();
   }
 
-  const ui = { armed: null, toast: '', limitOpen: false, limitSel: null, logOpen: false, logView: 'current', settingsOpen: false, settingsTab: 'settings', burst: [null, null], round: { end: null, done: false }, fpPop: false, artPop: null, memoPop: null };
+  const ui = { armed: null, toast: '', limitOpen: false, limitSel: null, logOpen: false, logView: 'current', settingsOpen: false, settingsTab: 'settings', burst: [null, null], round: { end: null, done: false }, fpPop: false, hpPop: null, fpHi: null, artPop: null, memoPop: null };
   // 화면이 바뀔 때(새 게임·불러오기·전체 삭제) 열린 창·합계 표시·카운트다운을 처음 상태로
   const resetUi = () => {
-    Object.assign(ui, { burst: [null, null], armed: null, undid: false, logOpen: false, settingsOpen: false, limitOpen: false, logView: 'current', round: { end: null, done: false }, fpPop: false, artPop: null, memoPop: null });
+    Object.assign(ui, { burst: [null, null], armed: null, undid: false, logOpen: false, settingsOpen: false, limitOpen: false, logView: 'current', round: { end: null, done: false }, fpPop: false, hpPop: null, fpHi: null, artPop: null, memoPop: null });
     if (ui.rec) Object.assign(ui.rec, { open: false, pick: null, armDel: null }); // 전적 창 (고른 나 · 상대는 남김)
   };
 
@@ -2275,7 +2391,7 @@
             <div class="line"><span class="ptag">${i + 1}P</span><span class="cname" style="color:${c.tcolor}">${esc(c.name)}</span><span id="badges${i}"></span></div>
           </div>
         </div>
-        <div class="hpline">
+        <div class="hpline" data-a="hppop" data-p="${i}" role="button" aria-label="${i + 1}P 체력: 눌러서 숫자로 데미지 · 회복 입력">
           <span class="hp num" id="hp${i}">0</span><span class="hpmax num" id="hpmax${i}"></span>
           <div class="hand" aria-label="최대 손패"><b class="dia num" id="hand${i}">0</b></div>
           <div class="burst num" id="burst${i}"><span class="amt"></span></div>
@@ -2316,6 +2432,41 @@
         ${panel(0)}${panel(1)}`;
     }
     el.querySelectorAll('.fpn').forEach((b) => b.classList.toggle('cur', Number(b.dataset.v) === state.players[b.dataset.p].fp));
+  }
+
+  // 체력 숫자 패드 (체력 숫자 줄을 누르면): 그 캐릭터 칸 위. 숫자 = ×100, 추가 입력 / 입력 확인 / ✕
+  // 골격은 열 때 한 번만 만들고, 누를 때마다 값 · 모드 표시만 바꿈 (다시 그리면 나타나는 효과가 되풀이돼 깜빡임)
+  function renderHpPop() {
+    const el = g$('hppop'), hp = ui.hpPop;
+    setProp(el, 'hidden', !hp);
+    if (!hp) { if (el.firstChild) el.innerHTML = ''; return; }
+    const i = hp.i, p = state.players[i], heal = hp.mode === 'heal';
+    if (!el.firstChild || el.dataset.p !== String(i)) {
+      const c = charOf(p);
+      const key = (v, label = v, cls = 'num', aria = '') => `<button class="hpkn ${cls} chamfer" data-a="hpkey" data-v="${v}"${aria ? ` aria-label="${aria}"` : ''}>${label}</button>`;
+      el.dataset.p = String(i);
+      el.innerHTML = `<div class="fpbg" data-a="hpclose"></div>
+        <div class="hpk p${i + 1}">
+          <header><span class="hpkwho"><span class="ptag">${i + 1}P</span><b style="color:${c.tcolor}">${esc(c.name)}</b></span>
+            <button class="hpkmode" data-a="hpmode" aria-label="데미지 ↔ 회복 바꾸기"><span data-v="dmg">데미지</span><span data-v="heal">회복</span></button>
+            <button class="lclose" data-a="hpclose" aria-label="닫기">✕</button></header>
+          <div class="hpkval"><span class="v num"><span class="vn"></span><span class="qz">00</span></span><span class="to num"><span class="from"></span><i>→</i><b></b></span></div>
+          <div class="hpkpad">
+            ${[7, 8, 9, 4, 5, 6, 1, 2, 3].map((d) => key(d)).join('')}${key('del', '←', 'fn', '한 자리 지우기')}${key(0)}${key('clr', 'C', 'fn', '모두 지우기')}
+            <button class="hpkgo next chamfer" data-a="hpenter" data-v="next">추가<br>입력</button>
+            <button class="hpkgo close chamfer" data-a="hpenter" data-v="close">입력<br>확인</button>
+          </div>
+        </div>`;
+    }
+    const amt = Number(hp.n || 0) * 100;
+    const next = Math.max(0, Math.min(p.maxHp, p.hp + (heal ? amt : -amt)));
+    el.querySelector('.hpk').classList.toggle('heal', heal);
+    el.querySelectorAll('.hpkmode span').forEach((m) => m.classList.toggle('on', (m.dataset.v === 'heal') === heal));
+    const v = el.querySelector('.hpkval .v');
+    v.classList.toggle('empty', !amt);
+    setText(v.firstElementChild, `${heal ? '+' : '−'}${hp.n || '0'}`);
+    setText(el.querySelector('.to .from'), p.hp);
+    setText(el.querySelector('.to b'), next);
   }
 
   const fpHtml = (i) => `
@@ -2453,7 +2604,7 @@
       ${sideHtml(0)}
       <div class="center">
         <div class="toolbar chamfer">
-          <button class="tbtext" data-a="reselect" data-hold="rematch" id="tb-reselect" aria-label="새 게임: 두 번 눌러 캐릭터 선택으로, 1초 누르면 같은 캐릭터로 다시"><i class="fill"></i><span>NEW GAME</span></button>
+          <button class="tbtext dbl" data-a="reselect" data-hold="rematch" id="tb-reselect" aria-label="새 게임: 두 번 눌러 캐릭터 선택으로, 1초 누르면 같은 캐릭터로 다시"><i class="fill"></i><span>NEW GAME</span></button>
           <button class="tbtext" data-a="log" aria-label="기록 보기">LOG</button>
           <button class="tbtext" data-a="settings" id="tb-settings" aria-label="설정">SETTING</button>
         </div>
@@ -2493,7 +2644,8 @@
         </div>
       </div>
       ${sideHtml(1)}
-      <div id="fppop" hidden></div>`;
+      <div id="fppop" hidden></div>
+      <div id="hppop" hidden></div>`;
     barPrev[0] = barPrev[1] = null;
     fitDirty = true;
   }
@@ -2531,7 +2683,7 @@
       const fpChanged = fp.textContent !== fpText;
       setText(fp, fpText);
       if (fpChanged || fitDirty) fitText(fp); // 두 자리(+10 등)가 칸보다 넓으면 글자를 줄임
-      setClass(fp, 'val num' + (p.fp > 0 ? ' pos' : p.fp < 0 ? ' neg' : ''));
+      setClass(fp, 'val num' + (p.fp > 0 ? ' pos' : p.fp < 0 ? ' neg' : '') + (ui.fpHi === i ? ' armed' : ''));
       const trait = g$('trait' + i);
       trait.classList.toggle('on', p.trait);
       setAttr(trait, 'aria-pressed', String(p.trait));
@@ -2546,6 +2698,7 @@
     });
     fitDirty = false;
     renderFpPop();
+    renderHpPop();
 
     setText(g$('turnNum'), state.turn);
     setText(g$('turnLbl'), state.sudden ? 'SUDDEN' : 'TURN');
@@ -2804,10 +2957,10 @@
     const meta = `<span class="lmeta">${g.entries.length || vs ? `<span class="lname num">${esc(g.name)}</span>${vs}` : ''}</span>`;
     return `
       <div class="logpanel">
-        <header><b>GAME LOG</b>${meta}<button class="hbtn" data-a="logrec" aria-label="이 로그의 1P · 2P로 전적 메모 열기">RECORD</button><button class="lclose" data-a="log" aria-label="닫기">✕</button></header>
+        <header><b>GAME LOG</b><button class="qhelp" data-a="help" data-v="log" aria-label="LOG 도움말">?</button>${meta}<button class="hbtn" data-a="logrec" aria-label="이 로그의 1P · 2P로 전적 메모 열기">RECORD</button><button class="lclose" data-a="log" aria-label="닫기">✕</button></header>
         <nav class="ltabs">${tabs}</nav>
         <div class="llist">${rows || '<div class="lempty">아직 기록이 없어요.</div>'}</div>
-        <footer><span class="lhint">로그 이름을 1초 누르면 그 게임의 마지막 상황을 불러와요</span><button class="lexp" data-a="logimport" aria-label="내보낸 텍스트 파일에서 로그 · 전적 불러오기">TXT IMPORT</button><button class="lexp" data-a="logexport" aria-label="모든 로그를 텍스트 파일로 저장">TXT EXPORT</button><button class="ldel" data-hold="logdel"><i class="fill"></i><span>ALL DELETE</span></button></footer>
+        <footer><button class="lexp" data-a="logimport" aria-label="내보낸 텍스트 파일에서 로그 · 전적 불러오기">TXT IMPORT</button><button class="lexp" data-a="logexport" aria-label="모든 로그를 텍스트 파일로 저장">TXT EXPORT</button><button class="ldel" data-hold="logdel"><i class="fill"></i><span>ALL DELETE</span></button></footer>
       </div>`;
   }
   // 로그 한 게임분: 이름 · [1P, 2P] 캐릭터 · 줄(최신이 앞)
@@ -2850,12 +3003,10 @@
   }
   function exportLogs() {
     if (!state.log.length && !state.logArchive.length) { flashToast('내보낼 로그가 없어요'); return; }
-    saveTextFile('log', logsToText(), '로그 파일');
+    saveTextFile('log', logsToText());
   }
   // 텍스트 파일 저장 (로그 · 전적 TXT EXPORT 공용). 파일 이름 = lumen-counter-{kind}-연월일-시분.txt
-  let savingWhat = '로그 파일'; // 저장 결과 알림의 이름 (안드로이드 저장 창은 결과를 나중에 onLogSaved로 알려 줌)
-  function saveTextFile(kind, text, what) {
-    savingWhat = what;
+  function saveTextFile(kind, text) {
     const d = new Date();
     const name = `lumen-counter-${kind}-${d.getFullYear()}${two(d.getMonth() + 1)}${two(d.getDate())}-${two(d.getHours())}${two(d.getMinutes())}.txt`;
     if (window.LumenNative && window.LumenNative.saveText) { window.LumenNative.saveText(name, text); return; } // 결과는 onLogSaved
@@ -2872,12 +3023,11 @@
       a.href = url; a.download = name;
       document.body.appendChild(a); a.click(); a.remove();
       setTimeout(() => URL.revokeObjectURL(url), 5000);
-      flashToast(`${savingWhat}을 저장했어요`, 1800);
     } catch (e) { flashToast('이 환경에서는 파일로 저장할 수 없어요', 2000); }
   }
-  // 안드로이드 저장 창이 닫힌 뒤 MainActivity가 부름: 'ok' / 'cancel' / 'fail'
+  // 안드로이드 저장 창이 닫힌 뒤 MainActivity가 부름: 'ok' / 'cancel' / 'fail' (실패만 알림)
   window.onLogSaved = (r) => {
-    flashToast(r === 'ok' ? `${savingWhat}을 저장했어요` : r === 'cancel' ? '저장을 취소했어요' : '저장하지 못했어요', 1800);
+    if (r === 'fail') flashToast('저장하지 못했어요', 1800);
     refresh();
   };
 
@@ -2910,7 +3060,7 @@
     }
     importInp.click();
   }
-  // 불러올 내용을 확인 창으로 물어봄: 덮어쓰기 / 합치기 (지금 비어 있으면 '불러오기' 하나). 문제가 있으면 알림 글자를 돌려줌
+  // 불러올 내용을 확인 창으로 물어봄: 덮어쓰기 / 합치기 (지금 비어 있으면 '불러오기' 하나). 불러올 수 없는 파일이면 알림 글자를 돌려줌
   function importBackup(text) {
     const at = text.startsWith(DATA_TAG) ? 0 : text.lastIndexOf(`\n${DATA_TAG}`) + 1; // 데이터 줄은 끝에 있음 → 뒤에서 바로 찾기
     let data = null;
@@ -2928,7 +3078,7 @@
       askChoice('로그 불러오기', `파일: ${games.length}게임 · 지금: ${cur}게임`, [cur
         ? ['덮어쓰기', 'ok', '지금 로그(진행 중인 게임 포함)를 모두 지우고 파일의 게임으로 바꿔요.', () => replaceLogs(games)]
         : ['불러오기', 'ok', '', () => replaceLogs(games)]]);
-      return '';
+      return;
     }
     const recs = data && data.type === 'record'
       ? (Array.isArray(data.rows) ? data.rows.filter(Array.isArray).map(([id, date, me, opp, res]) => ({ id, date, me, opp, res })) : Array.isArray(data.list) ? data.list : null)
@@ -2942,7 +3092,7 @@
       ['덮어쓰기', 'ok', '지금 전적을 모두 지우고 파일 내용(정리된 승패 포함)으로 바꿔요.', () => replaceRecords(recs, base)],
       ['합치기', '', `지금 전적에 파일의 기록 줄을 더해요. 같은 날짜의 판이 순서까지 모두 같으면 이미 있는 기록으로 보고 건너뛰어요.${fileBase ? ` 파일의 정리된 ${fileBase}판은 이미 있는 판과 구별할 수 없어 더하지 않아요.` : ''}`, () => mergeRecords(recs)],
     ] : [['불러오기', 'ok', '', () => replaceRecords(recs, base)]]);
-    return '';
+    return;
   }
   // 불러온 로그 한 줄: 객체만, 누른 값 목록 모양이 틀리면 버림 (화면을 그릴 때 오류가 나지 않게)
   const okRow = (r) => {
@@ -2970,7 +3120,6 @@
     saveNow();
     show();
     openPanel('log');
-    flashToast(`로그 ${games.length}게임을 불러왔어요`, 2000);
   }
   // 기록 한 줄 검사: 날짜 · 결과 · 캐릭터(부전승 · 부전패는 없음)가 맞으면 { date, me, opp, res }
   function cleanRec(r) {
@@ -2991,10 +3140,9 @@
       out.push(x);
     });
     Object.assign(rec, { list: out, base });
-    const cut = applyRecLimit();
-    Object.assign(ui.rec, { armDel: null, openGrp: new Set() });
+    applyRecLimit();
+    resetRecView();
     saveRec();
-    flashToast(`전적을 불러왔어요 · 기록 ${rec.list.length}개${cut ? ` (제한으로 ${cut}개는 승패만 남김)` : ''}`, 2200);
   }
   // 전적 합치기: 기록 줄만 더함 (정리된 승패는 어느 판인지 몰라 중복을 거를 수 없으므로 지금 것 그대로).
   //   날짜마다 비교: 파일의 그날 판들(넣은 순서 · 결과 · 캐릭터)이 지금 그날 기록 안에 순서까지 그대로 이어서 있으면 이미 있는 날 → 건너뜀.
@@ -3007,25 +3155,59 @@
     const clean = list.map((r, k) => { const x = cleanRec(r); return x && { ...x, n: recIdOk(r.id) ? r.id : k }; }).filter(Boolean);
     const file = byDay(clean.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : a.n - b.n)));
     const now = byDay(sortedRecs().reverse()); // 날짜 · 넣은 순서
-    let id = rec.list.reduce((m, r) => Math.max(m, r.id + 1), Date.now()), added = 0, sameDays = 0;
+    let id = rec.list.reduce((m, r) => Math.max(m, r.id + 1), Date.now()), added = 0;
     file.forEach((rs, date) => {
       const cur = now.get(date);
-      if (cur && `${SEP}${cur.map(dayKey).join(SEP)}${SEP}`.includes(`${SEP}${rs.map(dayKey).join(SEP)}${SEP}`)) { sameDays++; return; }
+      if (cur && `${SEP}${cur.map(dayKey).join(SEP)}${SEP}`.includes(`${SEP}${rs.map(dayKey).join(SEP)}${SEP}`)) return;
       rs.forEach(({ date, me, opp, res }) => { rec.list.push({ id: id++, date, me, opp, res }); added++; });
     });
     if (!added) { flashToast('새로 더할 전적이 없어요 (모두 이미 있는 날짜의 기록)', 2000); return; }
-    const cut = applyRecLimit();
-    Object.assign(ui.rec, { armDel: null, openGrp: new Set() });
+    applyRecLimit();
+    resetRecView();
     saveRec();
-    flashToast(`전적 ${added}개를 더했어요${sameDays ? ` · 이미 있는 ${sameDays}일은 건너뜀` : ''}${cut ? ` (제한으로 ${cut}개는 승패만 남김)` : ''}`, 2400);
   }
   // 확인 창 (되돌릴 수 없는 일 전에): 취소 + 고르는 버튼들. btns = [[글자, 'ok' | 'warn', 설명, fn], …] (설명은 버튼 위에 한 줄씩)
   function askChoice(title, text, btns) { ui.confirm = { title, text, btns }; }
   const askConfirm = (title, text, ok, fn) => askChoice(title, text, [[ok, 'ok', '', fn]]);
+  // 창 이름 옆 ? 의 간단한 사용법: 설정 > 사용법과 같은 "항목: 설명" 형식. 분석 기준 상수(ANAL_*)가 뒤에 있어 누를 때 만듦
+  const panelHelp = (v) => ({
+    log: ['GAME LOG', [
+      '로그 이름: 누르면 그 게임 보기',
+      '로그 이름 1초 누르기: 그 게임의 마지막 상황을 불러와 이어하기',
+      '자동 보관: 새 게임 · 앱 다시 열기 때 최근 10게임',
+      '이어 누르기: 한 줄로 묶여요 (체력 0.5초 · 토큰 · FP 3초 · 숫자 패드는 따로)',
+      '되돌림: 되돌린 기록은 흐리게 남아요',
+      'RECORD: 이 로그의 1P · 2P로 전적 메모',
+      'TXT EXPORT · IMPORT: 파일로 저장 · 불러오기 (불러오면 지금 로그는 바뀌어요)',
+      'ALL DELETE: 1초 누르기 = 모든 로그 삭제']],
+    rec: ['RECORD', [
+      '나 · 상대: 캐릭터 고르기 · ⇄ = 자리 바꾸기',
+      '승 · 패: 누르면 바로 저장',
+      '부전승 · 부전패 · 무효: 승률에는 안 들어가요 (무효는 기록 탭에만)',
+      '기록 · 날짜별 · 캐릭터별: 줄을 누르면 자세히 · 캐릭터별 다시 누르기 = 판수순 ↔ 승률순',
+      '✕: 빠르게 두 번 = 그 기록 삭제',
+      'CLEAR LOG: 1초 누르기 = 기록 줄만 정리 (승패 · 승률은 정리된 기록으로 남아요)',
+      'ALL DELETE: 1초 누르기 = 모든 전적 삭제',
+      'TXT EXPORT · IMPORT: 파일로 저장 · 불러오기 (덮어쓰기 · 합치기)',
+      'ANALYSIS: 전적 분석',
+      'NEW GAME: 빠르게 두 번 = 캐릭터 선택으로']],
+    anal: ['ANALYSIS', [
+      '두상: 그 캐릭터만 보기 (ALL = 전체)',
+      '집계: 승 · 패만 (무효 · 부전승 · 부전패 제외)',
+      `최고 승률: ${ANAL_MIN}판 이상인 캐릭터 중에서 (없으면 전체)`,
+      `상성: ${ANAL_MIN}판 이상 만난 상대만 · 전체 ${ANAL_NEED}판부터 보여요`,
+      `날짜별 승률: 최근 ${ANAL_DAYS}일`,
+      '정리된 기록: 판수 · 승률 · 날짜별 · 상대 정보에만 들어가요 (최근 흐름 · 연승 제외)']],
+  })[v];
   function renderConfirm() {
     const el = $('confirm'), c = ui.confirm;
     setProp(el, 'hidden', !c);
     if (!c) { htmlCache.delete(el); return; }
+    if (c.help) {
+      setHtml(el, `<div class="cfbox" role="dialog" aria-modal="true"><b>${esc(c.title)}</b><ul class="cfhelp">${c.help.map((t) => `<li>${helpItem(t)}</li>`).join('')}</ul>
+        <div class="cfbtns"><button class="chamfer ok" data-a="cfno">확인</button></div></div>`);
+      return;
+    }
     const notes = c.btns.filter(([, , d]) => d).map(([t, cls, d]) => `<li class="${cls}"><b>${esc(t)}</b>${esc(d)}</li>`).join('');
     setHtml(el, `<div class="cfbox" role="alertdialog" aria-modal="true"><b>${esc(c.title)}</b><p>${esc(c.text)}</p>${notes ? `<ul class="cfnotes">${notes}</ul>` : ''}
       <div class="cfbtns"><button class="chamfer" data-a="cfno">취소</button>${c.btns.map(([t, cls], k) => `<button class="chamfer ${cls}" data-a="cfok" data-v="${k}">${esc(t)}</button>`).join('')}</div></div>`);
@@ -3053,7 +3235,6 @@
     state.screen = 'select';
     clearPicks();
     resetUi();
-    flashToast('모든 로그 삭제 · 새 게임을 시작하세요', 2200);
     buzz(15);
     show();
   }
@@ -3098,29 +3279,69 @@
     toastTimer = setTimeout(() => { if (ui.toast === msg) { ui.toast = ''; refresh(); } }, ms);
   }
 
-  // 사용법: "항목: 설명" 한 줄씩 (앞부분은 굵게 표시). 캐릭터별 특성·토큰 규칙은 넣지 않음
+  // 사용법: "항목: 설명" 한 줄씩 (앞부분은 굵게). 한 줄에 한 가지, 짧게. 캐릭터별 특성·토큰 규칙은 넣지 않음
+  //   표기: 누르기 · 빠르게 두 번 · 1초 누르기(버튼 오른쪽 위 점) · 길게 누르기(0.55초)
   const HELP = [
-    ['상단 메뉴', ['NEW GAME: 두 번 누르면 캐릭터 선택으로, 1초 누르면 같은 캐릭터로 다시 시작', 'UNDO: 마지막 행동 취소', 'LOG: 게임 기록 보기', 'SETTING: 설정 · 일러스트 · 사용법 · 버전']],
-    ['캐릭터 선택', ['캐릭터 칸: 처음 누른 캐릭터가 1P, 다음이 2P', '고른 캐릭터 · 아래 캐릭터: 누르면 선택 취소', '↻: 1P · 2P 선택 모두 취소',
-      'GAME START: 둘 다 고르면 시작', 'SELECT YOUR CHARACTER: 누르면 캐릭터 이름 표시 켜기 · 끄기',
-      'LIMITATION: 이번 시즌 종제한 · 금지 · 에라타. 두상을 누르면 그 캐릭터의 제한 목록', 'RECORD: 전적 메모']],
-    ['체력', ['빨간 · 초록 버튼: 피해 · 회복', '연달아 누르기: 체력 옆에 합계 표시', '이름 옆 마름모: 지금 체력의 최대 손패',
-      '서든데스: 양쪽 체력이 0이면 가운데에 나타나요. 누르면 양쪽 체력 1000 · FP 0']],
-    ['FP · 특성 · 토큰', ['+ · −: FP 1씩 조절', '가운데 FP 숫자: 누르면 0, 두 번 누르거나 1초 누르면 FP 창', 'FP 버튼: 양쪽 FP를 −9~+9로 바로 입력',
-      '특성 마크: 누르면 ON · OFF', '토큰 + · −: 개수 조절',
-      '키메라 편린 숫자: 누르면 기술을 쓴 캐릭터 메모. 편린 마름모가 앞에서부터 그 캐릭터 색, 편린보다 많이 고르면 편린도 늘어요']],
-    ['타이머 · 턴', ['가운데 마름모: 카운트다운 시작 · 처음으로', '10 · 30: 카운트다운 길이', '경기 시간: 누르면 시작 · 일시정지, 길게 누르면 처음으로',
-      'TURN: 누르면 +1, 길게 누르면 −1']],
-    ['로그', ['로그 이름 1초 누르기: 그 게임 이어하기', '보관: 새 게임 · 앱 다시 열기 때 최근 10게임까지 자동 보관',
-      '이어 누르기: 체력은 1초, FP는 3초 안이면 한 줄로 묶이고 되돌리기도 한 번에', 'ALL DELETE 1초 누르기: 모든 로그 삭제',
-      'TXT EXPORT: 로그를 텍스트 파일로 저장', 'TXT IMPORT: 저장한 파일로 로그 목록 바꾸기. 지금 로그는 사라져요',
-      '아래 로그: 펼친 폴드폰 · 태블릿에서 게임 화면 아래에 보여요. 누르면 크기 바꾸기']],
-    ['전적 메모', ['나 · 상대: 눌러서 캐릭터 고르기, ⇄로 자리 바꾸기', '승 · 패: 누르면 바로 저장', '부전승 · 부전패: 캐릭터 없이 저장, 승률에는 안 들어가요',
-      '무효: 기록만 남고 승률에는 안 들어가요', '기록 · 날짜별 · 캐릭터별: 줄을 누르면 자세히', '캐릭터별 탭 다시 누르기: 판수순 · 승률순 바꾸기',
-      'ANALYSIS: 전적 분석. 위쪽 두상을 누르면 그 캐릭터만', '✕ 두 번: 그 기록 삭제', 'CLEAR LOG 1초 누르기: 기록만 지우고 승패 · 승률은 남겨요',
-      'ALL DELETE 1초 누르기: 모든 전적 삭제', 'TXT EXPORT: 전적을 텍스트 파일로 저장', 'TXT IMPORT: 저장한 파일로 덮어쓰기 또는 합치기']],
-    ['SETTING', ['APP INSTALL: 웹 버전을 홈 화면에 앱처럼 설치 (설치할 수 있는 브라우저에서만 보여요)', '경기 시간: 바꾸면 바로 적용', '화면 회전: 기본 · 90° · 180° · 270° (폰을 반대로 눕히거나 테이블 옆쪽에서 볼 때)', '아래 로그 비율 · 고정: 펼친 폴드폰 · 태블릿 전용',
-      '전적 기록 수 제한: 넘치면 오래된 기록부터 정리, 승패 · 승률은 남아요', '일러스트: 캐릭터마다 반신 · 두상 그림 고르기']],
+    ['상단 메뉴', [
+      'NEW GAME: 빠르게 두 번 = 캐릭터 선택으로 · 1초 누르기 = 같은 캐릭터로 다시 시작',
+      'UNDO: 마지막 행동 취소',
+      'LOG: 게임 기록',
+      'SETTING: 설정 · 일러스트 · 사용법 · 버전',
+      '오른쪽 위 점: 1초 눌러야 실행되는 버튼',
+      '왼쪽 위 점 2개: 빠르게 두 번 눌러야 실행되는 버튼']],
+    ['캐릭터 선택', [
+      '캐릭터 칸: 처음 고른 캐릭터가 1P, 다음이 2P',
+      '고른 캐릭터 · 아래 반신: 누르면 그쪽 선택 취소',
+      '↻: 1P · 2P 선택 모두 취소',
+      'GAME START: 둘 다 고르면 시작',
+      'SELECT YOUR CHARACTER: 캐릭터 이름 표시 켜기 · 끄기',
+      'LIMITATION: 이번 시즌 종제한 · 금지 · 에라타 (두상 = 그 캐릭터 목록)',
+      'RECORD: 전적 메모']],
+    ['체력', [
+      '빨간 · 초록 버튼: 피해 · 회복',
+      '체력 숫자: 숫자 패드 (입력 × 100 · 데미지 ↔ 회복 · 추가 입력 / 입력 확인)',
+      '연달아 누르기: 체력 옆에 합계 표시',
+      '이름 옆 마름모: 지금 체력의 최대 손패',
+      '서든데스: 양쪽 체력이 0이면 가운데에 나타나요 · 누르면 양쪽 체력 1000 · FP 0']],
+    ['FP · 특성 · 토큰', [
+      '+ · −: FP 1씩',
+      'FP 숫자: 누르면 0 · 빠르게 두 번 또는 1초 누르기 = FP 창',
+      'FP 버튼: 양쪽 FP를 −9 ~ +9로 바로 입력',
+      '특성 마크: ON · OFF',
+      '토큰 + · −: 개수 조절',
+      '키메라 편린 숫자: 기술을 쓴 캐릭터 메모 (편린보다 많이 고르면 편린도 늘어요)']],
+    ['타이머 · 턴', [
+      '가운데 마름모: 카운트다운 시작 · 처음으로',
+      '10 · 30: 카운트다운 길이',
+      '경기 시간: 누르면 시작 · 일시정지 · 길게 누르면 처음으로',
+      'TURN: 누르면 +1 · 길게 누르면 −1']],
+    ['로그', [
+      '?: 로그 창 사용법',
+      '로그 이름: 누르면 그 게임 보기',
+      '로그 이름 1초 누르기: 그 게임의 마지막 상황을 불러와 이어하기',
+      '자동 보관: 새 게임 · 앱 다시 열기 때 최근 10게임',
+      '이어 누르기: 한 줄로 묶여요 (체력 0.5초 · 토큰 · FP 3초 · 숫자 패드는 따로)',
+      'TXT EXPORT · IMPORT: 파일로 저장 · 불러오기 (불러오면 지금 로그는 바뀌어요)',
+      'ALL DELETE: 1초 누르기 = 모든 로그 삭제',
+      '아래 로그: 펼친 폴드폰 · 태블릿 · 화면 회전 90° / 270°에서 게임 화면 아래에 보여요']],
+    ['전적 메모', [
+      '?: RECORD · ANALYSIS 창 사용법',
+      '나 · 상대: 캐릭터 고르기 · ⇄ = 자리 바꾸기',
+      '승 · 패: 누르면 바로 저장',
+      '부전승 · 부전패 · 무효: 승률에는 안 들어가요',
+      '기록 · 날짜별 · 캐릭터별: 줄을 누르면 자세히 · 캐릭터별 다시 누르기 = 판수순 ↔ 승률순',
+      '✕: 빠르게 두 번 = 그 기록 삭제',
+      'CLEAR LOG: 1초 누르기 = 기록 줄만 정리 (승패 · 승률은 남아요)',
+      'ALL DELETE: 1초 누르기 = 모든 전적 삭제',
+      'TXT EXPORT · IMPORT: 파일로 저장 · 불러오기 (덮어쓰기 · 합치기)',
+      'ANALYSIS: 전적 분석']],
+    ['SETTING', [
+      'APP INSTALL: 웹 버전을 홈 화면에 설치 (설치할 수 있는 브라우저에서만)',
+      '경기 시간: 바꾸면 바로 적용',
+      '화면 회전: 기본 · 90° · 180° · 270°',
+      '아래 로그 비율 · 고정: 펼친 폴드폰 · 태블릿',
+      '전적 기록 수 제한: 넘치면 오래된 기록부터 정리 (승패 · 승률은 남아요)',
+      '일러스트: 캐릭터마다 반신 · 두상 고르기']],
   ];
   const helpItem = (t) => { const k = t.indexOf(': '); return k < 0 ? esc(t) : `<b>${esc(t.slice(0, k))}</b> ${esc(t.slice(k + 2))}`; };
   function renderSettings() {
@@ -3218,6 +3439,8 @@
   } catch (e) {}
   const REC_LIMITS = [0, 100, 300, 500, 1000]; // 설정 탭의 기록 수 제한 (0 = 무제한)
   let recRev = 0; // 전적이 바뀔 때마다 +1 → 목록 · 전체 승률을 다시 그릴지 판단
+  // 전적이 바뀐 뒤(불러오기 · 정리 · 삭제): 삭제 대기 ✕와 펼친 묶음을 처음으로
+  function resetRecView() { Object.assign(ui.rec, { armDel: null, openGrp: new Set() }); }
   const saveRec = () => { recRev++; try { localStorage.setItem(REC_KEY, JSON.stringify(rec)); } catch (e) { flashToast('저장 공간이 부족해요', 2000); } };
   const fmtDay = (d) => `${d.getFullYear()}-${two(d.getMonth() + 1)}-${two(d.getDate())}`;
   const REC_PAGE = 30; // 기록 탭에 처음 그리는 줄 수 · '더 보기' 한 번에 더하는 줄 수
@@ -3292,7 +3515,7 @@
   // 창(로그 · 설정 · 전적 · LIMITATION)은 한 번에 하나만. which = 'log' | 'settings' | 'rec' | 'limit' | null(모두 닫기)
   function openPanel(which) {
     Object.assign(ui, { logOpen: which === 'log', settingsOpen: which === 'settings', limitOpen: which === 'limit', artPop: null });
-    if (which) ui.fpPop = false;
+    if (which) Object.assign(ui, { fpPop: false, hpPop: null });
     Object.assign(ui.rec, { open: which === 'rec', pick: null, armDel: null });
     ui.anal.open = false;
   }
@@ -3310,7 +3533,7 @@
     if (!R.open) { if (el.firstChild) { el.innerHTML = ''; recListSig = null; } renderRecPick(); return; }
     if (!el.firstChild) {
       el.innerHTML = `
-        <header><b>RECORD<small>전적 메모</small></b><div class="rhtools" id="rhtools"></div></header>
+        <header><b>RECORD<small>전적 메모</small></b><button class="qhelp" data-a="help" data-v="rec" aria-label="RECORD 도움말">?</button><div class="rhtools" id="rhtools"></div></header>
         <div class="rmain">
           <div class="rform">
             <label class="rdate"><span>날짜</span><input type="date" id="rdate"></label>
@@ -3339,8 +3562,8 @@
     const f = R.form;
     const side = (k, label) => `<button class="rchar ${k}${f[k] ? '' : ' empty'}" data-a="recpick" data-v="${k}" aria-label="${label} 캐릭터 고르기">
         ${recFace(f[k])}<small>${k === 'me' ? 'ME' : 'VS'}</small>${f[k] ? recNameB(f[k]) : `<b>${label}</b>`}</button>`;
-    setHtml($('rhtools'), `<button class="hbtn anbtn" data-a="analopen" aria-label="전적 분석 리포트">ANALYSIS</button><button class="hbtn${ui.armed === 'recnew' ? ' armed' : ''}" data-a="recnew" aria-label="새 게임 (두 번 눌러 캐릭터 선택으로)">NEW GAME</button><button class="lclose" data-a="record" aria-label="닫기">✕</button>`);
-    setHtml($('rvs'), `${side('me', '나')}<button class="rswap chamfer" data-a="recswap" aria-label="나와 상대 자리 바꾸기">⇄<small>바꾸기</small></button>${side('opp', '상대')}`);
+    setHtml($('rhtools'), `<button class="hbtn anbtn" data-a="analopen" aria-label="전적 분석 리포트">ANALYSIS</button><button class="hbtn dbl${ui.armed === 'recnew' ? ' armed' : ''}" data-a="recnew" aria-label="새 게임 (두 번 눌러 캐릭터 선택으로)">NEW GAME</button><button class="lclose" data-a="record" aria-label="닫기">✕</button>`);
+    setHtml($('rvs'), `${side('me', '나')}<button class="rswap chamfer" data-a="recswap" aria-label="나와 상대 자리 바꾸기">⇄</button>${side('opp', '상대')}`);
     setHtml($('rtabs'), [['list', '기록'], ['date', '날짜별'], ['char', '캐릭터별']]
       .map(([v, t]) => `<button class="${R.view === v ? 'on' : ''}" data-a="recview" data-v="${v}">${t}${v === 'char' && R.view === v ? `<small>${R.charSort === 'rate' ? '승률순' : '판수순'}</small>` : ''}</button>`).join(''));
     const sig = `${recRev}|${R.view}|${R.charSort}|${R.armDel}|${[...R.openGrp]}|${R.more}`;
@@ -3360,12 +3583,12 @@
     const inner = `<span class="sn">${nameHtml}</span><span class="swl">${wlText(c)}${extra}</span><span class="srate">${pct(c)}</span><span class="arr">${can ? '▼' : ''}</span>`;
     return `<div class="rgrp">${can ? `<button class="rsum" data-a="recgrp" data-v="${esc(key)}" aria-expanded="${open}">${inner}</button>` : `<div class="rsum">${inner}</div>`}${resBar(c)}${open ? `<div class="rsub">${subHtml}</div>` : ''}</div>`;
   }
-  const delBtn = (r) => { const armed = ui.rec.armDel === r.id; return `<button class="rdel${armed ? ' armed' : ''}" data-a="recdel" data-v="${r.id}" aria-label="삭제">${armed ? '삭제?' : '✕'}</button>`; };
+  const delBtn = (r) => { const armed = ui.rec.armDel === r.id; return `<button class="rdel${armed ? ' armed' : ''}" data-a="recdel" data-v="${r.id}" aria-label="삭제">✕</button>`; };
   function recListHtml() {
     const list = sortedRecs(), R = ui.rec, kept = baseGames();
     if (!list.length && !kept) return '<div class="rempty">아직 전적이 없어요.<br>나 · 상대 캐릭터를 고르고 승 / 패를 누르세요.</div>';
     if (R.view === 'list') {
-      const note = kept ? `<div class="rnote">정리된 기록 ${kept}판은 승패 · 승률에만 남아 있어요</div>` : '';
+      const note = kept ? `<div class="rnote">정리된 기록 : <b class="num">${kept}</b>판</div>` : '';
       // 기록이 수천 줄이어도 가볍게: 최근 R.more줄만 그리고, 맨 아래 '더 보기'로 REC_PAGE줄씩 더
       const more = list.length - R.more;
       return note + list.slice(0, R.more).map((r) => `<div class="rrow"><span class="rd num">${esc(r.date.slice(2).replace(/-/g, '.'))}</span>${vsHtml(r.me, r.opp)}${resTag(r)}${delBtn(r)}</div>`).join('')
@@ -3433,7 +3656,7 @@
         ${id ? recFace(id) : '<span class="aall">ALL</span>'}<b>${id ? esc(recName(id)) : '전체'}</b></button>`;
     const faces = face(null, !who) + mine.filter(([id]) => CHAR_BY_ID[id]).map(([id]) => face(id, id === who)).join('');
     // 두상 줄도 리포트와 함께 스크롤 (캐릭터 고르기는 이 줄에서만)
-    const head = `<header><b>ANALYSIS<small>전적 분석${who ? ` · ${esc(recName(who))}` : ''}</small></b><button class="lclose" data-a="analclose" aria-label="닫기">✕</button></header>
+    const head = `<header><b>ANALYSIS<small>전적 분석${who ? ` · ${esc(recName(who))}` : ''}</small></b><button class="qhelp" data-a="help" data-v="anal" aria-label="ANALYSIS 도움말">?</button><button class="lclose" data-a="analclose" aria-label="닫기">✕</button></header>
       <div class="abody" id="abody"><nav class="afaces">${faces}</nav>`;
     if (!tot.n) return `${head}<div class="rempty">아직 분석할 승 · 패 전적이 없어요.</div></div>`;
     // 순서가 필요한 것: 남은 기록 줄(오래된 것부터)
@@ -3490,16 +3713,7 @@
         ${vsCard('상성 나쁜 상대', pool.filter(([, , c]) => c.rate < 50).sort((a, b) => a[2].rate - b[2].rate || b[2].n - a[2].n || earlier(a, b)), (c) => `${c.rate}%`, pool.length ? '승률 50% 미만인 상대가 없어요' : noPool)}
       </section>`;
     const flow = seq.length ? `<section class="acard wide"><h5>최근 흐름<small>최근 ${Math.min(20, seq.length)}판 · 왼쪽이 오래된 판</small></h5><div class="aflow">${seq.slice(-20).map((r) => `<span class="rres ${r.res}" title="${esc(r.date)} VS ${esc(recName(r.opp))}">${REC_RES[r.res]}</span>`).join('')}</div></section>` : '';
-    const kept = baseGames();
-    // 맨 아래 안내: 무엇을 어떻게 셌는지 (지금 분석 기준 그대로)
-    const note = `<ul class="anote">
-        <li>승 · 패만 세요. 무효 · 부전승 · 부전패는 빠져요.</li>
-        <li>최고 승률은 ${ANAL_MIN}판 이상인 캐릭터 중에서 고르고, 없으면 전체에서 골라요.</li>
-        <li>상성은 ${ANAL_MIN}판 이상 만난 상대만, 많이 만난 상대 · 상성은 ${ANAL_NEED}판 이상부터 보여요.</li>
-        <li>날짜별 승률은 최근 ${ANAL_DAYS}일이에요.</li>
-        ${kept ? `<li>CLEAR LOG · 기록 수 제한으로 정리한 ${kept}판은 판수 · 승률 · 날짜별 · 상대 정보에 들어가고, 최근 10판 · 최고 연승 · 최근 흐름에는 빠져요.</li>` : ''}
-      </ul>`;
-    return `${head}${kpis}${top}${chart}${oppCards}${flow}${note}</div>`;
+    return `${head}${kpis}${top}${chart}${oppCards}${flow}</div>`;
   }
   // 날짜별 승률 막대 그래프 (SVG). 칸은 늘 ANAL_DAYS개 → 영역 너비에 맞춰 줄어듦 (스크롤 없음)
   function dayChart(days) {
@@ -3531,9 +3745,8 @@
   function deleteAllRecords() {
     if (rec.list.length || baseGames()) {
       Object.assign(rec, { list: [], base: emptyBase() });
-      Object.assign(ui.rec, { armDel: null, openGrp: new Set() });
+      resetRecView();
       saveRec();
-      flashToast('모든 전적을 지웠어요', 1600);
       buzz(15);
     } else flashToast('지울 전적이 없어요');
     refresh();
@@ -3544,9 +3757,8 @@
     if (n) {
       foldRecs(rec.list);
       rec.list = [];
-      Object.assign(ui.rec, { armDel: null, openGrp: new Set() });
+      resetRecView();
       saveRec();
-      flashToast(`기록 ${n}개를 정리했어요 · 승패 · 승률은 남아요`, 2000);
       buzz(15);
     } else flashToast('정리할 기록이 없어요');
     refresh();
@@ -3568,7 +3780,7 @@
     },
     // NEW GAME (전적 창 ✕ 옆): 두 번 눌러 캐릭터 선택으로 — 계산기 툴바 NEW GAME과 같은 동작
     recnew() {
-      if (twoStep('recnew', '한 번 더 누르면 캐릭터 선택으로', () => { openPanel(null); goSelect(); })) return 'shown';
+      if (twoStep('recnew', () => { openPanel(null); goSelect(); })) return 'shown';
     },
     recview(_, v) {
       const R = ui.rec;
@@ -3593,32 +3805,30 @@
       rec.list.push({ id, date, me: bye ? null : f.me, opp: bye ? null : f.opp, res: v });
       applyRecLimit();
       saveRec();
-      flashToast(bye ? REC_RES[v] : `${REC_RES[v]} · ${recName(f.me)} VS ${recName(f.opp)}`);
       if (!bye) f.opp = null;
       ui.rec.armDel = null;
       buzz(10);
     },
-    // ✕ 한 번 = '삭제?', 2.5초 안에 한 번 더 = 삭제
+    // ✕ 두 번(DBL_TAP_MS 안) = 삭제. 첫 탭은 흰색 강조만
     recdel(_, v) {
       const R = ui.rec, id = Number(v);
       clearTimeout(recArmTimer);
-      if (R.armDel !== id) { R.armDel = id; recArmTimer = setTimeout(() => { R.armDel = null; refresh(); }, 2500); return; }
+      if (R.armDel !== id) { R.armDel = id; recArmTimer = setTimeout(() => { R.armDel = null; refresh(); }, DBL_TAP_MS); return; }
       rec.list = rec.list.filter((r) => r.id !== id);
       R.armDel = null;
       saveRec();
-      flashToast('기록을 지웠어요');
       buzz(8);
     },
     recexport() {
       if (!rec.list.length && !baseGames()) { flashToast('내보낼 전적이 없어요'); return; } // CLEAR LOG 뒤 승패만 남아 있어도 내보냄
-      saveTextFile('record', recordsToText(), '전적 파일');
+      saveTextFile('record', recordsToText());
     },
     recimport() { importText(); },
     recmore() { ui.rec.more += recPage(); }, // 기록 · 날짜별 탭 맨 아래 '더 보기'
     // 설정 탭 '전적 기록 수 제한': 줄여서 기록이 정리되면 확인 창
     reclimit(_, __, d) {
       const n = Number(d.set) || 0, over = n ? rec.list.length - n : 0;
-      const apply = () => { rec.limit = n; const cut = applyRecLimit(); saveRec(); flashToast(cut ? `오래된 기록 ${cut}개를 정리했어요 · 승패 · 승률은 남아요` : `전적 기록 수 제한: ${n ? `${n}개` : '무제한'}`, 2000); };
+      const apply = () => { rec.limit = n; applyRecLimit(); saveRec(); };
       if (over > 0) askConfirm('기록 수 제한을 바꿀까요?', `${n}개로 줄이면 오래된 기록 ${over}개가 정리돼요. 승패 · 승률은 그대로 남아요.`, '바꾸기', apply);
       else apply();
     },
@@ -3627,6 +3837,7 @@
     analwho(_, v) { ui.anal.who = v || null; const b = $('abody'); if (b) b.scrollTop = 0; },
     cfok(_, v) { const c = ui.confirm, b = c && c.btns[Number(v) || 0]; ui.confirm = null; if (b) b[3](); },
     cfno() { ui.confirm = null; },
+    help(_, v) { const h = panelHelp(v); if (h) ui.confirm = { title: h[0], help: h[1], btns: [] }; },
   };
 
   // ================= 화면 전환 =================
@@ -3696,7 +3907,6 @@
     if (state.screen !== 'game' || state.players.some((p) => !CHAR_BY_ID[p.char])) return;
     clearTimeout(armTimer);
     startGame();
-    flashToast('같은 캐릭터로 다시 시작');
     refresh();
   }
 
@@ -3708,25 +3918,47 @@
     show();
   }
 
+  // 체력 바꾸기 (데미지 · 회복 버튼, 체력 숫자 패드). 피해·회복은 한 묶음: HP_MERGE_MS(0.5초) 안에 이어 누르면 합친 값 한 줄
+  // (−500, +100 → 피해 −400). pad = 숫자 패드로 넣은 값 → 앞뒤 어느 입력과도 묶지 않고 늘 새 줄 · 새 되돌리기 지점
+  function changeHp(i, d, pad) {
+    const p = state.players[i];
+    const next = Math.max(0, Math.min(p.maxHp, p.hp + d));
+    if (next === p.hp) return;
+    const key = `hp${i}`;
+    const merged = record(pad ? `${key}pad` : key, `${i + 1}P 체력`, pad ? 0 : HP_MERGE_MS);
+    const real = next - p.hp;
+    const beforeHp = p.hp;
+    p.hp = next;
+    const row = logEntry(merged, key, i, '피해', bothHp(), 'dmg', real);
+    hpRowKind(row);
+    autoTrait(i, beforeHp);
+    autoToken(i, beforeHp);
+    const now = Date.now();
+    const b = ui.burst[i];
+    ui.burst[i] = b && now - b.t < HP_MERGE_MS ? { amt: b.amt + real, t: now } : { amt: real, t: now }; // 로그 묶음과 같은 기준으로 합침
+    clearTimeout(burstTimers[i]);
+    burstTimers[i] = setTimeout(refresh, BURST_MS + 20);
+  }
+
   // ================= 두 번 눌러 확인 =================
+  // 첫 탭 = 흰색 강조(ui.armed), DBL_TAP_MS 안에 같은 버튼을 한 번 더 = 실행. 시간이 지나면 강조가 사라지며 취소
   let armTimer = null;
-  function twoStep(key, msg, fn) {
+  function twoStep(key, fn) {
     clearTimeout(armTimer);
     if (ui.armed === key) {
-      ui.armed = null; ui.toast = '';
+      ui.armed = null;
       fn();
       return true;
     }
     ui.armed = key;
-    ui.toast = msg;
-    armTimer = setTimeout(() => { ui.armed = null; ui.toast = ''; refresh(); }, 2500);
+    armTimer = setTimeout(() => { ui.armed = null; refresh(); }, DBL_TAP_MS);
     return false;
   }
 
   // ================= actions =================
   const burstTimers = [null, null];
-  const DBL_TAP_MS = 300; // 현재 FP 숫자 두 번 탭 판정 시간
   let fpTap = null;       // 현재 FP 숫자 첫 탭 { i, at, prev(누르기 전 FP), histLen, row(그때 쓴 FP 기록 줄) }
+  let fpHiTimer = null;   // 첫 탭 흰색 강조(ui.fpHi)를 끄는 타이머
   // 두 번 탭: 첫 탭이 만든 0을 되돌림. 새 기록 줄 · 되돌리기 지점을 만들었으면 지우고, 기존 묶음에 합쳐졌으면 그 누름만 뺌
   function undoFpReset(t) {
     if (!t.row) return; // 첫 탭 때 이미 0이었음
@@ -3751,27 +3983,7 @@
     start() {
       if (state.players.every((p) => p.char != null)) { startGame(); return 'shown'; }
     },
-    hp(i, v) {
-      const p = state.players[i];
-      const d = Number(v);
-      const next = Math.max(0, Math.min(p.maxHp, p.hp + d));
-      if (next === p.hp) return;
-      // 피해·회복은 한 묶음: 1초 안에 이어 누르면 합친 값 한 줄 (−500, +100 → 피해 −400)
-      const key = `hp${i}`;
-      const merged = record(key, `${i + 1}P 체력`);
-      const real = next - p.hp;
-      const beforeHp = p.hp;
-      p.hp = next;
-      const row = logEntry(merged, key, i, '피해', bothHp(), 'dmg', real);
-      hpRowKind(row);
-      autoTrait(i, beforeHp);
-      autoToken(i, beforeHp);
-      const now = Date.now();
-      const b = ui.burst[i];
-      ui.burst[i] = b && now - b.t < MERGE_MS ? { amt: b.amt + real, t: now } : { amt: real, t: now }; // 로그 묶음과 같은 기준으로 합침
-      clearTimeout(burstTimers[i]);
-      burstTimers[i] = setTimeout(refresh, BURST_MS + 20);
-    },
+    hp(i, v) { changeHp(i, Number(v), false); },
     // FP는 1P·2P 한 묶음: 3초 안이면 양쪽 입력이 한 줄 (로그는 결과값 "FP 1P +3 · 2P −2", 되돌리기도 한 번)
     fp(i, v) {
       const merged = record('fp', 'FP', FP_MERGE_MS);
@@ -3779,7 +3991,26 @@
       logEntry(merged, 'fp', null, 'FP', bothFp(), 'fpx', [i, Number(v)]);
     },
     // FP 팝업 (가운데 FP 버튼). 고르면 바로 그 값, 팝업은 ✕로 닫을 때까지 열려 있음
-    fppop() { if (state.screen === 'game') ui.fpPop = true; },
+    fppop() { if (state.screen === 'game') Object.assign(ui, { fpPop: true, hpPop: null }); },
+    // 체력 숫자 패드: n = 입력한 숫자(문자열, 최대 두 자리) × 100, mode = 'dmg' | 'heal'
+    hppop(i) { if (state.screen === 'game' && !ui.fpPop) ui.hpPop = { i, mode: 'dmg', n: '' }; },
+    hpclose() { ui.hpPop = null; },
+    hpmode() { if (ui.hpPop) ui.hpPop.mode = ui.hpPop.mode === 'heal' ? 'dmg' : 'heal'; }, // 누를 때마다 데미지 ↔ 회복
+    hpkey(_, v) {
+      const h = ui.hpPop;
+      if (!h) return;
+      if (v === 'del') h.n = h.n.slice(0, -1);
+      else if (v === 'clr') h.n = '';
+      else if (h.n.length < 2 && !(h.n === '' && v === '0')) h.n += v;
+    },
+    hpenter(_, v) {
+      const h = ui.hpPop;
+      if (!h) return;
+      const amt = Number(h.n || 0) * 100;
+      if (amt) { changeHp(h.i, h.mode === 'heal' ? amt : -amt, true); buzz(8); }
+      h.n = '';
+      if (v === 'close') ui.hpPop = null;
+    },
     fpclose() { ui.fpPop = false; },
     logexport() { exportLogs(); },
     logimport() { importText(); },
@@ -3795,9 +4026,12 @@
     //   두 번째 탭이 DBL_TAP_MS 안에 오면 첫 탭의 0을 흔적 없이 되돌리고(기록 줄 · 되돌리기 지점도) FP 창을 엶
     fpreset(i) {
       const now = Date.now(), t = fpTap;
-      if (t && t.i === i && now - t.at < DBL_TAP_MS) { fpTap = null; undoFpReset(t); actions.fppop(); return; }
+      clearTimeout(fpHiTimer);
+      if (t && t.i === i && now - t.at < DBL_TAP_MS) { fpTap = null; ui.fpHi = null; undoFpReset(t); actions.fppop(); return; }
       const p = state.players[i];
       fpTap = { i, at: now, prev: p.fp, histLen: state.history.length, row: null };
+      ui.fpHi = i; // 첫 탭: 흰색 강조, 두 번째 탭이 안 오면 사라짐
+      fpHiTimer = setTimeout(() => { ui.fpHi = null; refresh(); }, DBL_TAP_MS);
       if (!p.fp) return;
       actions.fpset(i, 0);
       fpTap.row = state.log.find((r) => r.key === 'fp' && r.hid === actionHid) || null;
@@ -4011,7 +4245,7 @@
     },
     lview(_, v) { ui.logView = v; },
     reselect() {
-      if (twoStep('reselect', '한 번 더 누르면 캐릭터 선택으로', goSelect)) return 'shown';
+      if (twoStep('reselect', goSelect)) return 'shown';
     },
   };
 
